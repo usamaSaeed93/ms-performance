@@ -1,0 +1,177 @@
+# ============================================
+# Frontend - Node.js / Next.js
+# ============================================
+
+# Dependencies
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.js
+frontend/.pnpm-store/
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+frontend/.vercel
+frontend/.swc/
+frontend/.turbo/
+
+# Package Manager Lock Files (keep pnpm-lock.yaml but ignore others)
+frontend/package-lock.json
+frontend/yarn.lock
+frontend/.yarn/
+frontend/.pnp.*
+
+# Environment Variables
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/.env*.local
+
+# Testing
+frontend/coverage/
+frontend/.nyc_output/
+frontend/.jest/
+
+# IDE
+frontend/.vscode/
+frontend/.idea/
+frontend/*.swp
+frontend/*.swo
+frontend/.DS_Store
+frontend/.eslintcache
+
+# Cache
+frontend/.cache/
+frontend/.parcel-cache/
+
+# TypeScript
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Debug logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# ============================================
+# Backend - Python / FastAPI
+# ============================================
+
+# Python
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/*.so
+backend/.Python
+
+# Virtual Environments
+backend/env/
+backend/venv/
+backend/ENV/
+backend/env.bak/
+backend/venv.bak/
+backend/.venv/
+backend/.env/
+
+# Poetry
+backend/poetry.toml
+
+# Database Files
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+backend/dev.db
+backend/*.db-journal
+
+# Alembic Cache
+backend/alembic/versions/__pycache__/
+backend/alembic/versions/*.pyc
+
+# Environment Variables (IMPORTANT: Contains sensitive data)
+backend/.env
+backend/.vars
+backend/.env.local
+backend/.env.*.local
+
+# IDE
+backend/.vscode/
+backend/.idea/
+backend/*.swp
+backend/*.swo
+backend/.DS_Store
+
+# Testing & Coverage
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.coverage
+backend/htmlcov/
+backend/.tox/
+backend/.nox/
+backend/coverage.xml
+backend/.hypothesis/
+
+# Logs
+backend/*.log
+backend/logs/
+backend/.logs/
+
+# Distribution / Packaging
+backend/build/
+backend/dist/
+backend/*.egg-info/
+backend/.eggs/
+backend/wheels/
+backend/share/python-wheels/
+
+# ============================================
+# Docker
+# ============================================
+docker-compose.override.yml
+*.log
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ============================================
+# IDE (Global)
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================
+# Misc
+# ============================================
+.npm
+.eslintcache
+.yarn-integrity
