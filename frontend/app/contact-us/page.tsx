@@ -10,7 +10,7 @@ export default function ContactUsPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="mx-auto max-w-[1503px] px-4 pb-20 pt-8 lg:px-0">
+      <div className="pt-8">
         <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
           {/* Top Bar */}
           <header className="text-white">
@@ -91,28 +91,28 @@ export default function ContactUsPage() {
                 priority
               />
               <div className="absolute inset-0 bg-black/70" />
-              <div className="relative flex items-center h-full px-8 lg:px-12">
-                <h1 className="text-5xl lg:text-6xl font-bold">Contact Us</h1>
+              <div className="relative flex items-center h-full px-4 sm:px-6 md:px-8 lg:px-12">
+                <h1 className="text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl animate-heading">Contact Us</h1>
               </div>
             </section>
 
             {/* Main Content Section */}
-            <section className="px-8 py-16 lg:px-12">
+            <section className="px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-12">
               <div className="mx-auto max-w-7xl">
-                <h2 className="text-4xl lg:text-5xl font-bold text-[#0c1b33] mb-12">Let Your Wanderlust <br /> Guide You</h2>
+                <h2 className="text-2xl font-bold text-[#0c1b33] mb-6 sm:text-3xl sm:mb-8 md:text-4xl md:mb-10 lg:text-5xl lg:mb-12">Let Your Wanderlust <br className="hidden sm:block" /> Guide You</h2>
                 
-                <div className="grid gap-12 lg:grid-cols-[1fr_1fr]">
+                <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-12">
                   {/* Left Column - Contact Form */}
-                  <div>
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                  <div className="animate-slide-left">
+                    <div className="space-y-4 sm:space-y-5 md:space-y-6">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
-                          <label className="text-sm font-semibold text-[#0c1b33]">Your Email</label>
+                          <label className="text-xs font-semibold text-[#0c1b33] sm:text-sm">Your Email</label>
                           <div className="relative">
                             <input
                               type="email"
                               placeholder="Your Email"
-                              className="w-full rounded-[8px] border border-[#dfe6f2] bg-gray-50 px-4 py-4 pr-12 text-sm text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none"
+                              className="w-full rounded-lg border border-[#dfe6f2] bg-gray-50 px-3 py-3 pr-10 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none sm:rounded-[8px] sm:px-4 sm:py-4 sm:pr-12 sm:text-sm"
                             />
                             <div className="absolute right-4 top-1/2 -translate-y-1/2">
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#0c1b33]">
@@ -126,12 +126,12 @@ export default function ContactUsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-sm font-semibold text-[#0c1b33]">Your Phone</label>
+                          <label className="text-xs font-semibold text-[#0c1b33] sm:text-sm">Your Phone</label>
                           <div className="relative">
                             <input
                               type="tel"
                               placeholder="Your Phone"
-                              className="w-full rounded-[8px] border border-[#dfe6f2] bg-gray-50 px-4 py-4 pr-12 text-sm text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none"
+                              className="w-full rounded-lg border border-[#dfe6f2] bg-gray-50 px-3 py-3 pr-10 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none sm:rounded-[8px] sm:px-4 sm:py-4 sm:pr-12 sm:text-sm"
                             />
                             <div className="absolute right-4 top-1/2 -translate-y-1/2">
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#0c1b33]">
@@ -146,12 +146,12 @@ export default function ContactUsPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-[#0c1b33]">Your Address</label>
+                        <label className="text-xs font-semibold text-[#0c1b33] sm:text-sm">Your Address</label>
                         <div className="relative">
                           <input
                             type="text"
                             placeholder="Your Address"
-                            className="w-full rounded-[8px] border border-[#dfe6f2] bg-gray-50 px-4 py-4 pr-12 text-sm text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none"
+                            className="w-full rounded-lg border border-[#dfe6f2] bg-gray-50 px-3 py-3 pr-10 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none sm:rounded-[8px] sm:px-4 sm:py-4 sm:pr-12 sm:text-sm"
                           />
                           <div className="absolute right-4 top-1/2 -translate-y-1/2">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#0c1b33]">
@@ -166,12 +166,12 @@ export default function ContactUsPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-[#0c1b33]">Message</label>
+                        <label className="text-xs font-semibold text-[#0c1b33] sm:text-sm">Message</label>
                         <div className="relative">
                           <textarea
                             placeholder="Write Message.."
-                            rows={6}
-                            className="w-full rounded-[8px] border border-[#dfe6f2] bg-gray-50 px-4 py-4 pr-12 text-sm text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none resize-none"
+                            rows={5}
+                            className="w-full rounded-lg border border-[#dfe6f2] bg-gray-50 px-3 py-3 pr-10 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none resize-none sm:rounded-[8px] sm:px-4 sm:py-4 sm:pr-12 sm:text-sm sm:rows-6"
                           />
                           <div className="absolute right-4 top-4">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#0c1b33]">
@@ -184,14 +184,14 @@ export default function ContactUsPage() {
                         </div>
                       </div>
 
-                      <button className="w-full rounded-[8px] bg-[#1d70ff] px-6 py-4 text-sm font-semibold text-white hover:bg-[#1a5fdd] transition">
+                      <button className="w-full rounded-[8px] bg-[#1d70ff] px-6 py-4 text-sm font-semibold text-white hover:bg-[#1a5fdd] transition animate-button">
                         Send Message
                       </button>
                     </div>
                   </div>
 
                   {/* Right Column - Image and Contact Details */}
-                  <div className="space-y-6">
+                  <div className="space-y-6 animate-slide-right">
                     <div className="relative h-[300px] rounded-[16px] overflow-hidden">
                       <Image
                         src="/images/contact/contact-us.png"

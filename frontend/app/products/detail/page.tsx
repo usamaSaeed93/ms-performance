@@ -26,7 +26,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="mx-auto max-w-[1503px] px-4 pb-20 pt-8 lg:px-0">
+      <div className="mx-auto max-w-[1503px] px-4 pt-8 lg:px-0">
         <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
           {/* Header */}
           <header className="text-white">
@@ -107,14 +107,14 @@ export default function ProductDetailPage() {
                 priority
               />
               <div className="absolute inset-0 bg-black/60" />
-              <div className="relative h-full flex items-center px-8 lg:px-12">
-                <h1 className="text-5xl font-black lg:text-6xl">Product Detail</h1>
+              <div className="relative h-full flex items-center px-4 sm:px-6 md:px-8 lg:px-12">
+                <h1 className="text-3xl font-black sm:text-4xl md:text-5xl lg:text-6xl animate-heading">Product Detail</h1>
               </div>
             </section>
 
             {/* Product Information Section */}
-            <section className="px-8 py-10 lg:px-12">
-              <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
+            <section className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12">
+              <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-8">
                 {/* Left Column - Product Image Gallery */}
                 <div className="space-y-4">
                   {/* Share Icon */}
@@ -133,7 +133,7 @@ export default function ProductDetailPage() {
                   </div>
 
                   {/* Main Product Image */}
-                  <div className="relative bg-white rounded-[12px] overflow-hidden border border-gray-200">
+                  <div className="relative bg-white rounded-[12px] overflow-hidden shadow-sm">
                     <div className="relative aspect-square">
                       <Image
                         src={productImages[selectedImage]}
@@ -185,21 +185,21 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Right Column - Product Details */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-5 md:space-y-6">
                   {/* Product Title */}
-                  <h1 className="text-3xl font-black text-[#0c1b33] lg:text-4xl">{dummyProduct.title}</h1>
+                  <h1 className="text-2xl font-black text-[#0c1b33] sm:text-3xl lg:text-4xl animate-heading">{dummyProduct.title}</h1>
 
                   {/* Pricing */}
-                  <div className="flex items-baseline gap-3">
+                  <div className="flex items-baseline gap-2 sm:gap-3">
                     {dummyProduct.oldPrice && (
-                      <span className="text-xl text-[#9aa6bd] line-through">{dummyProduct.oldPrice}</span>
+                      <span className="text-lg text-[#9aa6bd] line-through sm:text-xl">{dummyProduct.oldPrice}</span>
                     )}
-                    <span className="text-4xl font-black text-[#0c1b33]">{dummyProduct.price}</span>
+                    <span className="text-3xl font-black text-[#0c1b33] sm:text-4xl">{dummyProduct.price}</span>
                   </div>
 
                   {/* Sales & Rating */}
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-[#5c6c86]">{dummyProduct.sold || 1238} Sold</span>
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                    <span className="text-xs text-[#5c6c86] sm:text-sm">{dummyProduct.sold || 1238} Sold</span>
                     <div className="flex items-center gap-1">
                       <div className="flex items-center gap-0.5">
                         {Array.from({ length: 5 }).map((_, idx) => {
@@ -241,10 +241,12 @@ export default function ProductDetailPage() {
                         { name: "Amazon Pay", logo: "/images/payments/amazon-pay.png" },
                         { name: "Google Pay", logo: "/images/payments/google-pay.png" },
                         { name: "Stripe", logo: "/images/payments/stripe.png" },
-                      ].map((payment) => (
+                      ].map((payment, idx) => (
                         <div
                           key={payment.name}
-                          className="flex h-16 items-center justify-center rounded-[8px] border border-gray-200 bg-white p-2 hover:border-[#1d70ff] transition"
+                          className={`flex h-16 items-center justify-center rounded-[8px] bg-white p-2 shadow-sm hover:shadow-md transition card-hover ${
+                            idx === 0 ? 'animate-card' : idx === 1 ? 'animate-card-delay-1' : idx === 2 ? 'animate-card-delay-2' : 'animate-card-delay-3'
+                          }`}
                         >
                           <Image
                             src={payment.logo}

@@ -46,7 +46,7 @@ export default function ServicesPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="mx-auto max-w-[1503px] px-4 pb-20 pt-8 lg:px-0">
+      <div className="pt-8">
         <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
           {/* Header */}
           <header className="text-white">
@@ -127,13 +127,13 @@ export default function ServicesPage() {
               priority
             />
             <div className="absolute inset-0 bg-black/60" />
-            <div className="relative px-8 py-20 lg:px-12">
-              <div className="space-y-6 max-w-3xl">
-                <p className="flex items-center gap-3 text-sm font-semibold text-[#7ab6ff]">
-                  <span className="h-px w-12 bg-[#7ab6ff]" />
+            <div className="relative px-4 py-12 sm:px-6 sm:py-16 md:px-8 md:py-20 lg:px-12">
+              <div className="space-y-4 max-w-3xl sm:space-y-5 md:space-y-6">
+                <p className="flex items-center gap-2 text-xs font-semibold text-[#7ab6ff] sm:gap-3 sm:text-sm animate-subtitle">
+                  <span className="h-px w-8 bg-[#7ab6ff] sm:w-12" />
                   Feel the Need for Speed: Dyno Car Tests
                 </p>
-                <h1 className="text-5xl font-black leading-tight lg:text-6xl">
+                <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl lg:text-6xl animate-heading">
                   ECU Remapping
                 </h1>
               </div>
@@ -141,34 +141,34 @@ export default function ServicesPage() {
           </section>
 
           {/* Section 1: Car ECU Remapping: Unleashing Power */}
-          <section className="px-8 py-10 lg:px-12">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12" style={{ gridAutoRows: '1fr' }}>
-              <div className="space-y-6 flex flex-col">
-                <div className="space-y-6">
-                  <h2 className="text-4xl font-black text-[#0c1b33] lg:text-5xl">
+          <section className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12" style={{ gridAutoRows: '1fr' }}>
+              <div className="space-y-4 flex flex-col sm:space-y-5 md:space-y-6">
+                <div className="space-y-4 sm:space-y-5 md:space-y-6">
+                  <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl lg:text-5xl">
                     Car ECU Remapping: Unleashing Power
                   </h2>
-                  <p className="text-base leading-relaxed text-[#5c6c86] lg:text-lg">
+                  <p className="text-sm leading-relaxed text-[#5c6c86] sm:text-base md:text-lg">
                     Car ECU Remapping Optimizes Engine Performance By Adjusting Parameters Like Fuel Injection, Ignition Timing, And Turbo Boost. With MSPerformance's Expertise And State-Of-The-Art Tools, Unleash Your Vehicle's Hidden Potential. Experience Increased Power, Improved Fuel Efficiency, And A Customized Driving Experience.
                   </p>
                 </div>
-                <div className="relative overflow-hidden rounded-[20px] flex-shrink-0">
+                <div className="relative overflow-hidden rounded-[20px] flex-shrink-0 animate-slide-right">
                   <Image
                     src="/images/services/ecu-remapping.png"
                     alt="ECU Remapping Process"
                     width={600}
                     height={400}
-                    className="w-full h-auto object-cover"
+                    className="w-full h-auto object-cover animate-image-hover"
                   />
                 </div>
               </div>
-              <div className="relative overflow-hidden h-[650px] rounded-[20px] border-2 border-[#1d70ff] flex">
+              <div className="relative overflow-hidden h-[650px] rounded-[20px] border-2 border-[#1d70ff] flex animate-slide-right">
                 <Image
                   src="/images/services/services1.png"
                   alt="Car Engine"
                   width={600}
                   height={400}
-                  className="w-full h-auto object-cover"
+                  className="w-full h-auto object-cover animate-image-hover"
                 />
               </div>
             </div>
@@ -187,14 +187,14 @@ export default function ServicesPage() {
           </section>
 
           {/* Section 3: Key Benefits Of The Service */}
-          <section className="px-8 py-10 lg:px-12">
-            <div className="bg-white rounded-[20px] p-8 lg:p-12">
-              <div className="grid gap-12 lg:grid-cols-[1fr_1fr]">
-                <div className="space-y-6">
-                  <h2 className="text-4xl font-black text-[#0c1b33] lg:text-5xl">
+          <section className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12">
+            <div className="bg-white rounded-xl p-4 sm:rounded-2xl sm:p-6 md:rounded-[20px] md:p-8 lg:p-12">
+              <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-12">
+                <div className="space-y-4 animate-slide-left sm:space-y-5 md:space-y-6">
+                  <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl lg:text-4xl animate-heading">
                     Key Benefits Of The Service
                   </h2>
-                  <p className="text-base leading-relaxed text-[#0c1b33] lg:text-lg">
+                  <p className="text-sm leading-relaxed text-[#0c1b33] sm:text-base md:text-lg">
                     Car ECU Remapping Optimizes Engine Performance By Adjusting Parameters Like Fuel Injection, Ignition Timing, And Turbo Boost. With MSPerformance's Expertise And State-Of-The-Art Tools, Unleash Your Vehicle's Hidden Potential. Experience Increased Power, Improved Fuel Efficiency, And A Customized Driving Experience.
                   </p>
                   <ul className="space-y-4">
@@ -304,7 +304,7 @@ export default function ServicesPage() {
                 {faqs.map((faq, index) => (
                   <div
                     key={index}
-                    className="rounded-[16px] border border-[#dfe6f2] bg-white shadow-sm"
+                    className="rounded-[16px] bg-white shadow-sm"
                   >
                     <button
                       onClick={() => setOpenFaq(openFaq === index ? null : index)}

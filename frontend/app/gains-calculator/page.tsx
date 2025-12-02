@@ -22,7 +22,7 @@ export default function GainsCalculatorPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="mx-auto max-w-[1503px] px-4 pb-20 pt-8 lg:px-0">
+      <div className="mx-auto max-w-[1503px] px-4  pt-8 lg:px-0">
         <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
           {/* Header */}
           <header className="text-white">
@@ -105,11 +105,11 @@ export default function GainsCalculatorPage() {
               <div className="absolute inset-0 bg-black/60" />
               <div className="relative px-8 py-20 lg:px-12">
               <div className="space-y-6 max-w-3xl">
-                <p className="flex items-center gap-3 text-sm font-semibold text-[#7ab6ff]">
+                <p className="flex items-center gap-3 text-sm font-semibold text-[#7ab6ff] animate-subtitle">
                   <span className="h-px w-12 bg-[#7ab6ff]" />
                   Feel the Need for Speed: Dyno Car Tests
                 </p>
-                <h1 className="text-5xl font-black leading-tight lg:text-6xl">
+                <h1 className="text-5xl font-black leading-tight lg:text-6xl animate-heading">
                   Vehicle Gains
                 </h1>
               </div>
@@ -120,7 +120,7 @@ export default function GainsCalculatorPage() {
             <section className="px-8 py-10 lg:px-12">
               <div className="grid gap-8 lg:grid-cols-[350px_1fr_350px]">
                 {/* Vehicle Application Form */}
-                <div className="bg-gray-100 rounded-[16px] p-6 space-y-4">
+                <div className="bg-gray-100 rounded-[16px] p-6 space-y-4 animate-card animate-slide-left">
                   <div className="space-y-3">
                     <label className="block text-sm font-semibold text-[#0c1b33] mb-2">Your vehicle registration</label>
                     <div className="flex gap-2">
@@ -132,7 +132,7 @@ export default function GainsCalculatorPage() {
                           className="flex-1 bg-transparent text-sm text-[#0c1b33] placeholder:text-gray-400 focus:outline-none"
                         />
                       </div>
-                      <button className="rounded-[8px] bg-gray-700 px-4 py-2 text-sm font-semibold text-white">
+                      <button className="rounded-[8px] bg-gray-700 px-4 py-2 text-sm font-semibold text-white animate-button">
                         Show
                       </button>
                     </div>
@@ -182,14 +182,14 @@ export default function GainsCalculatorPage() {
                         <option>1.4 Turbo MultiAir 167 bhp (2016&gt;)</option>
                       </select>
                     </div>
-                    <button className="w-full rounded-[8px] bg-[#ffd200] px-6 py-3 text-sm font-semibold text-black">
+                    <button className="w-full rounded-[8px] bg-[#ffd200] px-6 py-3 text-sm font-semibold text-black animate-button">
                       Show
                     </button>
                   </div>
                 </div>
 {/* Car Image and Specifications Card */}
 <div 
-  className="w-[869px] h-[229px] bg-white border border-gray-100 rounded-[10px] p-5 flex items-center gap-[35px]"
+  className="w-[869px] h-[229px] bg-white border border-gray-100 rounded-[10px] p-5 flex items-center gap-[35px] animate-card-delay-1 animate-slide-right"
 >
   {/* Car Image */}
   <div className="relative flex-shrink-0 w-[400px] h-[189px]">
@@ -311,39 +311,40 @@ export default function GainsCalculatorPage() {
 
             {/* Engine Specifications and Results */}
             <section className="px-8 py-10 lg:px-12">
-              <div className="grid gap-8 lg:grid-cols-[1fr_1.5fr]">
-                {/* Engine Specifications */}
-                <div className="bg-gray-100 rounded-[16px] p-8 space-y-4">
-                  <h3 className="text-2xl font-bold text-[#0c1b33] mb-6">Engine Specifications</h3>
-                  <div className="space-y-3 text-sm">
-                    <div>
-                      <span className="font-semibold text-[#0c1b33]">Cylinder Capacity:</span>
-                      <span className="ml-2 text-[#5c6c86]">5998CC</span>
+              <div className="bg-gray-100 rounded-[16px] p-8">
+                <div className="grid gap-8 lg:grid-cols-[1fr_1.5fr]">
+                  {/* Engine Specifications */}
+                  <div className="space-y-6">
+                    <h3 className="text-3xl font-black text-[#0c1b33] mb-8">Engine Specifications</h3>
+                    <div className="space-y-4 text-base">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-[#0c1b33] mb-1">Cylinder Capacity:</span>
+                        <span className="text-[#5c6c86] text-lg">5998CC</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-[#0c1b33] mb-1">Compression:</span>
+                        <span className="text-[#5c6c86] text-lg">9,1:1</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-[#0c1b33] mb-1">Type Ecu:</span>
+                        <span className="text-[#5c6c86] text-lg">Bosch ME17.1.6 & Bosch ME7.1.1 & Bosch MG1CS163</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-[#0c1b33] mb-1">Bore X Stroke:</span>
+                        <span className="text-[#5c6c86] text-lg">84,0 X 90,2 Mm</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-[#0c1b33] mb-1">Engine Code:</span>
+                        <span className="text-[#5c6c86] text-lg">DBD</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="font-semibold text-[#0c1b33]">Compression:</span>
-                      <span className="ml-2 text-[#5c6c86]">9,1:1</span>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-[#0c1b33]">Type Ecu:</span>
-                      <span className="ml-2 text-[#5c6c86]">Bosch ME17.1.6 & Bosch ME7.1.1 & Bosch MG1CS163</span>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-[#0c1b33]">Bore X Stroke:</span>
-                      <span className="ml-2 text-[#5c6c86]">84.0 X 90.2 Mm</span>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-[#0c1b33]">Engine Code:</span>
-                      <span className="ml-2 text-[#5c6c86]">DBD</span>
-                    </div>
+                    <button className="mt-8 w-full rounded-[12px] bg-[#12a7ff] px-6 py-4 text-base font-semibold text-white shadow-[0_4px_12px_rgba(18,167,255,0.3)] hover:bg-[#0f95e6] transition-colors animate-button">
+                      Request Quote
+                    </button>
                   </div>
-                  <button className="mt-6 w-full rounded-[8px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white">
-                    Request Quote
-                  </button>
-                </div>
 
-                {/* Performance Results */}
-                <div className="bg-gray-100 rounded-[16px] p-8">
+                  {/* Performance Results */}
+                  <div>
                   <div className="space-y-8">
                     {/* Power Row */}
                     <div>
@@ -563,7 +564,8 @@ export default function GainsCalculatorPage() {
                   </div>
                 </div>
               </div>
-            </section>
+            </div>
+          </section>
 
             {/* Detailed Results Graph */}
             <section className="px-8 py-10 lg:px-12">

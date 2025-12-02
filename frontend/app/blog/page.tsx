@@ -57,15 +57,46 @@ const blogArticles = [
 export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Category");
+  
+  // Blog carousel state
+  const [currentBlogIndex, setCurrentBlogIndex] = useState(0);
+  const blogsPerPage = 6;
+  
+  // Add dummy blog articles
+  const dummyBlogArticles = Array.from({ length: 6 }).map((_, i) => ({
+    id: 100 + i,
+    title: `Latest Performance Tuning News ${i + 1}`,
+    description: "Stay updated with the latest trends in car performance tuning and ECU remapping.",
+    image: blogArticles[i % blogArticles.length]?.image || "/images/blog/latest1.png",
+    date: "25 August 2024",
+    author: "MS Performance",
+    category: "News",
+  }));
+  
+  const allBlogArticles = [...blogArticles, ...dummyBlogArticles];
+  const totalBlogPages = Math.ceil(allBlogArticles.length / blogsPerPage);
+  
+  const nextBlogs = () => {
+    setCurrentBlogIndex((prev) => (prev + 1) % totalBlogPages);
+  };
+  
+  const prevBlogs = () => {
+    setCurrentBlogIndex((prev) => (prev - 1 + totalBlogPages) % totalBlogPages);
+  };
+  
+  const getVisibleBlogs = () => {
+    const start = currentBlogIndex * blogsPerPage;
+    return allBlogArticles.slice(start, start + blogsPerPage);
+  };
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="mx-auto max-w-[1503px] px-4 pb-20 pt-8 lg:px-0">
-        <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
+      <div className="pt-8">
+        <div className="bg-white rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden sm:rounded-2xl md:rounded-[20px]">
         <header className="text-white">
-            <div className="space-y-3 bg-black px-6 py-4 shadow-[0_20px_60px_rgba(1,4,13,0.65)]">
-              <div className="flex flex-wrap items-center justify-between border-b-2 border-gray-700 pb-2 text-xs text-white/70">
-                <div className="flex flex-wrap items-center gap-4">
+            <div className="space-y-2 bg-black px-4 py-3 shadow-[0_20px_60px_rgba(1,4,13,0.65)] sm:space-y-3 sm:px-6 sm:py-4">
+              <div className="flex flex-col items-start justify-between gap-3 border-b-2 border-gray-700 pb-2 text-xs text-white/70 sm:flex-row sm:items-center sm:gap-4">
+                <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
                   <div className="flex items-center gap-2">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
                       <path
@@ -74,7 +105,7 @@ export default function BlogPage() {
                       />
                       <circle cx="12" cy="10" r="3" fill="currentColor" />
                     </svg>
-                    <span>Unit 16, Bakers Ln, Chelmsford CM2 8LD</span>
+                    <span className="text-[10px] sm:text-xs">Unit 16, Bakers Ln, Chelmsford CM2 8LD</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
@@ -83,7 +114,7 @@ export default function BlogPage() {
                         fill="currentColor"
                       />
                     </svg>
-                    <span>info@msperformance.co.uk</span>
+                    <span className="text-[10px] sm:text-xs">info@msperformance.co.uk</span>
                   </div>
                 </div>
                 <Link href="/cart" className="flex items-center gap-2 text-white">
@@ -146,7 +177,7 @@ export default function BlogPage() {
                     <span className="inline-block rounded-[8px] bg-white/20 px-3 py-1 text-xs font-semibold text-white">
                       {featuredArticle.category}
                     </span>
-                    <h1 className="text-4xl font-black leading-tight lg:text-5xl">
+                    <h1 className="text-4xl font-black leading-tight lg:text-5xl animate-heading">
                       {featuredArticle.title}
                     </h1>
                     {/* Carousel Dots */}
@@ -185,20 +216,20 @@ export default function BlogPage() {
             </section>
 
             {/* Highlighted Articles Section */}
-            <section className="px-8 py-10 lg:px-12">
-              <h2 className="justify-center text-center text-3xl font-black text-[#0c1b33] mb-6">
+            <section className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12">
+              <h2 className="text-center text-xl font-black text-[#0c1b33] mb-4 sm:text-2xl sm:mb-5 md:text-3xl md:mb-6">
                 Highlighted Articles Or News At The Top Of The Page
               </h2>
 
               {/* Search and Filter Bar */}
-              <div className="flex flex-wrap items-center gap-4 mb-8">
-                <div className="relative flex-1 min-w-[200px]">
+              <div className="flex flex-col items-stretch gap-3 mb-6 sm:flex-row sm:items-center sm:gap-4 sm:mb-8">
+                <div className="relative flex-1 w-full min-w-[200px]">
                   <input
                     type="text"
                     placeholder="Find your latest news here"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 pl-10 pr-4 text-sm text-[#0c1b33] placeholder:text-gray-400 focus:border-[#1d70ff] focus:outline-none"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 pl-9 pr-3 text-xs text-[#0c1b33] placeholder:text-gray-400 focus:border-[#1d70ff] focus:outline-none sm:rounded-[8px] sm:px-4 sm:py-3 sm:pl-10 sm:pr-4 sm:text-sm"
                   />
                   <svg
                     width="16"
@@ -214,8 +245,8 @@ export default function BlogPage() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10"
-                  style={{ backgroundPosition: 'right 0.75rem center' }}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-xs text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-8 sm:w-auto sm:rounded-[8px] sm:px-4 sm:py-3 sm:text-sm sm:pr-10"
+                  style={{ backgroundPosition: 'right 0.5rem center' }}
                 >
                   <option>Category</option>
                   <option>ECU Remapping</option>
@@ -223,7 +254,7 @@ export default function BlogPage() {
                   <option>Custom Exhausts</option>
                   <option>News</option>
                 </select>
-                <button className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition">
+                <button className="flex h-10 w-full items-center justify-center rounded-lg bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition sm:h-12 sm:w-12 sm:rounded-[8px] animate-button">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
                     <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" />
@@ -233,11 +264,13 @@ export default function BlogPage() {
 
               {/* Top Article Grid - 3 Cards */}
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
-                {blogArticles.slice(0, 3).map((article) => (
+                {blogArticles.slice(0, 3).map((article, index) => (
                   <Link
                     key={article.id}
                     href="/blog/detail"
-                    className="bg-white rounded-[16px] border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                    className={`bg-white rounded-[16px] overflow-hidden hover:shadow-lg transition-shadow cursor-pointer shadow-sm card-hover ${
+                      index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : 'animate-card-delay-2'
+                    }`}
                   >
                     <div className="relative h-48 overflow-hidden">
                       <Image
@@ -245,7 +278,7 @@ export default function BlogPage() {
                         alt={article.title}
                         width={400}
                         height={200}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover animate-image-hover"
                       />
                     </div>
                     <div className="p-6 space-y-4">
@@ -272,48 +305,89 @@ export default function BlogPage() {
               </div>
 
               {/* Recent Blogs Section */}
-              <h2 className="text-3xl font-black text-[#0c1b33] mb-6">Recent Blogs</h2>
-
-              {/* Bottom Article Grid - 6 Cards (3x2) */}
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {blogArticles.map((article) => (
-                  <Link
-                    key={article.id}
-                    href="/blog/detail"
-                    className="bg-white rounded-[16px] border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-black text-[#0c1b33]">Recent Blogs</h2>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={prevBlogs}
+                    className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button"
+                    aria-label="Previous blogs"
                   >
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={article.image}
-                        alt={article.title}
-                        width={400}
-                        height={200}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-6 space-y-4">
-                      <h3 className="text-lg font-bold text-[#0c1b33] line-clamp-2">
-                        {article.title}
-                      </h3>
-                      <p className="text-sm text-[#5c6c86] line-clamp-2">
-                        {article.description}
-                      </p>
-                      <button className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path
-                            d="M5 12h14M12 5l7 7-7 7"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </Link>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <button 
+                    onClick={nextBlogs}
+                    className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button"
+                    aria-label="Next blogs"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div className="relative overflow-hidden mb-8">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {getVisibleBlogs().map((article, index) => (
+                    <Link
+                      key={article.id}
+                      href="/blog/detail"
+                      className={`bg-white rounded-[16px] overflow-hidden hover:shadow-lg transition-shadow cursor-pointer shadow-sm card-hover ${
+                        index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : index === 2 ? 'animate-card-delay-2' : index === 3 ? 'animate-card-delay-3' : 'animate-card animate-stagger-4'
+                      }`}
+                    >
+                      <div className="relative h-48 overflow-hidden">
+                        <Image
+                          src={article.image}
+                          alt={article.title}
+                          width={400}
+                          height={200}
+                          className="w-full h-full object-cover animate-image-hover"
+                        />
+                      </div>
+                      <div className="p-6 space-y-4">
+                        <h3 className="text-lg font-bold text-[#0c1b33] line-clamp-2">
+                          {article.title}
+                        </h3>
+                        <p className="text-sm text-[#5c6c86] line-clamp-2">
+                          {article.description}
+                        </p>
+                        <button className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition animate-button">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path
+                              d="M5 12h14M12 5l7 7-7 7"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Blog Carousel Indicators */}
+              <div className="flex justify-center gap-2 mb-8">
+                {Array.from({ length: totalBlogPages }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentBlogIndex(index)}
+                    className={`h-2 rounded-full transition-all ${
+                      index === currentBlogIndex
+                        ? 'w-8 bg-[#1d70ff]'
+                        : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
+                    }`}
+                    aria-label={`Go to page ${index + 1}`}
+                  />
                 ))}
               </div>
-            </section>
+          </section>
 
             {/* Footer */}
             <footer className="border-t border-[#1d70ff]/100 px-8 py-12">

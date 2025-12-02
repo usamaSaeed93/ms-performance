@@ -27,14 +27,46 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
+  
+  // Products carousel state
+  const [currentProductCarouselIndex, setCurrentProductCarouselIndex] = useState(0);
+  const productsCarouselPerPage = 8;
   const totalProducts = 100;
 
   // Generate more products for the grid (12 products)
   const allProducts = generateAllProducts();
+  
+  // Add more dummy products for carousel
+  const dummyProducts = Array.from({ length: 8 }).map((_, i) => ({
+    id: 100 + i,
+    title: `Premium Performance Product ${i + 1}`,
+    price: `£${(Math.random() * 500 + 100).toFixed(2)}`,
+    oldPrice: Math.random() > 0.5 ? `£${(Math.random() * 600 + 200).toFixed(2)}` : null,
+    rating: Math.random() * 2 + 3,
+    discount: Math.random() > 0.7 ? `-${Math.floor(Math.random() * 30 + 10)}%` : null,
+    image: allProducts[i % allProducts.length]?.image || "/images/products/product1.png",
+    brand: "MS",
+  }));
+  
+  const allProductsWithDummy = [...allProducts, ...dummyProducts];
+  const totalProductCarouselPages = Math.ceil(allProductsWithDummy.length / productsCarouselPerPage);
+  
+  const nextProducts = () => {
+    setCurrentProductCarouselIndex((prev) => (prev + 1) % totalProductCarouselPages);
+  };
+  
+  const prevProducts = () => {
+    setCurrentProductCarouselIndex((prev) => (prev - 1 + totalProductCarouselPages) % totalProductCarouselPages);
+  };
+  
+  const getVisibleProducts = () => {
+    const start = currentProductCarouselIndex * productsCarouselPerPage;
+    return allProductsWithDummy.slice(start, start + productsCarouselPerPage);
+  };
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="mx-auto max-w-[1503px] px-4 pb-20 pt-8 lg:px-0">
+      <div className="pt-8">
         <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
           {/* Header */}
           <header className="text-white">
@@ -96,7 +128,7 @@ export default function ProductsPage() {
                   ))}
                 </nav>
 
-                <button className="rounded-[12px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)]">
+                <button className="rounded-[12px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)] animate-button">
                   Become A Dealer
                 </button>
               </div>
@@ -105,7 +137,7 @@ export default function ProductsPage() {
 
           <main className="space-y-12">
             {/* Banner Section */}
-            <section className="relative overflow-hidden bg-[#030814] text-white h-[300px]">
+            <section className="relative overflow-hidden bg-[#030814] text-white h-[250px] sm:h-[300px] md:h-[350px]">
               <Image
                 src="/images/products/ProductsHero.png"
                 alt="All Products"
@@ -115,15 +147,15 @@ export default function ProductsPage() {
                 priority
               />
               <div className="absolute inset-0 bg-black/60" />
-              <div className="relative h-full flex items-center px-8 lg:px-12">
-                <h1 className="text-5xl font-black lg:text-6xl">All Products</h1>
+              <div className="relative h-full flex items-center px-4 sm:px-6 md:px-8 lg:px-12">
+                <h1 className="text-3xl font-black sm:text-4xl md:text-5xl lg:text-6xl animate-heading">All Products</h1>
               </div>
             </section>
 
             {/* Products Section */}
-            <section className="px-8 py-10 lg:px-12">
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <h2 className="text-4xl font-black text-[#0c1b33]">Products</h2>
+            <section className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12">
+              <div className="flex flex-col items-start justify-between gap-4 mb-4 sm:mb-6 sm:flex-row sm:items-center">
+                <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl">Products</h2>
                 <div className="flex flex-wrap items-center gap-4">
                   <span className="text-sm text-[#5c6c86]">
                     Showing {((currentPage - 1) * productsPerPage) + 1}-{Math.min(currentPage * productsPerPage, totalProducts)} of {totalProducts} Products
@@ -173,11 +205,13 @@ export default function ProductsPage() {
 
               {/* Products Grid */}
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
-                {allProducts.map((product, index) => (
+                {getVisibleProducts().map((product, index) => (
                   <Link
                     key={index}
                     href="/products/detail"
-                    className="relative flex flex-col gap-4 rounded-[28px] bg-white p-6 shadow-[0_10px_40px_rgba(16,53,106,0.05)] border border-gray-100 hover:shadow-[0_15px_50px_rgba(16,53,106,0.1)] transition-shadow cursor-pointer"
+                    className={`relative flex flex-col gap-4 rounded-[28px] bg-white p-6 shadow-[0_10px_40px_rgba(16,53,106,0.05)] hover:shadow-[0_15px_50px_rgba(16,53,106,0.1)] transition-shadow cursor-pointer card-hover ${
+                      index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : index === 2 ? 'animate-card-delay-2' : 'animate-card-delay-3'
+                    }`}
                   >
                     {product.discount && (
                       <div className="absolute right-4 top-4 z-10 rounded-full bg-red-500 px-3 py-1 text-xs font-semibold text-white">
@@ -190,7 +224,7 @@ export default function ProductsPage() {
                         alt={product.title}
                         width={320}
                         height={320}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover animate-image-hover"
                       />
                     </div>
                     <div className="space-y-2">
@@ -233,29 +267,46 @@ export default function ProductsPage() {
               {/* Pagination */}
               <div className="flex items-center justify-center gap-2">
                 <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="rounded-[8px] border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-[#0c1b33] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  onClick={prevProducts}
+                  disabled={currentProductCarouselIndex === 0}
+                  className="rounded-[8px] border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-[#0c1b33] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 animate-button"
                 >
                   ← Previous
                 </button>
-                {[1, 2, 3].map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`rounded-[8px] px-4 py-2 text-sm font-semibold ${
-                      currentPage === page
-                        ? "bg-[#1d70ff] text-white"
-                        : "bg-white border border-gray-300 text-[#0c1b33] hover:bg-gray-50"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <span className="px-2 text-sm text-[#5c6c86]">...</span>
+                {Array.from({ length: Math.min(totalProductCarouselPages, 3) }).map((_, idx) => {
+                  const page = idx + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentProductCarouselIndex(idx)}
+                      className={`rounded-[8px] px-4 py-2 text-sm font-semibold ${
+                        currentProductCarouselIndex === idx
+                          ? "bg-[#1d70ff] text-white"
+                          : "bg-white border border-gray-300 text-[#0c1b33] hover:bg-gray-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+                {totalProductCarouselPages > 3 && (
+                  <>
+                    <span className="px-2 text-sm text-[#5c6c86]">...</span>
+                    <button
+                      onClick={() => setCurrentProductCarouselIndex(totalProductCarouselPages - 1)}
+                      className={`rounded-[8px] px-4 py-2 text-sm font-semibold ${
+                        currentProductCarouselIndex === totalProductCarouselPages - 1
+                          ? "bg-[#1d70ff] text-white"
+                          : "bg-white border border-gray-300 text-[#0c1b33] hover:bg-gray-50"
+                      }`}
+                    >
+                      {totalProductCarouselPages}
+                    </button>
+                  </>
+                )}
                 <button
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage >= Math.ceil(totalProducts / productsPerPage)}
+                  onClick={nextProducts}
+                  disabled={currentProductCarouselIndex >= totalProductCarouselPages - 1}
                   className="rounded-[8px] border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-[#0c1b33] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
                   Next →
@@ -264,18 +315,34 @@ export default function ProductsPage() {
             </section>
 
             {/* Brand Logos Section */}
-            <section className="px-8 py-10 lg:px-12">
-              <div className="flex items-center justify-center gap-4 lg:gap-6">
-                {productBrandLogos.map((logo, index) => (
-                  <Image
-                    key={logo}
-                    src={logo}
-                    alt={`Brand logo ${index + 1}`}
-                    width={180}
-                    height={34}
-                    className="h-10 lg:h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
-                  />
-                ))}
+            <section className="px-8 py-10 lg:px-12 overflow-hidden">
+              <div className="relative w-full overflow-hidden">
+                <div className="flex items-center gap-8 sm:gap-12 md:gap-16 lg:gap-20 animate-scroll-logos">
+                  {/* First set of logos */}
+                  {productBrandLogos.map((logo, index) => (
+                    <div key={`logo-1-${index}`} className="flex-shrink-0">
+                      <Image
+                        src={logo}
+                        alt={`Brand logo ${index + 1}`}
+                        width={180}
+                        height={34}
+                        className="h-10 lg:h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+                      />
+                    </div>
+                  ))}
+                  {/* Duplicate set for seamless loop */}
+                  {productBrandLogos.map((logo, index) => (
+                    <div key={`logo-2-${index}`} className="flex-shrink-0">
+                      <Image
+                        src={logo}
+                        alt={`Brand logo ${index + 1}`}
+                        width={180}
+                        height={34}
+                        className="h-10 lg:h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             </section>
             {/* Footer */}
@@ -323,7 +390,7 @@ export default function ProductsPage() {
                       placeholder="Your Email"
                       className="w-full rounded-[8px] border border-[#dfe6f2] px-4 py-3 text-sm text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none"
                     />
-                    <button className="w-full rounded-[8px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white">
+                    <button className="w-full rounded-[8px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white animate-button">
                       Subscribe
                     </button>
                   </div>

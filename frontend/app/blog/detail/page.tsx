@@ -23,7 +23,7 @@ export default function BlogDetailPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="mx-auto max-w-[1503px] px-4 pb-20 pt-8 lg:px-0">
+      <div className="mx-auto max-w-[1503px] px-4 pt-8 lg:px-0">
         <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
           {/* Header */}
           <header className="text-white">
@@ -104,11 +104,11 @@ export default function BlogDetailPage() {
                 priority
               />
               <div className="absolute inset-0 bg-black/70" />
-              <div className="relative h-full flex items-end px-8 pb-12 lg:px-12">
-                <div className="space-y-4">
-                  <h1 className="text-5xl font-black lg:text-6xl">Blog Detail</h1>
-                  <div className="flex items-center gap-4">
-                    <div className="relative h-12 w-12 flex-shrink-0 rounded-full overflow-hidden bg-gray-600">
+              <div className="relative h-full flex items-end px-4 pb-8 sm:px-6 sm:pb-10 md:px-8 md:pb-12 lg:px-12">
+                <div className="space-y-3 sm:space-y-4">
+                  <h1 className="text-3xl font-black sm:text-4xl md:text-5xl lg:text-6xl animate-heading">Blog Detail</h1>
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="relative h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-gray-600 sm:h-12 sm:w-12">
                       <Image
                         src="/images/hero/slider1.jpg"
                         alt="Kevin McGill"
@@ -117,7 +117,7 @@ export default function BlogDetailPage() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="text-sm">
+                    <div className="text-xs sm:text-sm">
                       <p className="font-semibold text-white">By Kevin McGill</p>
                       <p className="text-white/70">23 August 2024 • 10 mins read</p>
                     </div>
@@ -127,11 +127,11 @@ export default function BlogDetailPage() {
             </section>
 
             {/* Blog Content */}
-            <section className="px-8 py-10 lg:px-12">
-              <div className="grid gap-8 lg:grid-cols-[250px_1fr]">
+            <section className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12">
+              <div className="grid gap-6 lg:grid-cols-[250px_1fr] lg:gap-8">
                 {/* Left Sidebar */}
                 <aside className="lg:sticky lg:top-8 h-fit">
-                  <div className="bg-gray-50 rounded-[16px] p-6 space-y-8">
+                  <div className="bg-gray-50 rounded-xl p-4 space-y-6 sm:rounded-2xl sm:p-5 sm:space-y-7 md:rounded-[16px] md:p-6 md:space-y-8">
                     {/* Jump To Section */}
                     <div>
                       <h3 className="text-lg font-bold text-[#0c1b33] mb-4">Jump To Section</h3>
@@ -155,7 +155,7 @@ export default function BlogDetailPage() {
                       <div className="flex flex-row gap-3">
                         {/* Facebook */}
                         <button
-                          className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition"
+                          className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition animate-button"
                           title="Facebook"
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -164,7 +164,7 @@ export default function BlogDetailPage() {
                         </button>
                         {/* Twitter */}
                         <button
-                          className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition"
+                          className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition animate-button"
                           title="Twitter"
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -173,7 +173,7 @@ export default function BlogDetailPage() {
                         </button>
                         {/* Instagram */}
                         <button
-                          className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition"
+                          className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition animate-button"
                           title="Instagram"
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -182,7 +182,7 @@ export default function BlogDetailPage() {
                         </button>
                         {/* Email */}
                         <button
-                          className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition"
+                          className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition animate-button"
                           title="Email"
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -196,32 +196,32 @@ export default function BlogDetailPage() {
                 </aside>
 
                 {/* Main Content */}
-                <article className="space-y-8">
+                <article className="space-y-6 sm:space-y-7 md:space-y-8">
                   {/* Introductory Paragraph */}
-                  <div className="bg-[#C9EEFF] rounded-[12px] p-6 text-black">
-                    <p className="text-base leading-relaxed">
+                  <div className="bg-[#C9EEFF] rounded-lg p-4 text-black sm:rounded-xl sm:p-5 md:rounded-[12px] md:p-6">
+                    <p className="text-sm leading-relaxed sm:text-base">
                       Car tuning has become a major trend among automotive enthusiasts who seek to improve their driving experience by making modifications and adjustments to various components of a vehicle. From tuning aims to enhance performance, handling, and personalization. In this blog post, we will explore the benefits of car tuning and why it can be good for your car.
                     </p>
                   </div>
 
                   {/* Section 1: Unleashing Performance Potential */}
-                  <section id="performance" className="space-y-4 scroll-mt-8">
-                    <h2 className="text-3xl font-black text-[#0c1b33]">Unleashing Performance Potential</h2>
-                    <p className="text-base leading-relaxed text-[#5c6c86]">
+                  <section id="performance" className="space-y-3 scroll-mt-8 sm:space-y-4">
+                    <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl">Unleashing Performance Potential</h2>
+                    <p className="text-sm leading-relaxed text-[#5c6c86] sm:text-base">
                       Car tuning can significantly improve your vehicle's engine performance, allowing you to unlock hidden horsepower and torque. By optimizing fuel injection, ignition timing, and turbo boost pressure, professional tuners can extract more power from your engine while maintaining reliability. This enhanced performance translates to better acceleration, higher top speeds, and a more exhilarating driving experience. Whether you're on the track or the open road, a well-tuned car delivers the power and responsiveness you crave.
                     </p>
                   </section>
 
                   {/* Section 2: Enhanced Handling And Safety */}
-                  <section id="handling" className="space-y-4 scroll-mt-8">
-                    <h2 className="text-3xl font-black text-[#0c1b33]">Enhanced Handling And Safety</h2>
-                    <p className="text-base leading-relaxed text-[#5c6c86]">
+                  <section id="handling" className="space-y-3 scroll-mt-8 sm:space-y-4">
+                    <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl">Enhanced Handling And Safety</h2>
+                    <p className="text-sm leading-relaxed text-[#5c6c86] sm:text-base">
                       Beyond raw power, car tuning can dramatically improve your vehicle's handling characteristics and safety. Upgrading suspension components, brake systems, and chassis modifications can enhance cornering ability, reduce body roll, and improve overall stability. These improvements not only make your car more fun to drive but also contribute to safer driving conditions, especially in emergency situations where precise handling can make all the difference.
                     </p>
                   </section>
 
                   {/* Image Section */}
-                  <div className="relative h-[400px] rounded-[16px] overflow-hidden">
+                  <div className="relative h-[250px] w-full rounded-lg overflow-hidden sm:h-[300px] sm:rounded-xl md:h-[350px] md:rounded-2xl lg:h-[400px] lg:rounded-[16px]">
                     <Image
                       src="/images/blog/BlogsDetail.png"
                       alt="Mechanic working on car"
@@ -232,17 +232,17 @@ export default function BlogDetailPage() {
                   </div>
 
                   {/* Section 3: Customization And Personalization */}
-                  <section id="customization" className="space-y-4 scroll-mt-8">
-                    <h2 className="text-3xl font-black text-[#0c1b33]">Customization And Personalization</h2>
-                    <p className="text-base leading-relaxed text-[#5c6c86]">
+                  <section id="customization" className="space-y-3 scroll-mt-8 sm:space-y-4">
+                    <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl">Customization And Personalization</h2>
+                    <p className="text-sm leading-relaxed text-[#5c6c86] sm:text-base">
                       One of the most appealing aspects of car tuning is the ability to personalize your vehicle to match your unique style and preferences. From exterior modifications like custom body kits and paint jobs to interior upgrades such as premium upholstery and advanced infotainment systems, tuning allows you to create a one-of-a-kind vehicle that reflects your personality. This level of customization ensures that your car stands out from the crowd and becomes a true extension of your identity.
                     </p>
                   </section>
 
                   {/* Section 4: Improved Resale Value */}
-                  <section id="resale" className="space-y-4 scroll-mt-8">
-                    <h2 className="text-3xl font-black text-[#0c1b33]">Improved Resale Value</h2>
-                    <p className="text-base leading-relaxed text-[#5c6c86]">
+                  <section id="resale" className="space-y-3 scroll-mt-8 sm:space-y-4">
+                    <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl">Improved Resale Value</h2>
+                    <p className="text-sm leading-relaxed text-[#5c6c86] sm:text-base">
                       Contrary to popular belief, professional car tuning can actually increase your vehicle's resale value when done correctly. High-quality modifications, especially performance upgrades and well-maintained tuning work, can make your car more attractive to potential buyers. Enthusiasts and collectors often value professionally tuned vehicles, recognizing the investment and care that went into the modifications. This can result in a higher resale price compared to a stock vehicle.
                     </p>
                   </section>
