@@ -287,5 +287,17 @@ export const adminApi = {
   }) {
     return apiClient.put<Discount>('create_discount', discount);
   },
+
+  async createProductImages(productId: number, images: Array<{
+    image_url: string;
+    alt_text?: string;
+    sort_order?: number;
+    is_primary?: boolean;
+  }>) {
+    return apiClient.put<{ images: ProductImage[] }>('create_product_image', {
+      product_id: productId,
+      images,
+    });
+  },
 };
 

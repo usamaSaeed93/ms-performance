@@ -1,8 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { adminApi, Product } from "@/lib/api/admin";
+import {
+  useGetProductsQuery,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+  type Product,
+} from "@/lib/store/api/adminApi";
 import { useTheme } from "@/lib/contexts/theme-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,11 +39,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AdminProductsPage() {
   const { theme } = useTheme();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [perPage, setPerPage] = useState(20);
@@ -49,20 +53,18 @@ export default function AdminProductsPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState<Partial<Product>>({});
 
-  useEffect(() => {
-    fetchProducts();
-  }, [page, perPage, orderBy, order]);
+  // RTK Query hooks
+  const {
+    data: productsData,
+    isLoading,
+    error,
+    refetch,
+  } = useGetProductsQuery({ page, per_page: perPage, order_by: orderBy, order });
 
-  const fetchProducts = async () => {
-    try {
-      const response = await adminApi.getProducts({ page, per_page: perPage, order_by: orderBy, order: order });
-      setProducts(response.products || []);
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+
+  const products = productsData?.products || [];
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
@@ -78,31 +80,44 @@ export default function AdminProductsPage() {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
+    
     try {
-      await adminApi.updateProduct(editingProduct.id, formData);
+      await updateProduct({
+        productId: editingProduct.id,
+        product: {
+          ...formData,
+          is_active: formData.is_active ? 1 : 0,
+        },
+      }).unwrap();
+      
+      toast.success("Product updated successfully");
       setShowEditModal(false);
       setEditingProduct(null);
-      fetchProducts();
-    } catch (error) {
+      // Cache will automatically invalidate and refetch
+    } catch (error: any) {
       console.error("Failed to update product:", error);
-      alert("Failed to update product");
+      toast.error(error?.data?.message || "Failed to update product");
     }
   };
 
   const handleDelete = async (productId: number) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
+    
     try {
-      await adminApi.deleteProduct(productId);
-      fetchProducts();
-    } catch (error) {
+      await deleteProduct(productId).unwrap();
+      toast.success("Product deleted successfully");
+      // Cache will automatically invalidate and refetch
+    } catch (error: any) {
       console.error("Failed to delete product:", error);
-      alert("Failed to delete product");
+      toast.error(error?.data?.message || "Failed to delete product");
     }
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.product_name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) =>
+      product.product_name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [products, search]);
 
   return (
     <div className="p-4 lg:p-8 space-y-6">
@@ -164,10 +179,18 @@ export default function AdminProductsPage() {
         </CardContent>
       </Card>
 
-      {loading ? (
+      {isLoading ? (
         <Card>
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">Loading products...</p>
+          </CardContent>
+        </Card>
+      ) : error ? (
+        <Card>
+          <CardContent className="py-8">
+            <p className="text-center text-destructive">
+              Error loading products. <Button variant="link" onClick={() => refetch()}>Try again</Button>
+            </p>
           </CardContent>
         </Card>
       ) : (
@@ -221,6 +244,7 @@ export default function AdminProductsPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleEdit(product)}
+                            disabled={isUpdating || isDeleting}
                           >
                             Edit
                           </Button>
@@ -228,8 +252,9 @@ export default function AdminProductsPage() {
                             variant="destructive"
                             size="sm"
                             onClick={() => handleDelete(product.id)}
+                            disabled={isUpdating || isDeleting}
                           >
-                            Delete
+                            {isDeleting ? "Deleting..." : "Delete"}
                           </Button>
                         </div>
                       </TableCell>
@@ -289,13 +314,20 @@ export default function AdminProductsPage() {
               <Label htmlFor="edit-is_active">Active</Label>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => {
-                setShowEditModal(false);
-                setEditingProduct(null);
-              }}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingProduct(null);
+                }}
+                disabled={isUpdating}
+              >
                 Cancel
               </Button>
-              <Button type="submit">Update</Button>
+              <Button type="submit" disabled={isUpdating}>
+                {isUpdating ? "Updating..." : "Update"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

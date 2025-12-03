@@ -141,7 +141,11 @@ export default function ImageGallery({ images, onImagesChange, folder = "product
         <ImageUpload
           folder={folder}
           onUploadComplete={handleAddImage}
-          onUploadError={(error) => alert(error)}
+          onUploadError={(error) => {
+            // Error handling is done in ImageUpload component via toast
+            console.error("Image upload error:", error);
+          }}
+          multiple={true}
         />
       </div>
     </div>

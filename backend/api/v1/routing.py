@@ -22,6 +22,7 @@ from .endpoints.update_user import UpdateUser
 from .endpoints.upload_image import UploadImage
 from .endpoints.create_discount import CreateDiscount
 from .endpoints.get_discounts import GetDiscounts
+from .endpoints.create_product_image import CreateProductImage
 
 
 class RoutingV1(BaseRouting):
@@ -112,4 +113,8 @@ class RoutingV1(BaseRouting):
         self.routing_collection[GetDiscounts.api_name] = (
             GetDiscounts(),
             GetDiscounts.api_url,
+        )
+        self.routing_collection[CreateProductImage.api_name] = (
+            CreateProductImage(),
+            CreateProductImage.api_url,
         )

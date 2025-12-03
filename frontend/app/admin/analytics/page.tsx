@@ -177,7 +177,7 @@ export default function AnalyticsPage() {
                       <Line
                         type="monotone"
                         dataKey="revenue"
-                        stroke="#12a7ff"
+                        stroke="#6b7280"
                         strokeWidth={2}
                         name="Revenue"
                       />
@@ -199,7 +199,7 @@ export default function AnalyticsPage() {
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Bar dataKey="count" fill="#12a7ff" name="Sales Count" />
+                      <Bar dataKey="count" fill="#6b7280" name="Sales Count" />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>

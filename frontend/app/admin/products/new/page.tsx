@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { adminApi, Category, Product } from "@/lib/api/admin";
+import { toast } from "sonner";
+import {
+  useGetCategoriesQuery,
+  useCreateProductMutation,
+  useCreateProductImagesMutation,
+  type Category,
+  type Product,
+} from "@/lib/store/api/adminApi";
 import ImageGallery, { ImageGalleryItem } from "@/lib/components/ImageGallery";
 import ProductVariants from "@/lib/components/ProductVariants";
 import { useTheme } from "@/lib/contexts/theme-context";
@@ -32,11 +39,17 @@ type TabType = "general" | "inventory" | "shipping" | "images" | "variants" | "s
 export default function NewProductPage() {
   const router = useRouter();
   const { theme } = useTheme();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("general");
   const [images, setImages] = useState<ImageGalleryItem[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
+  
+  // RTK Query hooks
+  const { data: categoriesData, isLoading: categoriesLoading } = useGetCategoriesQuery();
+  const [createProduct, { isLoading: isCreatingProduct }] = useCreateProductMutation();
+  const [createProductImages, { isLoading: isCreatingImages }] = useCreateProductImagesMutation();
+  
+  const categories = categoriesData?.categories || [];
+  const loading = isCreatingProduct || isCreatingImages;
   
   const [formData, setFormData] = useState<Partial<Product>>({
     product_name: "",
@@ -79,18 +92,7 @@ export default function NewProductPage() {
     button_text: "Buy product",
   });
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await adminApi.getCategories();
-      setCategories(response.categories || []);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-    }
-  };
+  // Categories are automatically fetched via RTK Query
 
   const generateSlug = (name: string) => {
     return name
@@ -109,7 +111,9 @@ export default function NewProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    
+    const loadingToast = toast.loading("Creating product...");
+    
     try {
       const submitData: any = {
         ...formData,
@@ -121,21 +125,57 @@ export default function NewProductPage() {
         width: formData.width ? parseFloat(formData.width as string) : null,
         height: formData.height ? parseFloat(formData.height as string) : null,
         image_url: images.length > 0 ? images.find(img => img.is_primary)?.image_url || images[0].image_url : formData.image_url,
+        is_active: formData.is_active ? 1 : 0,
       };
 
-      await adminApi.createProduct(submitData);
-      router.push("/admin/products");
+      console.log('[Product Creation] Submitting product data:', submitData);
+      const response = await createProduct(submitData).unwrap();
+      console.log('[Product Creation] Product created:', response);
+      const productId = response.id;
+
+      // Create product images if any
+      if (images.length > 0 && productId) {
+        toast.loading("Uploading product images...", { id: loadingToast });
+        
+        try {
+          const imageData = images.map((img, index) => ({
+            image_url: img.image_url,
+            alt_text: img.alt_text || "",
+            sort_order: img.sort_order ?? index,
+            is_primary: img.is_primary || false,
+          }));
+
+          console.log('[Product Creation] Creating product images:', imageData);
+          await createProductImages({ productId, images: imageData }).unwrap();
+          console.log('[Product Creation] Product images created successfully');
+          toast.success("Product images uploaded successfully", { id: loadingToast });
+        } catch (imageError: any) {
+          console.error("[Product Creation] Failed to create product images:", imageError);
+          toast.error(
+            `Product created but failed to upload images: ${imageError?.data?.message || imageError?.message || "Unknown error"}`,
+            { id: loadingToast }
+          );
+        }
+      }
+
+      toast.success("Product created successfully!", { id: loadingToast });
+      
+      // Navigate after a short delay to show the success message
+      setTimeout(() => {
+        router.push("/admin/products");
+      }, 1000);
     } catch (error: any) {
-      console.error("Failed to create product:", error);
-      alert(error.message || "Failed to create product");
-    } finally {
-      setLoading(false);
+      console.error("[Product Creation] Failed to create product:", error);
+      toast.error(
+        error?.data?.message || error?.message || "Failed to create product. Please try again.",
+        { id: loadingToast }
+      );
     }
   };
 
   return (
-    <div className="p-4 lg:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="p-4 lg:p-8 relative">
+      <div className="max-w-6xl mx-auto relative">
         <div className="mb-6">
           <Button
             variant="ghost"
@@ -153,14 +193,14 @@ export default function NewProductPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Card>
+          <Card className="overflow-visible">
             <CardHeader>
               <CardTitle>Product Details</CardTitle>
               <CardDescription>
                 Configure your product settings across different sections
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-visible">
               <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
                 <TabsList className="grid w-full grid-cols-7">
                   <TabsTrigger value="general">📝 General</TabsTrigger>
@@ -173,7 +213,7 @@ export default function NewProductPage() {
                 </TabsList>
 
                 {/* General Tab */}
-                <TabsContent value="general" className="space-y-6 mt-6">
+                <TabsContent value="general" className="space-y-6 mt-6 overflow-visible">
                   <div className="space-y-2">
                     <Label htmlFor="product_name">Product Name *</Label>
                     <Input
@@ -227,7 +267,7 @@ export default function NewProductPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="z-[9999] bg-white dark:bg-popover shadow-2xl border-2">
                         <SelectItem value="0">Select a category</SelectItem>
                         {categories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.id.toString()}>
