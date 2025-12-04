@@ -8,7 +8,7 @@ from ..schemas.get_products import GetProductsRequest, GetProductsResponse
 class GetProducts(GetResource):
     request_schema = GetProductsRequest
     response_schema = GetProductsResponse
-    authentication_required = True
+    authentication_required = False
 
     # Endpoint details
     api_name = "get_products"
@@ -33,14 +33,19 @@ class GetProducts(GetResource):
             product_dict = {
                 "id": p.id,
                 "product_name": p.product_name,
+                "slug": p.slug,
                 "description": p.description,
                 "category_id": p.category_id,
                 "quantity": p.quantity or 0,
                 "price": str(p.price),
+                "sale_price": str(p.sale_price) if p.sale_price else None,
+                "sale_start_date": p.sale_start_date.isoformat() if p.sale_start_date and hasattr(p.sale_start_date, 'isoformat') else None,
+                "sale_end_date": p.sale_end_date.isoformat() if p.sale_end_date and hasattr(p.sale_end_date, 'isoformat') else None,
                 "sku": p.sku,
                 "image_url": p.image_url,
                 "weight": str(p.weight) if p.weight else None,
                 "is_active": p.is_active,
+                "is_featured": p.is_featured if hasattr(p, 'is_featured') else False,
                 "created_at": p.created_at.isoformat() if hasattr(p.created_at, 'isoformat') else str(p.created_at),
                 "updated_at": p.updated_at.isoformat() if hasattr(p.updated_at, 'isoformat') else str(p.updated_at),
                 "category_name": p.category_name,

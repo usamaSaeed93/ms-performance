@@ -2,23 +2,413 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useCallback, Suspense, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { navLinks, vehicleMakes, vehicleModels } from "@/lib/constants";
+import { 
+  resolveVRM, 
+  getEngineDetails,
+  getBrands,
+  getModels,
+  getGenerations,
+  getEngines,
+  type VRMResponse,
+  type Brand,
+  type Model,
+  type Generation,
+  type Engine
+} from "@/lib/api/vrm";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  generateDynoData,
+  detectEngineType,
+  estimateEngineParams,
+  type DynoDataPoint,
+} from "@/lib/utils/dynoGenerator";
 
-export default function GainsCalculatorPage() {
-  const [selectedMake, setSelectedMake] = useState("Abarth");
-  const [selectedModel, setSelectedModel] = useState("124 Spider 2016+");
-  const [selectedYear, setSelectedYear] = useState("2016-2020");
-  const [selectedEngine, setSelectedEngine] = useState("1.4 Turbo MultiAir 167 Bhp");
-  const [carImage, setCarImage] = useState<string | null>(null);
+function GainsCalculatorContent() {
+  const searchParams = useSearchParams();
+  const regParam = searchParams?.get("reg");
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setCarImage(imageUrl);
+  // Manual selection state
+  const [selectedBrandId, setSelectedBrandId] = useState<string>("");
+  const [selectedModelId, setSelectedModelId] = useState<string>("");
+  const [selectedGenerationId, setSelectedGenerationId] = useState<string>("");
+  const [selectedEnginePublicId, setSelectedEnginePublicId] = useState<string>("");
+  
+  // Dropdown data state
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [models, setModels] = useState<Model[]>([]);
+  const [generations, setGenerations] = useState<Generation[]>([]);
+  const [engines, setEngines] = useState<Engine[]>([]);
+  
+  // Loading states
+  const [brandsLoading, setBrandsLoading] = useState(false);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [generationsLoading, setGenerationsLoading] = useState(false);
+  const [enginesLoading, setEnginesLoading] = useState(false);
+  
+  // VRM state
+  const [vrmInput, setVrmInput] = useState(regParam || "");
+  const [vrmData, setVrmData] = useState<VRMResponse | null>(null);
+  const [vrmLoading, setVrmLoading] = useState(false);
+  const [vrmError, setVrmError] = useState<string | null>(null);
+  const [animateProgress, setAnimateProgress] = useState(false);
+
+  const handleVRMLookup = useCallback(async (reg?: string) => {
+    const registration = reg || vrmInput.trim();
+    if (!registration) {
+      setVrmError("Please enter a vehicle registration number");
+      return;
+    }
+
+    setVrmLoading(true);
+    setVrmError(null);
+    setVrmData(null);
+    setAnimateProgress(false);
+
+    try {
+      const data = await resolveVRM(registration, "msperformance.co.uk");
+      setVrmData(data);
+      
+      // Optionally update dropdown selections with API data if available
+      if (data.engineDetails?.paths && brands.length > 0) {
+        // Find and set the brand ID
+        const brandName = data.engineDetails.paths?.brand?.name;
+        if (brandName) {
+          const matchingBrand = brands.find(b => b.name === brandName);
+          if (matchingBrand) {
+            setSelectedBrandId(matchingBrand.id);
+          }
+        }
+      }
+      
+      // Trigger animation after a small delay to ensure DOM is ready
+      setTimeout(() => {
+        setAnimateProgress(true);
+      }, 100);
+    } catch (error) {
+      setVrmError(error instanceof Error ? error.message : "Failed to resolve VRM. Please try again.");
+    } finally {
+      setVrmLoading(false);
+    }
+  }, [vrmInput]);
+
+  // Load brands on component mount
+  useEffect(() => {
+    const fetchBrands = async () => {
+      setBrandsLoading(true);
+      try {
+        const brandsData = await getBrands();
+        setBrands(brandsData);
+      } catch (error) {
+        console.error("Failed to fetch brands:", error);
+      } finally {
+        setBrandsLoading(false);
+      }
+    };
+    fetchBrands();
+  }, []);
+
+  // Load models when brand is selected
+  useEffect(() => {
+    if (!selectedBrandId) {
+      setModels([]);
+      setGenerations([]);
+      setEngines([]);
+      return;
+    }
+
+    const fetchModels = async () => {
+      setModelsLoading(true);
+      setModels([]);
+      setGenerations([]);
+      setEngines([]);
+      setSelectedModelId("");
+      setSelectedGenerationId("");
+      setSelectedEnginePublicId("");
+      
+      try {
+        const modelsData = await getModels(selectedBrandId);
+        setModels(modelsData);
+      } catch (error) {
+        console.error("Failed to fetch models:", error);
+      } finally {
+        setModelsLoading(false);
+      }
+    };
+
+    fetchModels();
+  }, [selectedBrandId]);
+
+  // Load generations when model is selected
+  useEffect(() => {
+    if (!selectedModelId) {
+      setGenerations([]);
+      setEngines([]);
+      return;
+    }
+
+    const fetchGenerations = async () => {
+      setGenerationsLoading(true);
+      setGenerations([]);
+      setEngines([]);
+      setSelectedGenerationId("");
+      setSelectedEnginePublicId("");
+      
+      try {
+        const generationsData = await getGenerations(selectedModelId);
+        setGenerations(generationsData);
+      } catch (error) {
+        console.error("Failed to fetch generations:", error);
+      } finally {
+        setGenerationsLoading(false);
+      }
+    };
+
+    fetchGenerations();
+  }, [selectedModelId]);
+
+  // Load engines when generation is selected
+  useEffect(() => {
+    if (!selectedGenerationId) {
+      setEngines([]);
+      return;
+    }
+
+    const fetchEngines = async () => {
+      setEnginesLoading(true);
+      setEngines([]);
+      setSelectedEnginePublicId("");
+      
+      try {
+        const enginesData = await getEngines(selectedGenerationId);
+        setEngines(enginesData);
+      } catch (error) {
+        console.error("Failed to fetch engines:", error);
+      } finally {
+        setEnginesLoading(false);
+      }
+    };
+
+    fetchEngines();
+  }, [selectedGenerationId]);
+
+  // Load VRM data if reg param exists
+  useEffect(() => {
+    if (regParam) {
+      setVrmInput(regParam);
+      handleVRMLookup(regParam);
+    }
+  }, [regParam, handleVRMLookup]);
+
+  // Handler for manual vehicle selection
+  const handleManualSelection = async () => {
+    if (!selectedEnginePublicId) {
+      setVrmError("Please select all vehicle details");
+      return;
+    }
+
+    setVrmLoading(true);
+    setVrmError(null);
+    setVrmData(null);
+    setAnimateProgress(false);
+
+    try {
+      const data = await getEngineDetails(selectedEnginePublicId);
+      setVrmData(data);
+      
+      // Trigger animation after a small delay
+      setTimeout(() => {
+        setAnimateProgress(true);
+      }, 100);
+    } catch (error) {
+      setVrmError(error instanceof Error ? error.message : "Failed to load vehicle data. Please try again.");
+    } finally {
+      setVrmLoading(false);
     }
   };
+
+  // Generate performance chart data using mathematically accurate engine physics
+  const chartData = useMemo(() => {
+    if (!vrmData?.engineDetails) {
+      return [];
+    }
+
+    const originalHP = vrmData.engineDetails.horsepower_original ?? 141;
+    const tunedHP = vrmData.engineDetails.horsepower_white ?? 160;
+    const originalTorqueNm = vrmData.engineDetails.torque_original ?? 300;
+    const tunedTorqueNm = vrmData.engineDetails.torque_white ?? 390;
+
+    // Detect engine type from fuel type
+    const engineType = detectEngineType(
+      vrmData.engineDetails.specz?.energy,
+      vrmData.engineDetails.fullname
+    );
+
+    // Estimate engine parameters
+    const engineParams = estimateEngineParams(
+      originalTorqueNm,
+      originalHP,
+      engineType,
+      5000 // max RPM for this chart
+    );
+
+    // Generate original curve
+    const originalData = generateDynoData({
+      peakTorque: originalTorqueNm,
+      peakHP: originalHP,
+      peakTorqueRPM: engineParams.peakTorqueRPM,
+      peakHPRPM: engineParams.peakHPRPM,
+      redline: 5000,
+      engineType,
+      minRPM: 500,
+      rpmStep: 250,
+    });
+
+    // Generate tuned curve
+    const tunedData = generateDynoData({
+      peakTorque: tunedTorqueNm,
+      peakHP: tunedHP,
+      peakTorqueRPM: engineParams.peakTorqueRPM,
+      peakHPRPM: engineParams.peakHPRPM,
+      redline: 5000,
+      engineType,
+      minRPM: 500,
+      rpmStep: 250,
+    });
+
+    // Combine into chart format
+    return originalData.map((orig, idx) => {
+      const tuned = tunedData[idx] || tunedData[tunedData.length - 1];
+      return {
+        rpm: orig.rpm,
+        orgBHP: Math.round(orig.hp),
+        tunedBHP: Math.round(tuned.hp),
+        orgNm: Math.round(orig.torque),
+        tunedNm: Math.round(tuned.torque),
+      };
+    });
+  }, [vrmData]);
+
+  // Generate dyno chart data (0-7000 RPM, torque in lb-ft) using mathematically accurate engine physics
+  const dynoChartData = useMemo(() => {
+    if (!vrmData?.engineDetails) {
+      return [];
+    }
+
+    const originalHP = vrmData.engineDetails.horsepower_original ?? 141;
+    const tunedHP = vrmData.engineDetails.horsepower_white ?? 160;
+    const originalTorqueNm = vrmData.engineDetails.torque_original ?? 300;
+    const tunedTorqueNm = vrmData.engineDetails.torque_white ?? 390;
+
+    // Convert Nm to lb-ft (1 Nm = 0.737562 lb-ft)
+    const nmToLbFt = 0.737562;
+    const originalTorqueLbFt = originalTorqueNm * nmToLbFt;
+    const tunedTorqueLbFt = tunedTorqueNm * nmToLbFt;
+
+    // Detect engine type from fuel type
+    const engineType = detectEngineType(
+      vrmData.engineDetails.specz?.energy,
+      vrmData.engineDetails.fullname
+    );
+
+    // Estimate engine parameters for full range
+    const engineParams = estimateEngineParams(
+      originalTorqueLbFt, // Use lb-ft for dyno chart
+      originalHP,
+      engineType,
+      7000 // Full redline for dyno chart
+    );
+
+    // Generate original curve (in lb-ft)
+    const originalData = generateDynoData({
+      peakTorque: originalTorqueLbFt,
+      peakHP: originalHP,
+      peakTorqueRPM: engineParams.peakTorqueRPM,
+      peakHPRPM: engineParams.peakHPRPM,
+      redline: 7000,
+      engineType,
+      minRPM: 800,
+      rpmStep: 100,
+    });
+
+    // Generate tuned curve (in lb-ft)
+    const tunedData = generateDynoData({
+      peakTorque: tunedTorqueLbFt,
+      peakHP: tunedHP,
+      peakTorqueRPM: engineParams.peakTorqueRPM,
+      peakHPRPM: engineParams.peakHPRPM,
+      redline: 7000,
+      engineType,
+      minRPM: 800,
+      rpmStep: 100,
+    });
+
+    // Combine into dyno chart format (RPM scaled to 0-7 for display)
+    return originalData.map((orig, idx) => {
+      const tuned = tunedData[idx] || tunedData[tunedData.length - 1];
+      return {
+        rpm: orig.rpm / 1000, // Scale to 0-7 for display
+        rpmRaw: orig.rpm,
+        orgBHP: Math.round(orig.hp),
+        tunedBHP: Math.round(tuned.hp),
+        orgTorqueLbFt: Math.round(orig.torque),
+        tunedTorqueLbFt: Math.round(tuned.torque),
+      };
+    });
+  }, [vrmData]);
+
+  // Calculate table metrics from dyno data
+  const dynoMetrics = useMemo(() => {
+    if (!dynoChartData.length || !vrmData?.engineDetails) {
+      return null;
+    }
+
+    const originalHP = vrmData.engineDetails.horsepower_original ?? 0;
+    const tunedHP = vrmData.engineDetails.horsepower_white ?? 0;
+    const originalTorqueNm = vrmData.engineDetails.torque_original ?? 0;
+    const tunedTorqueNm = vrmData.engineDetails.torque_white ?? 0;
+
+    const originalTorqueLbFt = originalTorqueNm * 0.737562;
+    const tunedTorqueLbFt = tunedTorqueNm * 0.737562;
+
+    // Calculate average HP (simplified - average of all points)
+    const avgOrgHP = Math.round(dynoChartData.reduce((sum, d) => sum + d.orgBHP, 0) / dynoChartData.length);
+    const avgTunedHP = Math.round(dynoChartData.reduce((sum, d) => sum + d.tunedBHP, 0) / dynoChartData.length);
+
+    // Calculate average Torque
+    const avgOrgTorque = Math.round(dynoChartData.reduce((sum, d) => sum + d.orgTorqueLbFt, 0) / dynoChartData.length);
+    const avgTunedTorque = Math.round(dynoChartData.reduce((sum, d) => sum + d.tunedTorqueLbFt, 0) / dynoChartData.length);
+
+    return {
+      original: {
+        maxHP: Math.round(originalHP),
+        engHP: Math.round(originalHP),
+        avgHP: avgOrgHP,
+        maxTorqueLbFt: Math.round(originalTorqueLbFt),
+        engTorqueLbFt: Math.round(originalTorqueLbFt),
+        avgTorqueLbFt: avgOrgTorque,
+      },
+      tuned: {
+        maxHP: Math.round(tunedHP),
+        engHP: Math.round(tunedHP),
+        avgHP: avgTunedHP,
+        maxTorqueLbFt: Math.round(tunedTorqueLbFt),
+        engTorqueLbFt: Math.round(tunedTorqueLbFt),
+        avgTorqueLbFt: avgTunedTorque,
+      },
+    };
+  }, [dynoChartData, vrmData]);
 
   return (
     <div className="min-h-screen bg-black">
@@ -128,62 +518,100 @@ export default function GainsCalculatorPage() {
                         <span className="text-xs font-semibold bg-[#ffd200] px-2 py-1 rounded text-black">GB</span>
                         <input
                           type="text"
+                          value={vrmInput}
+                          onChange={(e) => setVrmInput(e.target.value.toUpperCase())}
+                          onKeyPress={(e) => e.key === "Enter" && handleVRMLookup()}
                           placeholder="Your vehicle registration"
                           className="flex-1 bg-transparent text-sm text-[#0c1b33] placeholder:text-gray-400 focus:outline-none"
                         />
                       </div>
-                      <button className="rounded-[8px] bg-gray-700 px-4 py-2 text-sm font-semibold text-white animate-button">
-                        Show
+                      <button 
+                        onClick={() => handleVRMLookup()}
+                        disabled={vrmLoading}
+                        className="rounded-[8px] bg-gray-700 px-4 py-2 text-sm font-semibold text-white animate-button disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {vrmLoading ? "..." : "Show"}
                       </button>
                     </div>
-                    <p className="text-sm text-red-600">or find your vehicle below</p>
+                    {vrmError && (
+                      <div className="rounded-lg bg-red-50 border border-red-200 p-3">
+                        <p className="text-sm text-red-700 font-medium">{vrmError}</p>
+                        {vrmError.includes("calculator is not available") && (
+                          <p className="text-xs text-red-600 mt-1">Please try selecting a different vehicle using the manual dropdowns below.</p>
+                        )}
+                      </div>
+                    )}
+                    {!vrmError && <p className="text-sm text-red-600">or find your vehicle below</p>}
                   </div>
                   <div className="space-y-4 pt-2">
                     <div>
+                      <label className="block text-xs font-semibold text-[#0c1b33] mb-1.5">Make</label>
                       <select
-                        value={selectedMake}
-                        onChange={(e) => setSelectedMake(e.target.value)}
-                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10"
+                        value={selectedBrandId}
+                        onChange={(e) => setSelectedBrandId(e.target.value)}
+                        disabled={brandsLoading}
+                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ backgroundPosition: 'right 0.75rem center' }}
                       >
-                        <option>Abarth</option>
-                        {vehicleMakes.map((make) => (
-                          <option key={make}>{make}</option>
+                        <option value="">- Please Select Make -</option>
+                        {brands.map((brand) => (
+                          <option key={brand.id} value={brand.id}>{brand.name}</option>
                         ))}
                       </select>
                     </div>
                     <div>
+                      <label className="block text-xs font-semibold text-[#0c1b33] mb-1.5">Model</label>
                       <select
-                        value={selectedModel}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10"
+                        value={selectedModelId}
+                        onChange={(e) => setSelectedModelId(e.target.value)}
+                        disabled={!selectedBrandId || modelsLoading}
+                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ backgroundPosition: 'right 0.75rem center' }}
                       >
-                        <option>124 Spider 2008&gt;</option>
+                        <option value="">- Please Select Model -</option>
+                        {models.map((model) => (
+                          <option key={model.id} value={model.id}>{model.name}</option>
+                        ))}
                       </select>
                     </div>
                     <div>
+                      <label className="block text-xs font-semibold text-[#0c1b33] mb-1.5">Generation</label>
                       <select
-                        value={selectedYear}
-                        onChange={(e) => setSelectedYear(e.target.value)}
-                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10"
+                        value={selectedGenerationId}
+                        onChange={(e) => setSelectedGenerationId(e.target.value)}
+                        disabled={!selectedModelId || generationsLoading}
+                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ backgroundPosition: 'right 0.75rem center' }}
                       >
-                        <option>Petrol</option>
+                        <option value="">- Please Select Generation -</option>
+                        {generations.map((generation) => (
+                          <option key={generation.id} value={generation.id}>{generation.name}</option>
+                        ))}
                       </select>
                     </div>
                     <div>
+                      <label className="block text-xs font-semibold text-[#0c1b33] mb-1.5">Engine</label>
                       <select
-                        value={selectedEngine}
-                        onChange={(e) => setSelectedEngine(e.target.value)}
-                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10"
+                        value={selectedEnginePublicId}
+                        onChange={(e) => setSelectedEnginePublicId(e.target.value)}
+                        disabled={!selectedGenerationId || enginesLoading}
+                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ backgroundPosition: 'right 0.75rem center' }}
                       >
-                        <option>1.4 Turbo MultiAir 167 bhp (2016&gt;)</option>
+                        <option value="">- Please Select Engine -</option>
+                        {engines.map((engine) => (
+                          <option key={engine.publicid} value={engine.publicid}>
+                            {engine.name} {engine.energy ? `(${engine.energy})` : ''}
+                          </option>
+                        ))}
                       </select>
                     </div>
-                    <button className="w-full rounded-[8px] bg-[#ffd200] px-6 py-3 text-sm font-semibold text-black animate-button">
-                      Show
+                    <button 
+                      onClick={handleManualSelection}
+                      disabled={!selectedEnginePublicId || vrmLoading}
+                      className="w-full rounded-[8px] bg-[#ffd200] px-6 py-3 text-sm font-semibold text-black animate-button hover:bg-[#e6c000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {vrmLoading ? "Loading..." : "Show"}
                     </button>
                   </div>
                 </div>
@@ -191,57 +619,56 @@ export default function GainsCalculatorPage() {
 <div 
   className="w-[869px] h-[229px] bg-white border border-gray-100 rounded-[10px] p-5 flex items-center gap-[35px] animate-card-delay-1 animate-slide-right"
 >
-  {/* Car Image */}
+  {/* Car/Brand Image */}
   <div className="relative flex-shrink-0 w-[400px] h-[189px]">
-    {carImage ? (
-      <div className="w-full h-full rounded-[8px] overflow-hidden relative">
-        <img
-          src={carImage}
-          alt="Uploaded car"
-          className="w-full h-full object-cover"
+    {vrmData?.engineDetails?.brand_image ? (
+      <div className="w-full h-full rounded-[8px] overflow-hidden relative bg-gray-50 flex items-center justify-center">
+        <Image
+          src={vrmData.engineDetails.brand_image}
+          alt={vrmData.engineDetails.paths?.brand?.name || vrmData.name || "Vehicle"}
+          width={400}
+          height={189}
+          className="w-full h-full object-contain p-4"
         />
-        <button
-          onClick={() => setCarImage(null)}
-          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
-          title="Remove image"
+      </div>
+    ) : vrmData?.engineDetails?.brand_svg ? (
+      <div className="w-full h-full rounded-[8px] overflow-hidden relative bg-gray-50 flex items-center justify-center">
+        <Image
+          src={vrmData.engineDetails.brand_svg}
+          alt={vrmData.engineDetails.paths?.brand?.name || vrmData.name || "Vehicle"}
+          width={400}
+          height={189}
+          className="w-full h-full object-contain p-4"
+        />
+      </div>
+    ) : (
+      <div className="w-full h-full bg-gray-100 rounded-[8px] overflow-hidden flex items-center justify-center">
+        <div className="text-center text-gray-400">
+          <svg
+            width="64"
+            height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+            className="mx-auto mb-2"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M18 6L6 18M6 6l12 12"
+          <path
+              d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-          </svg>
-        </button>
-      </div>
-    ) : (
-      <label className="w-full h-full bg-gray-200 rounded-[8px] overflow-hidden flex flex-col items-center justify-center cursor-pointer hover:bg-gray-300 transition border-2 border-dashed border-gray-400">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="hidden"
-        />
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="text-gray-400 mb-2"
-        >
-          <path
-            d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5m5-5v12"
+            <path
+              d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
-        <span className="text-sm text-gray-500 font-medium">Upload Car Image</span>
-        <span className="text-xs text-gray-400 mt-1">Click to browse</span>
-      </label>
+          <p className="text-sm font-medium">Enter VRM to load vehicle image</p>
+        </div>
+      </div>
     )}
   </div>
 
@@ -251,15 +678,23 @@ export default function GainsCalculatorPage() {
     <div className="space-y-4">
       <div>
         <div className="font-bold text-[#0c1b33]">Model:</div>
-        <div className="text-[#5c6c86] mt-1">Abarth 124 Spider</div>
+        <div className="text-[#5c6c86] mt-1">
+          {vrmData?.engineDetails?.paths?.model?.name || "-"}
+        </div>
       </div>
       <div>
         <div className="font-bold text-[#0c1b33]">Fuel:</div>
-        <div className="text-[#5c6c86] mt-1">Petrol</div>
+        <div className="text-[#5c6c86] mt-1">
+          {vrmData?.engineDetails?.specz?.energy || "Petrol"}
+        </div>
       </div>
       <div>
         <div className="font-bold text-[#0c1b33]">Engine Size:</div>
-        <div className="text-[#5c6c86] mt-1">1368 Ccm</div>
+        <div className="text-[#5c6c86] mt-1">
+          {vrmData?.engineDetails?.specz?.["Cylinder content"] 
+            ? `${vrmData.engineDetails.specz["Cylinder content"]} cc`
+            : vrmData?.engine_size || "1329 cc"}
+        </div>
       </div>
     </div>
 
@@ -267,15 +702,21 @@ export default function GainsCalculatorPage() {
     <div className="space-y-4">
       <div>
         <div className="font-bold text-[#0c1b33]">Variant:</div>
-        <div className="text-[#5c6c86] mt-1">1.4 Turbo MultiAir 167 Bhp</div>
+        <div className="text-[#5c6c86] mt-1">
+          {vrmData?.engineDetails?.paths?.engine?.name || "-"}
+        </div>
       </div>
       <div>
         <div className="font-bold text-[#0c1b33]">Years:</div>
-        <div className="text-[#5c6c86] mt-1">2016-Now</div>
+        <div className="text-[#5c6c86] mt-1">
+          {vrmData?.engineDetails?.paths?.generation?.name || vrmData?.year || "-"}
+        </div>
       </div>
       <div>
         <div className="font-bold text-[#0c1b33]">ECU Type:</div>
-        <div className="text-[#5c6c86] mt-1">Marelli 8GM</div>
+        <div className="text-[#5c6c86] mt-1">
+          {vrmData?.engineDetails?.specz?.engine_ecu || "Marelli 8GM"}
+        </div>
       </div>
     </div>
   </div>
@@ -285,25 +726,135 @@ export default function GainsCalculatorPage() {
               {/* Vehicle Title and Description */}
               <div className="mt-8 space-y-4">
                 <h2 className="text-3xl font-black text-[#1d70ff]">
-                  Abarth 124 Spider 1.4 Turbo MultiAir 167 Bhp
+                  {vrmData?.name || vrmData?.engineDetails?.fullname || "Abarth 124 Spider 1.4 Turbo MultiAir 167 Bhp"}
                 </h2>
                 <p className="text-base leading-relaxed text-[#5c6c86] max-w-4xl">
+                  {vrmData?.engineDetails ? (
+                    <>
+                      Our ECU Software remapping service for the {vrmData.engineDetails.paths?.brand?.name} {vrmData.engineDetails.paths?.model?.name} includes Dyno Development to ensure
+                      optimal performance. We enhance Power & Torque while maintaining Fuel Economy and Reliability. Our
+                      professional tuning delivers safe, tested improvements to your vehicle's performance.
+                    </>
+                  ) : (
+                    <>
                   Our ECU Software remapping service for the Abarth 124 Spider includes Dyno Development to ensure
                   optimal performance. We enhance Power & Torque while maintaining Fuel Economy and Reliability. Our
                   professional tuning delivers safe, tested improvements to your vehicle's performance.
+                    </>
+                  )}
                 </p>
               </div>
             {/* Performance Graph Section */}
              <div className="px-8 py-10 lg:px-12">
               <div className="bg-white rounded-[16px] p-8">
                 <h3 className="text-2xl font-bold text-[#0c1b33] mb-6">
-                  Vehicle Performance Chart - Abarth 124 Spider 1.4 Turbo MultiAir 167 Bhp
+                  Vehicle Performance Chart - {vrmData?.name || vrmData?.engineDetails?.fullname || "Abarth 124 Spider 1.4 Turbo MultiAir 167 Bhp"}
                 </h3>
-                <div className="h-[400px] bg-gray-50 rounded-[12px] flex items-center justify-center border border-gray-200">
+                <div className="h-[500px] rounded-[12px] border border-gray-200 p-4">
+                  {chartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis 
+                          dataKey="rpm" 
+                          label={{ value: 'RPM', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fill: '#0c1b33', fontWeight: 'bold', fontSize: 12 } }}
+                          tick={{ fill: '#5c6c86', fontSize: 11 }}
+                          domain={[500, 5000]}
+                          type="number"
+                          ticks={[500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]}
+                        />
+                        <YAxis 
+                          yAxisId="bhp"
+                          orientation="left"
+                          label={{ value: 'BHP', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#0c1b33', fontWeight: 'bold', fontSize: 12 } }}
+                          tick={{ fill: '#5c6c86', fontSize: 11 }}
+                          domain={[0, 400]}
+                          ticks={[0, 50, 100, 150, 200, 250, 300, 350, 400]}
+                        />
+                        <YAxis 
+                          yAxisId="nm"
+                          orientation="right"
+                          label={{ value: 'Nm', angle: 90, position: 'insideRight', style: { textAnchor: 'middle', fill: '#0c1b33', fontWeight: 'bold', fontSize: 12 } }}
+                          tick={{ fill: '#5c6c86', fontSize: 11 }}
+                          domain={[0, 400]}
+                          ticks={[0, 50, 100, 150, 200, 250, 300, 350, 400]}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            padding: '12px'
+                          }}
+                          formatter={(value: number, name: string) => {
+                            const labelMap: { [key: string]: string } = {
+                              'orgBHP': 'Org BHP',
+                              'tunedBHP': 'Tuned BHP',
+                              'orgNm': 'Org Nm',
+                              'tunedNm': 'Tuned Nm'
+                            };
+                            return [value, labelMap[name] || name];
+                          }}
+                          labelFormatter={(label) => `RPM: ${label}`}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: '20px' }}
+                          formatter={(value: string) => {
+                            const labelMap: { [key: string]: string } = {
+                              'orgBHP': 'Org BHP',
+                              'tunedBHP': 'Tuned BHP',
+                              'orgNm': 'Org Nm',
+                              'tunedNm': 'Tuned Nm'
+                            };
+                            return labelMap[value] || value;
+                          }}
+                        />
+                        <Line
+                          yAxisId="bhp"
+                          type="monotone"
+                          dataKey="orgBHP"
+                          stroke="#ff9999"
+                          strokeWidth={2}
+                          dot={false}
+                          name="orgBHP"
+                        />
+                        <Line
+                          yAxisId="bhp"
+                          type="monotone"
+                          dataKey="tunedBHP"
+                          stroke="#cc0000"
+                          strokeWidth={2}
+                          dot={false}
+                          name="tunedBHP"
+                        />
+                        <Line
+                          yAxisId="nm"
+                          type="monotone"
+                          dataKey="orgNm"
+                          stroke="#99ff99"
+                          strokeWidth={2}
+                          dot={false}
+                          name="orgNm"
+                        />
+                        <Line
+                          yAxisId="nm"
+                          type="monotone"
+                          dataKey="tunedNm"
+                          stroke="#00cc00"
+                          strokeWidth={2}
+                          dot={false}
+                          name="tunedNm"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
                   <div className="text-center space-y-2">
                     <p className="text-gray-400">Performance Graph</p>
-                    <p className="text-sm text-gray-500">Original (Red) vs Modified (Green)</p>
+                        <p className="text-sm text-gray-500">Enter VRM or select vehicle to view chart</p>
                   </div>
+                    </div>
+                  )}
                 </div>
               </div>
               </div>
@@ -319,23 +870,35 @@ export default function GainsCalculatorPage() {
                     <div className="space-y-4 text-base">
                       <div className="flex flex-col">
                         <span className="font-bold text-[#0c1b33] mb-1">Cylinder Capacity:</span>
-                        <span className="text-[#5c6c86] text-lg">5998CC</span>
+                        <span className="text-[#5c6c86] text-lg">
+                          {vrmData?.engineDetails?.specz?.["Cylinder content"] 
+                            ? `${vrmData.engineDetails.specz["Cylinder content"]} CC`
+                            : vrmData?.engine_size || "-"}
+                        </span>
                       </div>
                       <div className="flex flex-col">
                         <span className="font-bold text-[#0c1b33] mb-1">Compression:</span>
-                        <span className="text-[#5c6c86] text-lg">9,1:1</span>
+                        <span className="text-[#5c6c86] text-lg">
+                          {vrmData?.engineDetails?.specz?.compression_ratio || "-"}
+                        </span>
                       </div>
                       <div className="flex flex-col">
                         <span className="font-bold text-[#0c1b33] mb-1">Type Ecu:</span>
-                        <span className="text-[#5c6c86] text-lg">Bosch ME17.1.6 & Bosch ME7.1.1 & Bosch MG1CS163</span>
+                        <span className="text-[#5c6c86] text-lg">
+                          {vrmData?.engineDetails?.specz?.engine_ecu || "-"}
+                        </span>
                       </div>
                       <div className="flex flex-col">
                         <span className="font-bold text-[#0c1b33] mb-1">Bore X Stroke:</span>
-                        <span className="text-[#5c6c86] text-lg">84,0 X 90,2 Mm</span>
+                        <span className="text-[#5c6c86] text-lg">
+                          {vrmData?.engineDetails?.specz?.bore_stroke_ratio || "-"}
+                        </span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-bold text-[#0c1b33] mb-1">Engine Code:</span>
-                        <span className="text-[#5c6c86] text-lg">DBD</span>
+                        <span className="font-bold text-[#0c1b33] mb-1">Engine Number:</span>
+                        <span className="text-[#5c6c86] text-lg">
+                          {vrmData?.engineDetails?.specz?.engine_number || "-"}
+                        </span>
                       </div>
                     </div>
                     <button className="mt-8 w-full rounded-[12px] bg-[#12a7ff] px-6 py-4 text-base font-semibold text-white shadow-[0_4px_12px_rgba(18,167,255,0.3)] hover:bg-[#0f95e6] transition-colors animate-button">
@@ -352,9 +915,25 @@ export default function GainsCalculatorPage() {
                       <div className="grid grid-cols-3 gap-4">
                         {/* Original */}
                         <div className="bg-white rounded-[12px] p-4 flex flex-col items-center">
-                          <span className="text-sm text-[#5c6c86] mb-3">Original</span>
+                          <span className="text-sm text-[#5c6c86] mb-3">Standard</span>
                           <div className="relative w-24 h-24 mb-2">
-                            <svg className="w-full h-full transform -rotate-90">
+                            {(() => {
+                              const originalHP = vrmData?.engineDetails?.horsepower_original;
+                              const tunedHP = vrmData?.engineDetails?.horsepower_white;
+                              if (!originalHP || !tunedHP) {
+                                return (
+                                  <div className="flex items-center justify-center h-full">
+                                    <span className="text-sm text-gray-400">-</span>
+                                  </div>
+                                );
+                              }
+                              const maxHP = Math.max(tunedHP * 1.2, tunedHP + 20);
+                              const percentage = (originalHP / maxHP) * 100;
+                              const circumference = 2 * Math.PI * 40;
+                              const offset = circumference - (circumference * percentage / 100);
+                              return (
+                                <>
+                            <svg className="w-full h-full transform -rotate-90" key={`hp-original-${originalHP}`}>
                               <circle
                                 cx="48"
                                 cy="48"
@@ -370,31 +949,48 @@ export default function GainsCalculatorPage() {
                                 fill="none"
                                 stroke="#1d70ff"
                                 strokeWidth="8"
-                                strokeDasharray={`${2 * Math.PI * 40 * 0.6} ${2 * Math.PI * 40}`}
+                                strokeDasharray={circumference}
+                                strokeDashoffset={animateProgress ? offset : circumference}
                                 strokeLinecap="round"
+                                className="progress-ring"
+                                style={{
+                                  '--circumference': `${circumference}px`,
+                                  '--offset': `${offset}px`,
+                                  transition: 'stroke-dashoffset 1.5s ease-out'
+                                } as React.CSSProperties}
                               />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <span className="text-2xl font-bold text-[#0c1b33]">184</span>
+                                    <span className="text-2xl font-bold text-[#0c1b33]">{originalHP}</span>
                               <span className="text-xs text-[#5c6c86]">Hp</span>
                             </div>
-                          </div>
-                          <div className="flex gap-1 mt-2">
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                              <div
-                                key={i}
-                                className="w-2 bg-[#1d70ff] rounded-sm"
-                                style={{ height: `${10 + i * 3}px` }}
-                              />
-                            ))}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
 
                         {/* Modified */}
                         <div className="bg-white rounded-[12px] p-4 flex flex-col items-center">
-                          <span className="text-sm text-[#5c6c86] mb-3">Modified</span>
+                          <span className="text-sm text-[#5c6c86] mb-3">Tuned</span>
                           <div className="relative w-24 h-24 mb-2">
-                            <svg className="w-full h-full transform -rotate-90">
+                            {(() => {
+                              const originalHP = vrmData?.engineDetails?.horsepower_original;
+                              const tunedHP = vrmData?.engineDetails?.horsepower_white;
+                              if (!originalHP || !tunedHP) {
+                                return (
+                                  <div className="flex items-center justify-center h-full">
+                                    <span className="text-sm text-gray-400">-</span>
+                                  </div>
+                                );
+                              }
+                              const maxHP = Math.max(tunedHP * 1.2, tunedHP + 20);
+                              const percentage = (tunedHP / maxHP) * 100;
+                              const circumference = 2 * Math.PI * 40;
+                              const offset = circumference - (circumference * percentage / 100);
+                              return (
+                                <>
+                            <svg className="w-full h-full transform -rotate-90" key={`hp-tuned-${tunedHP}`}>
                               <circle
                                 cx="48"
                                 cy="48"
@@ -410,23 +1006,22 @@ export default function GainsCalculatorPage() {
                                 fill="none"
                                 stroke="#1d70ff"
                                 strokeWidth="8"
-                                strokeDasharray={`${2 * Math.PI * 40 * 0.85} ${2 * Math.PI * 40}`}
+                                strokeDasharray={circumference}
+                                strokeDashoffset={animateProgress ? offset : circumference}
                                 strokeLinecap="round"
+                                className="progress-ring"
+                                style={{
+                                  transition: 'stroke-dashoffset 1.5s ease-out'
+                                } as React.CSSProperties}
                               />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <span className="text-2xl font-bold text-[#0c1b33]">231</span>
+                                    <span className="text-2xl font-bold text-[#0c1b33]">{tunedHP}</span>
                               <span className="text-xs text-[#5c6c86]">Hp</span>
                             </div>
-                          </div>
-                          <div className="flex gap-1 mt-2">
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                              <div
-                                key={i}
-                                className="w-2 bg-[#1d70ff] rounded-sm"
-                                style={{ height: `${15 + i * 4}px` }}
-                              />
-                            ))}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
 
@@ -434,7 +1029,20 @@ export default function GainsCalculatorPage() {
                         <div className="bg-white rounded-[12px] p-4 flex flex-col items-center">
                           <span className="text-sm text-[#5c6c86] mb-3">Difference</span>
                           <div className="relative w-24 h-24 mb-2">
-                            <svg className="w-full h-full transform -rotate-90">
+                            {(() => {
+                              const originalHP = vrmData?.engineDetails?.horsepower_original;
+                              const tunedHP = vrmData?.engineDetails?.horsepower_white;
+                              if (!originalHP || !tunedHP) {
+                                return (
+                                  <div className="flex items-center justify-center h-full">
+                                    <span className="text-sm text-gray-400">-</span>
+                                  </div>
+                                );
+                              }
+                              const difference = tunedHP - originalHP;
+                              return (
+                                <>
+                            <svg className="w-full h-full difference-ring" key={`hp-diff-${difference}`} style={{ transform: 'rotate(-90deg)' }}>
                               <circle
                                 cx="48"
                                 cy="48"
@@ -446,9 +1054,12 @@ export default function GainsCalculatorPage() {
                               />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <span className="text-2xl font-bold text-[#0c1b33]">+47</span>
+                                    <span className="text-2xl font-bold text-[#0c1b33]">+{difference}</span>
                               <span className="text-xs text-[#5c6c86]">Hp</span>
                             </div>
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -460,9 +1071,25 @@ export default function GainsCalculatorPage() {
                       <div className="grid grid-cols-3 gap-4">
                         {/* Original */}
                         <div className="bg-white rounded-[12px] p-4 flex flex-col items-center">
-                          <span className="text-sm text-[#5c6c86] mb-3">Original</span>
+                          <span className="text-sm text-[#5c6c86] mb-3">Standard</span>
                           <div className="relative w-24 h-24 mb-2">
-                            <svg className="w-full h-full transform -rotate-90">
+                            {(() => {
+                              const originalTorque = vrmData?.engineDetails?.torque_original;
+                              const tunedTorque = vrmData?.engineDetails?.torque_white;
+                              if (!originalTorque || !tunedTorque) {
+                                return (
+                                  <div className="flex items-center justify-center h-full">
+                                    <span className="text-sm text-gray-400">-</span>
+                                  </div>
+                                );
+                              }
+                              const maxTorque = Math.max(tunedTorque * 1.2, tunedTorque + 20);
+                              const percentage = (originalTorque / maxTorque) * 100;
+                              const circumference = 2 * Math.PI * 40;
+                              const offset = circumference - (circumference * percentage / 100);
+                              return (
+                                <>
+                            <svg className="w-full h-full transform -rotate-90" key={`torque-original-${originalTorque}`}>
                               <circle
                                 cx="48"
                                 cy="48"
@@ -478,31 +1105,46 @@ export default function GainsCalculatorPage() {
                                 fill="none"
                                 stroke="#1d70ff"
                                 strokeWidth="8"
-                                strokeDasharray={`${2 * Math.PI * 40 * 0.6} ${2 * Math.PI * 40}`}
+                                strokeDasharray={circumference}
+                                strokeDashoffset={animateProgress ? offset : circumference}
                                 strokeLinecap="round"
+                                className="progress-ring"
+                                style={{
+                                  transition: 'stroke-dashoffset 1.5s ease-out'
+                                } as React.CSSProperties}
                               />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <span className="text-2xl font-bold text-[#0c1b33]">184</span>
+                                    <span className="text-2xl font-bold text-[#0c1b33]">{originalTorque}</span>
                               <span className="text-xs text-[#5c6c86]">Nm</span>
                             </div>
-                          </div>
-                          <div className="flex gap-1 mt-2">
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                              <div
-                                key={i}
-                                className="w-2 bg-[#1d70ff] rounded-sm"
-                                style={{ height: `${10 + i * 3}px` }}
-                              />
-                            ))}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
 
                         {/* Modified */}
                         <div className="bg-white rounded-[12px] p-4 flex flex-col items-center">
-                          <span className="text-sm text-[#5c6c86] mb-3">Modified</span>
+                          <span className="text-sm text-[#5c6c86] mb-3">Tuned</span>
                           <div className="relative w-24 h-24 mb-2">
-                            <svg className="w-full h-full transform -rotate-90">
+                            {(() => {
+                              const originalTorque = vrmData?.engineDetails?.torque_original;
+                              const tunedTorque = vrmData?.engineDetails?.torque_white;
+                              if (!originalTorque || !tunedTorque) {
+                                return (
+                                  <div className="flex items-center justify-center h-full">
+                                    <span className="text-sm text-gray-400">-</span>
+                                  </div>
+                                );
+                              }
+                              const maxTorque = Math.max(tunedTorque * 1.2, tunedTorque + 20);
+                              const percentage = (tunedTorque / maxTorque) * 100;
+                              const circumference = 2 * Math.PI * 40;
+                              const offset = circumference - (circumference * percentage / 100);
+                              return (
+                                <>
+                            <svg className="w-full h-full transform -rotate-90" key={`torque-tuned-${tunedTorque}`}>
                               <circle
                                 cx="48"
                                 cy="48"
@@ -518,23 +1160,22 @@ export default function GainsCalculatorPage() {
                                 fill="none"
                                 stroke="#1d70ff"
                                 strokeWidth="8"
-                                strokeDasharray={`${2 * Math.PI * 40 * 0.85} ${2 * Math.PI * 40}`}
+                                strokeDasharray={circumference}
+                                strokeDashoffset={animateProgress ? offset : circumference}
                                 strokeLinecap="round"
+                                className="progress-ring"
+                                style={{
+                                  transition: 'stroke-dashoffset 1.5s ease-out'
+                                } as React.CSSProperties}
                               />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <span className="text-2xl font-bold text-[#0c1b33]">231</span>
+                                    <span className="text-2xl font-bold text-[#0c1b33]">{tunedTorque}</span>
                               <span className="text-xs text-[#5c6c86]">Nm</span>
                             </div>
-                          </div>
-                          <div className="flex gap-1 mt-2">
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                              <div
-                                key={i}
-                                className="w-2 bg-[#1d70ff] rounded-sm"
-                                style={{ height: `${15 + i * 4}px` }}
-                              />
-                            ))}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
 
@@ -542,7 +1183,20 @@ export default function GainsCalculatorPage() {
                         <div className="bg-white rounded-[12px] p-4 flex flex-col items-center">
                           <span className="text-sm text-[#5c6c86] mb-3">Difference</span>
                           <div className="relative w-24 h-24 mb-2">
-                            <svg className="w-full h-full transform -rotate-90">
+                            {(() => {
+                              const originalTorque = vrmData?.engineDetails?.torque_original;
+                              const tunedTorque = vrmData?.engineDetails?.torque_white;
+                              if (!originalTorque || !tunedTorque) {
+                                return (
+                                  <div className="flex items-center justify-center h-full">
+                                    <span className="text-sm text-gray-400">-</span>
+                                  </div>
+                                );
+                              }
+                              const difference = tunedTorque - originalTorque;
+                              return (
+                                <>
+                            <svg className="w-full h-full difference-ring" key={`torque-diff-${difference}`} style={{ transform: 'rotate(-90deg)' }}>
                               <circle
                                 cx="48"
                                 cy="48"
@@ -554,9 +1208,12 @@ export default function GainsCalculatorPage() {
                               />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <span className="text-2xl font-bold text-[#0c1b33]">+47</span>
+                                    <span className="text-2xl font-bold text-[#0c1b33]">+{difference}</span>
                               <span className="text-xs text-[#5c6c86]">Nm</span>
                             </div>
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -574,7 +1231,7 @@ export default function GainsCalculatorPage() {
                   RESULTS
                 </h3>
                 <p className="text-lg text-[#5c6c86] mb-6">
-                  Abarth 124 Spider 1.4 Turbo MultiAir 1368 cc Power(HP) & Torque(lb-ft) VS Engine Speed(RPM)
+                  {vrmData?.engineDetails?.fullname || vrmData?.name || "Vehicle"} {vrmData?.engineDetails?.specz?.["Cylinder content"] ? `${vrmData.engineDetails.specz["Cylinder content"]} cc` : vrmData?.engine_size || ""} Power(HP) & Torque(lb-ft) VS Engine Speed(RPM)
                 </p>
                 
                 {/* Dyno Chart */}
@@ -634,13 +1291,103 @@ export default function GainsCalculatorPage() {
                         <span>7</span>
                       </div>
                       
-                      {/* Chart Lines Placeholder - Would need a charting library for actual curves */}
-                      <div className="absolute inset-0 top-8 bottom-12 left-12 right-12 flex items-center justify-center">
-                        <div className="text-center space-y-2">
-                          <p className="text-gray-400">Dyno Chart</p>
-                          <p className="text-sm text-gray-500">ORI (Black) vs MOD V9 (Red)</p>
+                      {/* Chart Lines - Using Recharts */}
+                      {dynoChartData.length > 0 ? (
+                        <div className="absolute inset-0 top-8 bottom-12 left-12 right-12">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={dynoChartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
+                              <XAxis 
+                                dataKey="rpm" 
+                                type="number"
+                                domain={[0, 7]}
+                                ticks={[0, 1, 2, 3, 4, 5, 6, 7]}
+                                tick={false}
+                                axisLine={false}
+                              />
+                              <YAxis 
+                                yAxisId="hp"
+                                orientation="left"
+                                domain={[0, 250]}
+                                ticks={[0, 50, 100, 150, 200, 250]}
+                                tick={false}
+                                axisLine={false}
+                              />
+                              <YAxis 
+                                yAxisId="torque"
+                                orientation="right"
+                                domain={[0, 250]}
+                                ticks={[0, 50, 100, 150, 200, 250]}
+                                tick={false}
+                                axisLine={false}
+                              />
+                              <Tooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                  border: '1px solid #e5e7eb',
+                                  borderRadius: '8px',
+                                  padding: '8px'
+                                }}
+                                formatter={(value: number, name: string) => {
+                                  const labelMap: { [key: string]: string } = {
+                                    'orgBHP': 'ORI Power',
+                                    'tunedBHP': 'MOD V9 Power',
+                                    'orgTorqueLbFt': 'ORI Torque',
+                                    'tunedTorqueLbFt': 'MOD V9 Torque'
+                                  };
+                                  return [value, labelMap[name] || name];
+                                }}
+                                labelFormatter={(label) => `RPM: ${(parseFloat(label) * 1000).toLocaleString()}`}
+                              />
+                              <Line
+                                yAxisId="hp"
+                                type="monotone"
+                                dataKey="orgBHP"
+                                stroke="#000000"
+                                strokeWidth={2}
+                                dot={false}
+                                name="orgBHP"
+                              />
+                              <Line
+                                yAxisId="hp"
+                                type="monotone"
+                                dataKey="tunedBHP"
+                                stroke="#dc2626"
+                                strokeWidth={2}
+                                dot={false}
+                                name="tunedBHP"
+                              />
+                              <Line
+                                yAxisId="torque"
+                                type="monotone"
+                                dataKey="orgTorqueLbFt"
+                                stroke="#000000"
+                                strokeWidth={2}
+                                strokeDasharray="5 5"
+                                dot={false}
+                                name="orgTorqueLbFt"
+                              />
+                              <Line
+                                yAxisId="torque"
+                                type="monotone"
+                                dataKey="tunedTorqueLbFt"
+                                stroke="#dc2626"
+                                strokeWidth={2}
+                                strokeDasharray="5 5"
+                                dot={false}
+                                name="tunedTorqueLbFt"
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="absolute inset-0 top-8 bottom-12 left-12 right-12 flex items-center justify-center">
+                          <div className="text-center space-y-2">
+                            <p className="text-gray-400">Dyno Chart</p>
+                            <p className="text-sm text-gray-500">Enter VRM or select vehicle to view chart</p>
+                          </div>
+                        </div>
+                      )}
                       
                       {/* Legend */}
                       <div className="absolute top-4 right-4 space-y-2 text-xs">
@@ -694,48 +1441,64 @@ export default function GainsCalculatorPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {/* Run 3 - ORI */}
-                      <tr className="border-b border-gray-200">
-                        <td className="py-2 px-3 border-r border-gray-200">
-                          <div className="w-4 h-4 bg-black"></div>
-                        </td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">ORI</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">6/4/21</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">175.8</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">175.8</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">123.3</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">0.0%</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">191.1</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">191.1</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">158.2</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">RO</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">70.7 °F</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">29.69</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">19</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">0.98</td>
-                        <td className="py-2 px-3 text-[#5c6c86]"></td>
-                      </tr>
-                      {/* Run 21 - MOD V9 */}
-                      <tr className="border-b border-gray-200">
-                        <td className="py-2 px-3 border-r border-gray-200">
-                          <div className="w-4 h-4 bg-blue-600"></div>
-                        </td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">MOD V9</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">6/4/21</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">208.8</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">208.8</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">141.5</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">0.0%</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">231.6</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">231.6</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">177.6</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">RO</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">70.1 °F</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">29.69</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">19</td>
-                        <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">0.98</td>
-                        <td className="py-2 px-3 text-[#5c6c86]"></td>
-                      </tr>
+                      {/* Run - ORI */}
+                      {dynoMetrics ? (
+                        <>
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-3 border-r border-gray-200">
+                              <div className="w-4 h-4 bg-black"></div>
+                            </td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">ORI</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">
+                              {new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}
+                            </td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.original.maxHP.toFixed(1)} HP</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.original.engHP.toFixed(1)} HP</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.original.avgHP.toFixed(1)} HP</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">0.0%</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.original.maxTorqueLbFt.toFixed(1)} lb-ft</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.original.engTorqueLbFt.toFixed(1)} lb-ft</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.original.avgTorqueLbFt.toFixed(1)} lb-ft</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">RO</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">70.7 °F</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">29.69</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">19</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">0.98</td>
+                            <td className="py-2 px-3 text-[#5c6c86]"></td>
+                          </tr>
+                          {/* Run - MOD V9 */}
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-3 border-r border-gray-200">
+                              <div className="w-4 h-4 bg-red-600"></div>
+                            </td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">MOD V9</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">
+                              {new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}
+                            </td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.tuned.maxHP.toFixed(1)} HP</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.tuned.engHP.toFixed(1)} HP</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.tuned.avgHP.toFixed(1)} HP</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">
+                              {((dynoMetrics.tuned.maxHP - dynoMetrics.original.maxHP) / dynoMetrics.original.maxHP * 100).toFixed(1)}%
+                            </td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.tuned.maxTorqueLbFt.toFixed(1)} lb-ft</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.tuned.engTorqueLbFt.toFixed(1)} lb-ft</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">{dynoMetrics.tuned.avgTorqueLbFt.toFixed(1)} lb-ft</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">RO</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">70.1 °F</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">29.69</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">19</td>
+                            <td className="py-2 px-3 text-[#5c6c86] border-r border-gray-200">0.98</td>
+                            <td className="py-2 px-3 text-[#5c6c86]"></td>
+                          </tr>
+                        </>
+                      ) : (
+                        <tr>
+                          <td colSpan={15} className="py-4 px-3 text-center text-[#5c6c86]">
+                            Enter VRM or select vehicle to view dyno data
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -867,6 +1630,18 @@ export default function GainsCalculatorPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GainsCalculatorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    }>
+      <GainsCalculatorContent />
+    </Suspense>
   );
 }
 

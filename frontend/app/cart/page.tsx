@@ -49,9 +49,11 @@ export default function CartPage() {
   };
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const vat = subtotal * 0.2; // 20% UK VAT
   const discount = subtotal * 0.2; // 20% discount
   const deliveryFee = 15;
-  const total = subtotal - discount + deliveryFee;
+  const deliveryVat = deliveryFee * 0.2; // VAT on delivery
+  const total = subtotal + vat - discount + deliveryFee + deliveryVat;
 
   return (
     <div className="min-h-screen bg-black">
@@ -235,22 +237,30 @@ export default function CartPage() {
                     <div className="space-y-3 border-b border-gray-200 pb-4">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-[#5c6c86]">Subtotal</span>
-                        <span className="font-semibold text-[#0c1b33]">£{subtotal}</span>
+                        <span className="font-semibold text-[#0c1b33]">£{subtotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-[#5c6c86]">VAT (20%)</span>
+                        <span className="font-semibold text-[#0c1b33]">£{(subtotal * 0.2).toFixed(2)}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-[#5c6c86]">Discount (-20%)</span>
-                        <span className="font-semibold text-red-500">-£{discount.toFixed(0)}</span>
+                        <span className="font-semibold text-red-500">-£{discount.toFixed(2)}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-[#5c6c86]">Delivery Fee</span>
-                        <span className="font-semibold text-[#0c1b33]">£{deliveryFee}</span>
+                        <span className="font-semibold text-[#0c1b33]">£{deliveryFee.toFixed(2)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-[#5c6c86]">VAT on Delivery (20%)</span>
+                        <span className="font-semibold text-[#0c1b33]">£{deliveryVat.toFixed(2)}</span>
                       </div>
                     </div>
 
                     {/* Total */}
                     <div className="flex items-center justify-between border-t border-gray-200 pt-4">
                       <span className="text-lg font-bold text-[#0c1b33]">Total</span>
-                      <span className="text-2xl font-black text-[#0c1b33]">£{total.toFixed(0)}</span>
+                      <span className="text-2xl font-black text-[#0c1b33]">£{total.toFixed(2)}</span>
                     </div>
 
                     {/* Promo Code */}

@@ -49,12 +49,14 @@ class Configuration:
     PROD_DB_CONFIG: ProductionDBConfig = ProductionDBConfig()
 
     # SQLAlchemy Engines
+    # Enable echo=True for SQL query logging (controlled by LOG_LEVEL env var)
+    enable_sql_logging = os.getenv("LOG_LEVEL", "DEBUG").upper() in ["DEBUG", "INFO"]
     SQLALCHEMY_ENGINES: dict = {
         "development": create_async_engine(
             DEV_DB_CONFIG.DEV_CONN_STRING.format(
                 filename=DEV_DB_CONFIG.DEV_DB_SQLITE_FILENAME
             ),
-            echo=False,
+            echo=enable_sql_logging,
         ),
         "production": create_async_engine(
             PROD_DB_CONFIG.PROD_CONN_STRING.format(
@@ -64,7 +66,7 @@ class Configuration:
                 port=PROD_DB_CONFIG.PROD_DB_PORT,
                 database=PROD_DB_CONFIG.PROD_DB_DATABASE,
             ),
-            echo=False,
+            echo=enable_sql_logging,
         ),
     }
 
@@ -92,6 +94,14 @@ class Configuration:
 
     # API
     API_PREFIX: str = "ecommerce"
+
+    # Storage
+    STORAGE_TYPE: str = os.getenv("STORAGE_TYPE", "local")
+    LOCAL_STORAGE_PATH: str = os.getenv(
+        "LOCAL_STORAGE_PATH", os.path.join(os.getcwd(), "uploads")
+    )
+    LOCAL_STORAGE_BASE_URL: str = os.getenv("LOCAL_STORAGE_BASE_URL", "/uploads")
+    STORAGE_BUCKET_NAME: str = os.getenv("STORAGE_BUCKET_NAME", "ecommerce-images")
 
 
 config = Configuration()

@@ -1,3 +1,4 @@
+import re
 from typing import Iterable, Optional
 
 from sqlalchemy import select, text
@@ -24,6 +25,30 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_by_slug(self, db: AsyncSession, *, slug: str) -> Optional[Product]:
+        stmt = select(self.model).filter(self.model.slug == slug)
+        result = await db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def generate_unique_slug(
+        self, db: AsyncSession, *, base_slug: str, current_id: Optional[int] = None
+    ) -> str:
+        """Generate a unique slug based on the provided base slug."""
+        slug = base_slug
+        counter = 1
+        while True:
+            existing = await self.get_by_slug(db, slug=slug)
+            if not existing or (current_id and existing.id == current_id):
+                return slug
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+    @staticmethod
+    def slugify(text_value: str) -> str:
+        """Create a URL-friendly slug."""
+        slug = re.sub(r"[^a-zA-Z0-9]+", "-", text_value.lower()).strip("-")
+        return slug
+
     async def get_multi_with_category(
         self,
         db: AsyncSession,
@@ -38,14 +63,19 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
         stmt = select(
             self.model.id,
             self.model.product_name,
+            self.model.slug,
             self.model.description,
             self.model.category_id,
             self.model.quantity,
             self.model.price,
+            self.model.sale_price,
+            self.model.sale_start_date,
+            self.model.sale_end_date,
             self.model.sku,
             self.model.image_url,
             self.model.weight,
             self.model.is_active,
+            self.model.is_featured,
             self.model.created_at,
             self.model.updated_at,
             Category.category_name,

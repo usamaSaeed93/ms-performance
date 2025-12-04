@@ -60,10 +60,13 @@ class BaseResource(Resource):
             data=self.response_data,
         )
 
-        return JSONResponse(
+        # Log final response
+        response = JSONResponse(
             content=jsonable_encoder(self.response_data),
             status_code=self.status_code,
         )
+        self.logger.debug(f"Final response from {self.api_name}: Status {self.status_code}, Content length: {len(str(self.response_data))}")
+        return response
 
     async def set_pre_request_vars(self):
         # Initialize Logger
@@ -82,26 +85,54 @@ class BaseResource(Resource):
         # Set pre request vars
         await self._base_req_params(request, db)
         await self.set_pre_request_vars()
+        
+        # Log endpoint entry
+        self.logger.info(f"Entering endpoint: {self.api_name} ({request.method} {request.url.path})")
+        
         try:
             # Check authentication data
-            if self.authentication_required and not context.data.get("user"):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Not authorized to access this resource",
-                )
+            if self.authentication_required:
+                user = context.data.get("user")
+                if not user:
+                    self.logger.warning(f"Authentication failed for {self.api_name}: No user found in context")
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="Not authorized to access this resource",
+                    )
+                else:
+                    self.logger.debug(f"Authentication successful for {self.api_name}: User ID {user.get('id') if isinstance(user, dict) else 'unknown'}")
+            
             # Run preprocess
             await self.run_preprocess(request)
+            
+            # Log request data if available
+            if hasattr(self, 'request_data') and self.request_data:
+                import json
+                try:
+                    request_data_dict = self.request_data.dict() if hasattr(self.request_data, 'dict') else str(self.request_data)
+                    self.logger.debug(f"Request data for {self.api_name}: {json.dumps(request_data_dict, indent=2, default=str)}")
+                except Exception as e:
+                    self.logger.debug(f"Request data for {self.api_name}: {str(self.request_data)} (could not serialize: {e})")
+            
             # Run API specific process flow
+            self.logger.debug(f"Executing process_flow for {self.api_name}")
             await self.process_flow()
+            self.logger.debug(f"Process flow completed for {self.api_name}")
+            
         # TODO: Add DB related exceptions too for rollback
         except HTTPException as e:
             await self.db.close()
+            self.logger.warning(f"HTTPException in {self.api_name}: {e.status_code} - {e.detail}")
             raise e
         except Exception as e:
             await self.db.close()
             self.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
             self.success = False
-            self.logger.error(e)
+            
+            # Log full exception with traceback
+            import traceback
+            self.logger.exception(f"Exception in {self.api_name}: {str(e)}")
+            self.logger.error(f"Full traceback:\n{''.join(traceback.format_exc())}")
 
             # Get errors from Pydantic if applicable
             errors = getattr(e, "errors", None)
@@ -113,6 +144,19 @@ class BaseResource(Resource):
             self.response_message = "We're unable to process your request at this time."
             self.response_data = errors
             self.dont_postprocess = True
+
+        # Log response before postprocess
+        if not self.early_response:
+            self.logger.info(f"Response from {self.api_name}: Status {self.status_code}, Success: {self.success}")
+            if hasattr(self, 'response_data') and self.response_data:
+                import json
+                try:
+                    response_data_dict = self.response_data if isinstance(self.response_data, dict) else str(self.response_data)
+                    self.logger.debug(f"Response data from {self.api_name}: {json.dumps(response_data_dict, indent=2, default=str)}")
+                except Exception as e:
+                    self.logger.debug(f"Response data from {self.api_name}: {str(self.response_data)} (could not serialize: {e})")
+        else:
+            self.logger.warning(f"Early response from {self.api_name}: Status {self.status_code}")
 
         # Run postprocess
         return await self.run_postprocess()

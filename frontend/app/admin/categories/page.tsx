@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { adminApi, Category } from "@/lib/api/admin";
+import { useState } from "react";
+import { Category } from "@/lib/api/admin";
 import { useTheme } from "@/lib/contexts/theme-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,29 +25,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGetCategoriesQuery, useCreateCategoryMutation, useUpdateCategoryMutation } from "@/lib/store/api/adminApi";
+import { toast } from "sonner";
 
 export default function AdminCategoriesPage() {
   const { theme } = useTheme();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading, refetch } = useGetCategoriesQuery({});
+  const [createCategory] = useCreateCategoryMutation();
+  const [updateCategory] = useUpdateCategoryMutation();
+  const categories = data?.categories || [];
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState({ category_name: "", category_slug: "", description: "" });
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await adminApi.getCategories();
-      setCategories(response.categories || []);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
@@ -63,17 +52,19 @@ export default function AdminCategoriesPage() {
     e.preventDefault();
     try {
       if (editingCategory) {
-        await adminApi.updateCategory(editingCategory.id, formData);
+        await updateCategory({ categoryId: editingCategory.id, category: formData }).unwrap();
+        toast.success("Category updated successfully");
       } else {
-        await adminApi.createCategory(formData);
+        await createCategory(formData).unwrap();
+        toast.success("Category created successfully");
       }
       setShowModal(false);
       setEditingCategory(null);
       setFormData({ category_name: "", category_slug: "", description: "" });
-      fetchCategories();
-    } catch (error) {
+      refetch();
+    } catch (error: any) {
       console.error("Failed to save category:", error);
-      alert("Failed to save category");
+      toast.error(error?.data?.message || "Failed to save category");
     }
   };
 
@@ -155,7 +146,7 @@ export default function AdminCategoriesPage() {
         </Dialog>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <Card>
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">Loading categories...</p>

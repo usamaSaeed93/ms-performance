@@ -15,15 +15,29 @@ import {
   blogPosts,
   footerLinks,
 } from "@/lib/constants";
+import { resolveVRM, type VRMResponse } from "@/lib/api/vrm";
+import { useHomePageProducts } from "@/lib/hooks/useHomePageProducts";
+import { ProductCard } from "@/components/products/ProductCard";
 
 export default function HomePage() {
   // Services carousel state
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
   const itemsPerPage = 4;
 
-  // Products carousel state
+  // VRM state
+  const [vrmInput, setVrmInput] = useState("");
+  const [vrmData, setVrmData] = useState<VRMResponse | null>(null);
+  const [vrmLoading, setVrmLoading] = useState(false);
+  const [vrmError, setVrmError] = useState<string | null>(null);
+
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
   const productsPerPage = 4;
+
+  const productStrategy = (process.env.NEXT_PUBLIC_HOME_PRODUCTS_STRATEGY || 'mixed') as 'featured' | 'newest' | 'mixed' | 'onsale';
+  const { products: homeProducts, isLoading: productsLoading } = useHomePageProducts({
+    strategy: productStrategy,
+    limit: 8,
+  });
 
   // Testimonials carousel state
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
@@ -57,49 +71,6 @@ export default function HomePage() {
     },
   ];
 
-  // Add dummy products
-  const dummyProducts = [
-    {
-      id: 5,
-      title: "Performance Air Filter",
-      price: "£45.00",
-      oldPrice: null,
-      rating: 4.0,
-      discount: null,
-      image: "/images/products/product1.png",
-      sold: 523,
-    },
-    {
-      id: 6,
-      title: "Sport Exhaust System",
-      price: "£320.00",
-      oldPrice: "£380.00",
-      rating: 4.8,
-      discount: "-15%",
-      image: "/images/products/product2.png",
-      sold: 789,
-    },
-    {
-      id: 7,
-      title: "ECU Tuning Module",
-      price: "£250.00",
-      oldPrice: null,
-      rating: 4.5,
-      discount: null,
-      image: "/images/products/product3.png",
-      sold: 456,
-    },
-    {
-      id: 8,
-      title: "Performance Brake Pads",
-      price: "£89.00",
-      oldPrice: null,
-      rating: 4.2,
-      discount: null,
-      image: "/images/products/product4.png",
-      sold: 634,
-    },
-  ];
 
   // Add dummy testimonials
   const dummyTestimonials = [
@@ -131,9 +102,7 @@ export default function HomePage() {
     },
   ];
 
-  // Combine real and dummy data
   const allServices = [...services, ...dummyServices];
-  const allProducts = [...products, ...dummyProducts];
   const allTestimonials = [...testimonials, ...dummyTestimonials];
   const allBlogPosts = [...blogPosts, ...dummyBlogPosts];
 
@@ -150,8 +119,7 @@ export default function HomePage() {
     return allServices.slice(start, start + itemsPerPage);
   };
 
-  // Products carousel functions
-  const totalProductPages = Math.ceil(allProducts.length / productsPerPage);
+  const totalProductPages = Math.max(1, Math.ceil(homeProducts.length / productsPerPage));
   const nextProducts = () => {
     setCurrentProductIndex((prev) => (prev + 1) % totalProductPages);
   };
@@ -160,7 +128,7 @@ export default function HomePage() {
   };
   const getVisibleProducts = () => {
     const start = currentProductIndex * productsPerPage;
-    return allProducts.slice(start, start + productsPerPage);
+    return homeProducts.slice(start, start + productsPerPage);
   };
 
   // Testimonials carousel functions
@@ -188,6 +156,34 @@ export default function HomePage() {
     const start = currentBlogIndex * blogsPerPage;
     return allBlogPosts.slice(start, start + blogsPerPage);
   };
+
+  // VRM handler
+  const handleVRMLookup = async () => {
+    if (!vrmInput.trim()) {
+      setVrmError("Please enter a vehicle registration number");
+      return;
+    }
+
+    setVrmLoading(true);
+    setVrmError(null);
+    setVrmData(null);
+
+    try {
+      const data = await resolveVRM(vrmInput.trim(), "msperformance.co.uk");
+      setVrmData(data);
+    } catch (error) {
+      setVrmError(error instanceof Error ? error.message : "Failed to resolve VRM. Please try again.");
+    } finally {
+      setVrmLoading(false);
+    }
+  };
+
+  const handleVRMKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleVRMLookup();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black">
       <div className="pt-8">
@@ -293,15 +289,77 @@ export default function HomePage() {
                         </span>
                         <input
                           type="text"
+                          value={vrmInput}
+                          onChange={(e) => setVrmInput(e.target.value.toUpperCase())}
+                          onKeyPress={handleVRMKeyPress}
                           placeholder="Your vehicle registration"
                           className="w-full bg-transparent text-xs text-white placeholder:text-white/60 focus:outline-none sm:text-sm"
                         />
                       </div>
-                      <button className="w-full rounded-xl bg-[#ffd200] px-4 py-2.5 text-xs font-semibold text-black sm:w-auto sm:rounded-[12px] sm:px-4 sm:py-3 sm:text-sm animate-button">
-                        Show
+                      <button 
+                        onClick={handleVRMLookup}
+                        disabled={vrmLoading}
+                        className="w-full rounded-xl bg-[#ffd200] px-4 py-2.5 text-xs font-semibold text-black sm:w-auto sm:rounded-[12px] sm:px-4 sm:py-3 sm:text-sm animate-button disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {vrmLoading ? "Loading..." : "Show"}
                       </button>
                     </div>
                   </div>
+                  
+                  {/* Error Message */}
+                  {vrmError && (
+                    <div className="mt-3 rounded-lg bg-red-500/20 border border-red-500/50 px-3 py-2">
+                      <p className="text-xs text-red-300">{vrmError}</p>
+                    </div>
+                  )}
+
+                  {/* VRM Results */}
+                  {vrmData && vrmData.engineDetails && (
+                    <div className="mt-4 space-y-3 rounded-lg bg-white/10 p-4 backdrop-blur-sm">
+                      {vrmData.engineDetails.brand_image && (
+                        <div className="flex justify-center">
+                          <Image
+                            src={vrmData.engineDetails.brand_image}
+                            alt={vrmData.engineDetails.paths?.brand?.name || "Vehicle"}
+                            width={120}
+                            height={80}
+                            className="object-contain"
+                          />
+                        </div>
+                      )}
+                      <div className="space-y-2 text-white">
+                        <h3 className="text-sm font-bold">{vrmData.name}</h3>
+                        {vrmData.engineDetails.paths && (
+                          <div className="text-xs space-y-1">
+                            <p><span className="font-semibold">Brand:</span> {vrmData.engineDetails.paths.brand.name}</p>
+                            <p><span className="font-semibold">Model:</span> {vrmData.engineDetails.paths.model.name}</p>
+                            <p><span className="font-semibold">Engine:</span> {vrmData.engineDetails.paths.engine.name}</p>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/20">
+                          <div>
+                            <p className="text-xs text-white/70">Original HP</p>
+                            <p className="text-sm font-bold">{vrmData.engineDetails.horsepower_original} HP</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-white/70">Tuned HP</p>
+                            <p className="text-sm font-bold text-[#7ab6ff]">{vrmData.engineDetails.horsepower_white} HP</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-white/70">Gain</p>
+                            <p className="text-sm font-bold text-green-400">+{vrmData.engineDetails.horsepower_white - vrmData.engineDetails.horsepower_original} HP</p>
+                          </div>
+                        </div>
+                      </div>
+                      <Link 
+                        href={`/gains-calculator?reg=${encodeURIComponent(vrmInput)}`}
+                        className="block w-full mt-4 rounded-[14px] bg-[#1d70ff] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_15px_35px_rgba(29,112,255,0.35)] hover:bg-[#1565e0] transition-colors"
+                      >
+                        View Full Details
+                      </Link>
+                    </div>
+                  )}
+
                   <p className="mt-3 text-[10px] text-white/70 sm:mt-4 sm:text-xs">or find your vehicle below</p>
                   <div className="mt-3 space-y-3 sm:mt-4 sm:space-y-4">
                     <div>
@@ -519,67 +577,39 @@ export default function HomePage() {
                     <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <button className="w-full rounded-xl bg-[#1d70ff] px-4 py-2.5 text-xs font-semibold text-white sm:w-auto sm:rounded-[12px] sm:px-6 sm:py-3 sm:text-sm animate-button">
+                <Link href="/products" className="w-full rounded-xl bg-[#1d70ff] px-4 py-2.5 text-xs font-semibold text-white sm:w-auto sm:rounded-[12px] sm:px-6 sm:py-3 sm:text-sm animate-button text-center">
                   View All
-                </button>
+                </Link>
               </div>
             </div>
 
             <div className="relative overflow-hidden">
-              <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-                {getVisibleProducts().map((product, index) => (
-                <div
-                  key={index}
-                  className={`relative flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-[0_10px_40px_rgba(16,53,106,0.05)] sm:gap-4 sm:rounded-[24px] sm:p-5 md:rounded-[28px] md:p-6 card-hover ${
-                    index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : index === 2 ? 'animate-card-delay-2' : 'animate-card-delay-3'
-                  }`}
-                >
-                  {product.discount && (
-                    <div className="absolute right-4 top-4 z-10 rounded-full bg-[#ffe5e5] px-3 py-1 text-xs font-semibold text-red-600">
-                      {product.discount}
+              {productsLoading ? (
+                <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="relative flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-[0_10px_40px_rgba(16,53,106,0.05)] sm:gap-4 sm:rounded-[24px] sm:p-5 md:rounded-[28px] md:p-6 animate-pulse"
+                    >
+                      <div className="h-48 bg-gray-200 rounded-2xl" />
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                        <div className="h-6 bg-gray-200 rounded w-1/2" />
+                      </div>
                     </div>
-                  )}
-                  <div className="relative overflow-hidden rounded-2xl">
-                    <Image
-                      src={product.image}
-                      alt={product.title}
-                      width={320}
-                      height={220}
-                      className="h-48 w-full object-cover animate-image-hover"
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <h3 className="text-base font-semibold leading-tight text-[#0c1b33]">
-                      {product.title}
-                    </h3>
-                    <div className="flex items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, idx) => {
-                        const starValue = idx + 1;
-                        const fullStars = Math.floor(product.rating);
-                        const hasHalfStar = product.rating % 1 >= 0.5;
-                        const isFullStar = starValue <= fullStars;
-                        const isHalfStar = hasHalfStar && starValue === fullStars + 1;
-                        
-                        if (isFullStar) {
-                          return <span key={idx} className="text-lg text-yellow-400">★</span>;
-                        } else if (isHalfStar) {
-                          return <span key={idx} className="text-lg text-yellow-400">★</span>;
-                        } else {
-                          return <span key={idx} className="text-lg text-gray-300">★</span>;
-                        }
-                      })}
-                      <span className="ml-1 text-sm text-[#5c6c86]">{product.rating.toFixed(1)}</span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-black text-[#0c1b33]">{product.price}</span>
-                      {product.oldPrice && (
-                        <span className="text-sm text-[#9aa6bd] line-through">{product.oldPrice}</span>
-                      )}
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-              </div>
+              ) : homeProducts.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-[#5c6c86]">No products available at the moment.</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+                  {getVisibleProducts().map((product, index) => (
+                    <ProductCard key={product.id} product={product} index={index} />
+                  ))}
+                </div>
+              )}
             </div>
             
             {/* Products Carousel Indicators */}

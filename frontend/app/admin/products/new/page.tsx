@@ -33,6 +33,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { validateProductForm, getFieldError, type ValidationError } from "@/lib/utils/productValidation";
 
 type TabType = "general" | "inventory" | "shipping" | "images" | "variants" | "seo" | "advanced";
 
@@ -42,9 +43,11 @@ export default function NewProductPage() {
   const [activeTab, setActiveTab] = useState<TabType>("general");
   const [images, setImages] = useState<ImageGalleryItem[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
   
   // RTK Query hooks
-  const { data: categoriesData, isLoading: categoriesLoading } = useGetCategoriesQuery();
+  const { data: categoriesData, isLoading: categoriesLoading, error: categoriesError } = useGetCategoriesQuery();
   const [createProduct, { isLoading: isCreatingProduct }] = useCreateProductMutation();
   const [createProductImages, { isLoading: isCreatingImages }] = useCreateProductImagesMutation();
   
@@ -111,6 +114,25 @@ export default function NewProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    const errors = validateProductForm(formData, false);
+    setValidationErrors(errors);
+    setTouchedFields(new Set(Object.keys(formData))); // Mark all fields as touched
+    
+    if (errors.length > 0) {
+      toast.error(`Please fix ${errors.length} validation error${errors.length > 1 ? 's' : ''} before submitting.`);
+      // Switch to the first tab with errors
+      const firstErrorField = errors[0].field;
+      if (['product_name', 'category_id', 'price', 'sale_price', 'sale_start_date', 'sale_end_date', 'product_type', 'external_url', 'slug', 'sku'].includes(firstErrorField)) {
+        setActiveTab('general');
+      } else if (['quantity', 'stock_status', 'stock_threshold', 'manage_stock', 'backorders_allowed'].includes(firstErrorField)) {
+        setActiveTab('inventory');
+      } else if (['weight', 'length', 'width', 'height', 'shipping_class', 'shipping_required', 'shipping_taxable'].includes(firstErrorField)) {
+        setActiveTab('shipping');
+      }
+      return;
+    }
     
     const loadingToast = toast.loading("Creating product...");
     
@@ -263,19 +285,35 @@ export default function NewProductPage() {
                       value={formData.category_id?.toString() || "0"}
                       onValueChange={(value) => setFormData({ ...formData, category_id: parseInt(value) })}
                       required
+                      disabled={categoriesLoading}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder={categoriesLoading ? "Loading categories..." : "Select a category"} />
                       </SelectTrigger>
                       <SelectContent className="z-[9999] bg-white dark:bg-popover shadow-2xl border-2">
                         <SelectItem value="0">Select a category</SelectItem>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id.toString()}>
-                            {cat.category_name}
-                          </SelectItem>
-                        ))}
+                        {categories.length === 0 && !categoriesLoading ? (
+                          <SelectItem value="0" disabled>No categories available</SelectItem>
+                        ) : (
+                          categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                              {cat.category_name}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
+                    {categoriesLoading && (
+                      <p className="text-xs text-muted-foreground">Loading categories...</p>
+                    )}
+                    {categoriesError && (
+                      <p className="text-xs text-destructive">
+                        Error loading categories: {(categoriesError as any)?.data?.message || (categoriesError as any)?.message || 'Unknown error'}
+                      </p>
+                    )}
+                    {!categoriesLoading && !categoriesError && categories.length === 0 && (
+                      <p className="text-xs text-muted-foreground">No categories found. Please create a category first.</p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -537,7 +575,7 @@ export default function NewProductPage() {
                 <TabsContent value="images" className="mt-6">
                   <ImageGallery
                     images={images}
-                    onImagesChange={setImages}
+                    onImagesChange={(newImages) => setImages(newImages)}
                     folder="products"
                   />
                 </TabsContent>

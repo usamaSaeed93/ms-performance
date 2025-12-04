@@ -7,3 +7,4 @@ from .category import Category, CategoryCreate, CategoryUpdate
 from .product_image import ProductImage, ProductImageCreate, ProductImageUpdate
 from .product_variant import ProductVariant, ProductVariantCreate, ProductVariantUpdate
 from .discount import Discount, DiscountCreate, DiscountUpdate
+from .tax import TaxClass, TaxClassCreate, TaxClassUpdate, TaxRate, TaxRateCreate, TaxRateUpdate

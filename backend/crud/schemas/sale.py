@@ -6,7 +6,11 @@ from common.types import TzDateTime
 
 class SaleBase(BaseModel):
     user_id: int
-    total_amount: Decimal = Field(..., decimal_places=2)
+    subtotal: Decimal = Field(..., decimal_places=2)  # Amount before tax
+    tax: Decimal = Field(default=0, decimal_places=2)  # Total tax amount
+    shipping_cost: Decimal = Field(default=0, decimal_places=2)
+    shipping_tax: Decimal = Field(default=0, decimal_places=2)  # Tax on shipping
+    total_amount: Decimal = Field(..., decimal_places=2)  # Total (subtotal + tax + shipping + shipping_tax)
 
 
 class SaleCreate(SaleBase):

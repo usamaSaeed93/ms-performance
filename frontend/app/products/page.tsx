@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { navLinks, products } from "@/lib/constants";
-import { generateAllProducts } from "@/lib/utils/products";
+import { useState, useMemo } from "react";
+import { navLinks } from "@/lib/constants";
+import { useGetProductsQuery } from "@/lib/store/api/productsApi";
+import { ProductCard } from "@/components/products/ProductCard";
+import { Pagination } from "@/components/products/Pagination";
 
 const productBrandLogos = [
   "/images/logos/Plogo1.png",
@@ -15,60 +17,80 @@ const productBrandLogos = [
   "/images/logos/Plogo6.png",
 ];
 
-const categories = [
-  { label: "All", count: null },
-  { label: "Brand", count: 2 },
-  { label: "MS", count: 4 },
-  { label: "Exhaust", count: 2 },
-  { label: "Engine Oil", count: 2 },
-];
-
 export default function ProductsPage() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState("id");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [searchQuery, setSearchQuery] = useState("");
   const productsPerPage = 12;
-  
-  // Products carousel state
-  const [currentProductCarouselIndex, setCurrentProductCarouselIndex] = useState(0);
-  const productsCarouselPerPage = 8;
-  const totalProducts = 100;
 
-  // Generate more products for the grid (12 products)
-  const allProducts = generateAllProducts();
-  
-  // Add more dummy products for carousel
-  const dummyProducts = Array.from({ length: 8 }).map((_, i) => ({
-    id: 100 + i,
-    title: `Premium Performance Product ${i + 1}`,
-    price: `£${(Math.random() * 500 + 100).toFixed(2)}`,
-    oldPrice: Math.random() > 0.5 ? `£${(Math.random() * 600 + 200).toFixed(2)}` : null,
-    rating: Math.random() * 2 + 3,
-    discount: Math.random() > 0.7 ? `-${Math.floor(Math.random() * 30 + 10)}%` : null,
-    image: allProducts[i % allProducts.length]?.image || "/images/products/product1.png",
-    brand: "MS",
-  }));
-  
-  const allProductsWithDummy = [...allProducts, ...dummyProducts];
-  const totalProductCarouselPages = Math.ceil(allProductsWithDummy.length / productsCarouselPerPage);
-  
-  const nextProducts = () => {
-    setCurrentProductCarouselIndex((prev) => (prev + 1) % totalProductCarouselPages);
+  const { data, isLoading, error } = useGetProductsQuery({
+    page: currentPage,
+    per_page: productsPerPage,
+    order_by: sortBy,
+    order: sortOrder,
+  });
+
+  const products = data?.products || [];
+  const totalProducts = data?.total || products.length;
+  const totalPages = data?.total_pages || Math.ceil(totalProducts / productsPerPage);
+
+  const filteredProducts = useMemo(() => {
+    let filtered = products;
+
+    if (searchQuery) {
+      filtered = filtered.filter((product) =>
+        product.product_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedCategory) {
+      filtered = filtered.filter((product) =>
+        product.category_name === selectedCategory
+      );
+    }
+
+    return filtered;
+  }, [products, searchQuery, selectedCategory]);
+
+  const displayTotal = searchQuery || selectedCategory 
+    ? filteredProducts.length 
+    : totalProducts;
+
+  const categories = useMemo(() => {
+    const categoryMap = new Map<string, number>();
+    products.forEach((product) => {
+      if (product.category_name) {
+        categoryMap.set(
+          product.category_name,
+          (categoryMap.get(product.category_name) || 0) + 1
+        );
+      }
+    });
+
+    const categoryList = Array.from(categoryMap.entries()).map(([name, count]) => ({
+      label: name,
+      count,
+    }));
+
+    return [{ label: "All", count: null }, ...categoryList];
+  }, [products]);
+
+  const handleSortChange = (value: string) => {
+    const [field, order] = value.split("_");
+    setSortBy(field);
+    setSortOrder(order as "asc" | "desc");
+    setCurrentPage(1);
   };
-  
-  const prevProducts = () => {
-    setCurrentProductCarouselIndex((prev) => (prev - 1 + totalProductCarouselPages) % totalProductCarouselPages);
-  };
-  
-  const getVisibleProducts = () => {
-    const start = currentProductCarouselIndex * productsCarouselPerPage;
-    return allProductsWithDummy.slice(start, start + productsCarouselPerPage);
-  };
+
+  const startIndex = (currentPage - 1) * productsPerPage + 1;
+  const endIndex = Math.min(currentPage * productsPerPage, totalProducts);
 
   return (
     <div className="min-h-screen bg-black">
       <div className="pt-8">
         <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
-          {/* Header */}
           <header className="text-white">
             <div className="space-y-3 bg-black px-6 py-4 shadow-[0_20px_60px_rgba(1,4,13,0.65)]">
               <div className="flex flex-wrap items-center justify-between border-b-2 border-gray-700 pb-2 text-xs text-white/70">
@@ -86,7 +108,7 @@ export default function ProductsPage() {
                   <div className="flex items-center gap-2">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
                       <path
-                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Zm0 2v.51l8 5.33 8-5.33V6H4zm0 12h16V9.49l-8 5.33-8-5.33V18Z"
+                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v.51l8 5.33 8-5.33V6H4zm0 12h16V9.49l-8 5.33-8-5.33V18Z"
                         fill="currentColor"
                       />
                     </svg>
@@ -136,7 +158,6 @@ export default function ProductsPage() {
           </header>
 
           <main className="space-y-12">
-            {/* Banner Section */}
             <section className="relative overflow-hidden bg-[#030814] text-white h-[250px] sm:h-[300px] md:h-[350px]">
               <Image
                 src="/images/products/ProductsHero.png"
@@ -152,24 +173,32 @@ export default function ProductsPage() {
               </div>
             </section>
 
-            {/* Products Section */}
             <section className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12">
               <div className="flex flex-col items-start justify-between gap-4 mb-4 sm:mb-6 sm:flex-row sm:items-center">
                 <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl">Products</h2>
                 <div className="flex flex-wrap items-center gap-4">
                   <span className="text-sm text-[#5c6c86]">
-                    Showing {((currentPage - 1) * productsPerPage) + 1}-{Math.min(currentPage * productsPerPage, totalProducts)} of {totalProducts} Products
+                    Showing {startIndex}-{Math.min(endIndex, displayTotal)} of {displayTotal} Products
                   </span>
-                  <select className="rounded-[8px] border border-gray-300 bg-white px-4 py-2 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none">
-                    <option>Sort By: Most Popular</option>
-                    <option>Sort By: Price Low to High</option>
-                    <option>Sort By: Price High to Low</option>
-                    <option>Sort By: Newest</option>
+                  <select
+                    value={`${sortBy}_${sortOrder}`}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                    className="rounded-[8px] border border-gray-300 bg-white px-4 py-2 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none"
+                  >
+                    <option value="id_desc">Sort By: Most Popular</option>
+                    <option value="price_asc">Sort By: Price Low to High</option>
+                    <option value="price_desc">Sort By: Price High to Low</option>
+                    <option value="created_at_desc">Sort By: Newest</option>
                   </select>
                   <div className="relative">
                     <input
                       type="text"
                       placeholder="Search products..."
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setCurrentPage(1);
+                      }}
                       className="rounded-[8px] border border-gray-300 bg-white px-4 py-2 pl-10 pr-4 text-sm text-[#0c1b33] placeholder:text-gray-400 focus:border-[#1d70ff] focus:outline-none"
                     />
                     <svg
@@ -186,139 +215,78 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              {/* Category Filters */}
               <div className="flex flex-wrap items-center gap-3 mb-8">
                 {categories.map((category) => (
                   <button
                     key={category.label}
-                    onClick={() => setSelectedCategory(category.label)}
+                    onClick={() => {
+                      setSelectedCategory(category.label === "All" ? null : category.label);
+                      setCurrentPage(1);
+                    }}
                     className={`rounded-[8px] px-4 py-2 text-sm font-semibold transition ${
+                      (selectedCategory === null && category.label === "All") ||
                       selectedCategory === category.label
                         ? "bg-[#1d70ff] text-white"
                         : "bg-gray-100 text-[#0c1b33] hover:bg-gray-200"
                     }`}
                   >
-                    {category.label} {category.count && `(${category.count})`}
+                    {category.label} {category.count !== null && `(${category.count})`}
                   </button>
                 ))}
               </div>
 
-              {/* Products Grid */}
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
-                {getVisibleProducts().map((product, index) => (
-                  <Link
-                    key={index}
-                    href="/products/detail"
-                    className={`relative flex flex-col gap-4 rounded-[28px] bg-white p-6 shadow-[0_10px_40px_rgba(16,53,106,0.05)] hover:shadow-[0_15px_50px_rgba(16,53,106,0.1)] transition-shadow cursor-pointer card-hover ${
-                      index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : index === 2 ? 'animate-card-delay-2' : 'animate-card-delay-3'
-                    }`}
+              {isLoading ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
+                  {Array.from({ length: 12 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="relative flex flex-col gap-4 rounded-[28px] bg-white p-6 shadow-[0_10px_40px_rgba(16,53,106,0.05)] animate-pulse"
+                    >
+                      <div className="aspect-square rounded-2xl bg-gray-200" />
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                        <div className="h-6 bg-gray-200 rounded w-full" />
+                        <div className="h-8 bg-gray-200 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : error ? (
+                <div className="text-center py-12">
+                  <p className="text-red-600 mb-4">Failed to load products. Please try again later.</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="rounded-[8px] bg-[#1d70ff] px-6 py-2 text-sm font-semibold text-white"
                   >
-                    {product.discount && (
-                      <div className="absolute right-4 top-4 z-10 rounded-full bg-red-500 px-3 py-1 text-xs font-semibold text-white">
-                        {product.discount}
-                      </div>
-                    )}
-                    <div className="relative overflow-hidden rounded-2xl bg-gray-100 aspect-square">
-                      <Image
-                        src={product.image}
-                        alt={product.title}
-                        width={320}
-                        height={320}
-                        className="h-full w-full object-cover animate-image-hover"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                          {product.brand || "MS"}
-                        </span>
-                      </div>
-                      <h3 className="text-base font-semibold leading-tight text-[#0c1b33] line-clamp-2">
-                        {product.title}
-                      </h3>
-                      <div className="flex items-center gap-0.5">
-                        {Array.from({ length: 5 }).map((_, idx) => {
-                          const starValue = idx + 1;
-                          const fullStars = Math.floor(product.rating);
-                          const hasHalfStar = product.rating % 1 >= 0.5;
-                          const isFullStar = starValue <= fullStars;
-                          const isHalfStar = hasHalfStar && starValue === fullStars + 1;
-                          
-                          if (isFullStar) {
-                            return <span key={idx} className="text-lg text-yellow-400">★</span>;
-                          } else if (isHalfStar) {
-                            return <span key={idx} className="text-lg text-yellow-400">★</span>;
-                          } else {
-                            return <span key={idx} className="text-lg text-gray-300">★</span>;
-                          }
-                        })}
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-black text-[#0c1b33]">{product.price}</span>
-                        {product.oldPrice && (
-                          <span className="text-sm text-[#9aa6bd] line-through">{product.oldPrice}</span>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                    Retry
+                  </button>
+                </div>
+              ) : filteredProducts.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-[#5c6c86] text-lg">No products found.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
+                    {filteredProducts.map((product, index) => (
+                      <ProductCard key={product.id} product={product} index={index} />
+                    ))}
+                  </div>
 
-              {/* Pagination */}
-              <div className="flex items-center justify-center gap-2">
-                <button
-                  onClick={prevProducts}
-                  disabled={currentProductCarouselIndex === 0}
-                  className="rounded-[8px] border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-[#0c1b33] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 animate-button"
-                >
-                  ← Previous
-                </button>
-                {Array.from({ length: Math.min(totalProductCarouselPages, 3) }).map((_, idx) => {
-                  const page = idx + 1;
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentProductCarouselIndex(idx)}
-                      className={`rounded-[8px] px-4 py-2 text-sm font-semibold ${
-                        currentProductCarouselIndex === idx
-                          ? "bg-[#1d70ff] text-white"
-                          : "bg-white border border-gray-300 text-[#0c1b33] hover:bg-gray-50"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
-                {totalProductCarouselPages > 3 && (
-                  <>
-                    <span className="px-2 text-sm text-[#5c6c86]">...</span>
-                    <button
-                      onClick={() => setCurrentProductCarouselIndex(totalProductCarouselPages - 1)}
-                      className={`rounded-[8px] px-4 py-2 text-sm font-semibold ${
-                        currentProductCarouselIndex === totalProductCarouselPages - 1
-                          ? "bg-[#1d70ff] text-white"
-                          : "bg-white border border-gray-300 text-[#0c1b33] hover:bg-gray-50"
-                      }`}
-                    >
-                      {totalProductCarouselPages}
-                    </button>
-                  </>
-                )}
-                <button
-                  onClick={nextProducts}
-                  disabled={currentProductCarouselIndex >= totalProductCarouselPages - 1}
-                  className="rounded-[8px] border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-[#0c1b33] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Next →
-                </button>
-              </div>
+                  {!searchQuery && !selectedCategory && totalPages > 1 && (
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                    />
+                  )}
+                </>
+              )}
             </section>
 
-            {/* Brand Logos Section */}
             <section className="px-8 py-10 lg:px-12 overflow-hidden">
               <div className="relative w-full overflow-hidden">
                 <div className="flex items-center gap-8 sm:gap-12 md:gap-16 lg:gap-20 animate-scroll-logos">
-                  {/* First set of logos */}
                   {productBrandLogos.map((logo, index) => (
                     <div key={`logo-1-${index}`} className="flex-shrink-0">
                       <Image
@@ -330,7 +298,6 @@ export default function ProductsPage() {
                       />
                     </div>
                   ))}
-                  {/* Duplicate set for seamless loop */}
                   {productBrandLogos.map((logo, index) => (
                     <div key={`logo-2-${index}`} className="flex-shrink-0">
                       <Image
@@ -345,7 +312,7 @@ export default function ProductsPage() {
                 </div>
               </div>
             </section>
-            {/* Footer */}
+
             <footer className="border-t border-[#1d70ff]/100 px-8 py-12">
               <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr_1fr_1fr]">
                 <div className="space-y-4">
@@ -472,4 +439,3 @@ export default function ProductsPage() {
     </div>
   );
 }
-

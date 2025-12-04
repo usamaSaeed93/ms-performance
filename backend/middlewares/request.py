@@ -25,10 +25,14 @@ class RequestPreProcessor(object):
         1. body (json)
         2. form_data
         3. query_params
+        
+        IMPORTANT: For multipart/form-data (file uploads), we MUST NOT read the body
+        or form_data here, as it will consume the stream and prevent FastAPI from
+        parsing UploadFile parameters.
         """
         return_dict = {}
 
-        # Process query_params
+        # Process query_params (safe - doesn't consume body)
         if request.query_params:
             try:
                 data = dict(request.query_params)
@@ -37,21 +41,33 @@ class RequestPreProcessor(object):
             except:
                 pass
 
-        # Process body
-        body = await request.body()
-        if body:
+        # Check content type - SKIP body reading for multipart/form-data (file uploads)
+        content_type = request.headers.get("content-type", "")
+        is_multipart = "multipart/form-data" in content_type
+        
+        if not is_multipart:
+            # Process body (only for non-multipart requests like JSON)
             try:
-                return_dict.update(json.loads(body))
+                body = await request.body()
+                if body:
+                    try:
+                        return_dict.update(json.loads(body))
+                    except:
+                        pass
             except:
                 pass
 
-        # Process form_data
-        form = await request.form()
-        if form:
+        # Process form_data (only for non-multipart - multipart is handled by FastAPI)
+        if not is_multipart:
             try:
-                data = dict(form)
-                await process_dict_val_as_json(data)
-                return_dict.update(data)
+                form = await request.form()
+                if form:
+                    try:
+                        data = dict(form)
+                        await process_dict_val_as_json(data)
+                        return_dict.update(data)
+                    except:
+                        pass
             except:
                 pass
 

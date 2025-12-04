@@ -141,8 +141,8 @@ const baseQuery = fetchBaseQuery({
       headers.set('authorization', `Bearer ${token}`);
     }
     
-    const isFormData = (args as any)?.body instanceof FormData;
-    if (!isFormData) {
+    // Set Content-Type for JSON requests (will be overridden by FormData if needed)
+    if (!headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
     }
     
@@ -187,6 +187,8 @@ export const adminApi = createApi({
   tagTypes: [
     'Product',
     'Products',
+    'Product',
+    'ProductImages',
     'Category',
     'Categories',
     'User',
@@ -241,6 +243,24 @@ export const adminApi = createApi({
         if (params && params.order) queryParams.append('order', params.order);
         
         return `get_products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      },
+      transformResponse: (response: any) => {
+        // baseQueryWithReauth already extracts the 'data' field from FinalResponse
+        // So response here should already be { products: [...] }
+        // Just ensure we return the expected structure
+        if (response && typeof response === 'object') {
+          // If response already has products array, return as-is
+          if ('products' in response && Array.isArray(response.products)) {
+            return { products: response.products };
+          }
+          // If response is the products array directly (shouldn't happen but handle it)
+          if (Array.isArray(response)) {
+            return { products: response };
+          }
+        }
+        // Default to empty array if structure is unexpected
+        console.warn('Unexpected response structure for getProducts:', response);
+        return { products: [] };
       },
       providesTags: ['Products'],
     }),
@@ -310,6 +330,42 @@ export const adminApi = createApi({
       ],
     }),
 
+    getProductImages: builder.query<
+      { images: ProductImage[] },
+      number
+    >({
+      query: (productId) => `get_product_images?product_id=${productId}`,
+      transformResponse: (response: any) => {
+        if (response && typeof response === 'object') {
+          if ('images' in response && Array.isArray(response.images)) {
+            return { images: response.images };
+          }
+          if (Array.isArray(response)) {
+            return { images: response };
+          }
+        }
+        return { images: [] };
+      },
+      providesTags: (result, error, productId) => [
+        { type: 'ProductImages', id: productId },
+      ],
+    }),
+
+    updateProductImages: builder.mutation<
+      { images: ProductImage[] },
+      { productId: number; images: Array<{ image_url: string; alt_text?: string; sort_order?: number; is_primary?: boolean }> }
+    >({
+      query: ({ productId, images }) => ({
+        url: 'update_product_images',
+        method: 'PUT',
+        body: { product_id: productId, images },
+      }),
+      invalidatesTags: (result, error, { productId }) => [
+        { type: 'ProductImages', id: productId },
+        { type: 'Product', id: productId },
+      ],
+    }),
+
     // Categories
     getCategories: builder.query<
       { categories: Category[] },
@@ -321,6 +377,24 @@ export const adminApi = createApi({
         if (params && params.per_page) queryParams.append('per_page', params.per_page.toString());
         
         return `get_categories${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      },
+      transformResponse: (response: any) => {
+        // baseQueryWithReauth already extracts the 'data' field from FinalResponse
+        // So response here should already be { categories: [...] }
+        // Just ensure we return the expected structure
+        if (response && typeof response === 'object') {
+          // If response already has categories array, return as-is
+          if ('categories' in response && Array.isArray(response.categories)) {
+            return { categories: response.categories };
+          }
+          // If response is the categories array directly (shouldn't happen but handle it)
+          if (Array.isArray(response)) {
+            return { categories: response };
+          }
+        }
+        // Default to empty array if structure is unexpected
+        console.warn('Unexpected response structure for getCategories:', response);
+        return { categories: [] };
       },
       providesTags: ['Categories'],
     }),
@@ -678,6 +752,8 @@ export const {
   useGetLowStockProductsQuery,
   useAddInventoryMutation,
   useCreateProductImagesMutation,
+  useGetProductImagesQuery,
+  useUpdateProductImagesMutation,
   
   // Categories
   useGetCategoriesQuery,

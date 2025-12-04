@@ -16,12 +16,24 @@ class CreateProduct(PutResource):
     api_url = "create_product"
 
     async def check_if_category_exists(self):
-        category = await crud.category.get(self.db, id=self.request_data.category_id)
-        if not category:
-            self.early_response = True
-            self.status_code = status.HTTP_404_NOT_FOUND
-            self.response_message = "Category not found"
-            self.response_data = {}
+        if self.request_data.category_id:
+            category = await crud.category.get(self.db, id=self.request_data.category_id)
+            if not category:
+                self.early_response = True
+                self.status_code = status.HTTP_404_NOT_FOUND
+                self.response_message = "Category not found"
+                self.response_data = {}
+
+    async def prepare_payload(self):
+        """Normalize slug and other derived fields before persisting."""
+        request_payload = self.request_data.model_dump()
+        base_slug = crud.product.slugify(
+            request_payload.get("slug") or request_payload.get("product_name", "")
+        )
+        request_payload["slug"] = await crud.product.generate_unique_slug(
+            self.db, base_slug=base_slug
+        )
+        self.request_data = CreateProductRequest(**request_payload)
 
     async def create_product(self):
         self.product: Product = await crud.product.create(
@@ -38,5 +50,6 @@ class CreateProduct(PutResource):
         if self.early_response:
             return
 
+        await self.prepare_payload()
         await self.create_product()
         await self.generate_response()

@@ -81,6 +81,10 @@ class Product(Base):
     external_url = Column(String(500), nullable=True)  # For external/affiliate products
     button_text = Column(String(100), nullable=True, default="Buy product")  # Button text for external products
     
+    # Tax Settings (WooCommerce-like)
+    tax_class_id = Column(Integer, ForeignKey("tax_class.id"), nullable=True, index=True)  # Tax class for this product
+    tax_status = Column(String(20), nullable=False, default="taxable")  # taxable, shipping, none
+    
     # Timestamps
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated_at = Column(

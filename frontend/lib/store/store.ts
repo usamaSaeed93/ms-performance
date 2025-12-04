@@ -1,17 +1,22 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { adminApi } from './api/adminApi';
+import { productsApi } from './api/productsApi';
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       [adminApi.reducerPath]: adminApi.reducer,
+      [productsApi.reducerPath]: productsApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         serializableCheck: {
-          ignoredActions: [adminApi.util.getRunningQueriesThunk.type],
+          ignoredActions: [
+            adminApi.util.getRunningQueriesThunk.type,
+            productsApi.util.getRunningQueriesThunk.type,
+          ],
         },
-      }).concat(adminApi.middleware),
+      }).concat(adminApi.middleware, productsApi.middleware),
   });
 };
 

@@ -340,3 +340,19 @@ html {
 .animate-scroll-logos:hover {
   animation-play-state: paused;
 }
+
+/* Circular Progress Ring Animations */
+@keyframes slowRotate {
+  from {
+    transform: rotate(-90deg);
+  }
+  to {
+    transform: rotate(270deg);
+  }
+}
+
+.difference-ring {
+  animation: slowRotate 8s linear infinite;
+  transform-origin: center;
+  will-change: transform;
+}
