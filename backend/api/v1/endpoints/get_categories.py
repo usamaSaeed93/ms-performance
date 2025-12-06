@@ -9,7 +9,7 @@ from ..schemas.get_categories import GetCategoriesRequest, GetCategoriesResponse
 class GetCategories(GetResource):
     request_schema = GetCategoriesRequest
     response_schema = GetCategoriesResponse
-    authentication_required = True
+    authentication_required = False
 
     # Endpoint details
     api_name = "get_categories"
@@ -22,6 +22,7 @@ class GetCategories(GetResource):
             per_page=self.request_data.per_page,
             order_by=self.request_data.order_by,
             order=self.request_data.order,
+            search=self.request_data.search,
         )
 
     async def generate_response(self):

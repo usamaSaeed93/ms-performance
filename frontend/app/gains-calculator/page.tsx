@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect, useCallback, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { navLinks, vehicleMakes, vehicleModels } from "@/lib/constants";
+import { VehicleComboboxLight } from "@/components/VehicleComboboxLight";
 import { 
   resolveVRM, 
   getEngineDetails,
@@ -63,6 +64,7 @@ function GainsCalculatorContent() {
   const [vrmLoading, setVrmLoading] = useState(false);
   const [vrmError, setVrmError] = useState<string | null>(null);
   const [animateProgress, setAnimateProgress] = useState(false);
+
 
   const handleVRMLookup = useCallback(async (reg?: string) => {
     const registration = reg || vrmInput.trim();
@@ -210,6 +212,23 @@ function GainsCalculatorContent() {
       handleVRMLookup(regParam);
     }
   }, [regParam, handleVRMLookup]);
+
+  // Prepare options for comboboxes
+  const brandOptions = useMemo(() => 
+    brands.map(b => ({ value: b.id, label: b.name }))
+  , [brands]);
+
+  const modelOptions = useMemo(() => 
+    models.map(m => ({ value: m.id, label: m.name }))
+  , [models]);
+
+  const generationOptions = useMemo(() => 
+    generations.map(g => ({ value: g.id, label: g.name }))
+  , [generations]);
+
+  const engineOptions = useMemo(() => 
+    engines.map(e => ({ value: e.publicid, label: `${e.name}${e.energy ? ` (${e.energy})` : ''}` }))
+  , [engines]);
 
   // Handler for manual vehicle selection
   const handleManualSelection = async () => {
@@ -492,7 +511,7 @@ function GainsCalculatorContent() {
                 className="absolute inset-0 h-full w-full object-cover"
                 priority
               />
-              <div className="absolute inset-0 bg-black/60" />
+              <div className="absolute inset-0 bg-black/60 pointer-events-none" />
               <div className="relative px-8 py-20 lg:px-12">
               <div className="space-y-6 max-w-3xl">
                 <p className="flex items-center gap-3 text-sm font-semibold text-[#7ab6ff] animate-subtitle">
@@ -514,7 +533,7 @@ function GainsCalculatorContent() {
                   <div className="space-y-3">
                     <label className="block text-sm font-semibold text-[#0c1b33] mb-2">Your vehicle registration</label>
                     <div className="flex gap-2">
-                      <div className="flex items-center gap-2 rounded-[8px] border border-gray-300 bg-white px-3 py-2">
+                      <div className="flex items-center gap-2 rounded-[8px] border border-gray-300 bg-white px-3 py-2 flex-1">
                         <span className="text-xs font-semibold bg-[#ffd200] px-2 py-1 rounded text-black">GB</span>
                         <input
                           type="text"
@@ -522,7 +541,8 @@ function GainsCalculatorContent() {
                           onChange={(e) => setVrmInput(e.target.value.toUpperCase())}
                           onKeyPress={(e) => e.key === "Enter" && handleVRMLookup()}
                           placeholder="Your vehicle registration"
-                          className="flex-1 bg-transparent text-sm text-[#0c1b33] placeholder:text-gray-400 focus:outline-none"
+                          className="flex-1 bg-transparent text-sm text-[#0c1b33] placeholder:text-gray-400 focus:outline-none w-full"
+                          readOnly={false}
                         />
                       </div>
                       <button 
@@ -546,65 +566,63 @@ function GainsCalculatorContent() {
                   <div className="space-y-4 pt-2">
                     <div>
                       <label className="block text-xs font-semibold text-[#0c1b33] mb-1.5">Make</label>
-                      <select
+                      <VehicleComboboxLight
+                        options={brandOptions}
                         value={selectedBrandId}
-                        onChange={(e) => setSelectedBrandId(e.target.value)}
+                        onValueChange={(value) => {
+                          setSelectedBrandId(value);
+                          setSelectedModelId("");
+                          setSelectedGenerationId("");
+                          setSelectedEnginePublicId("");
+                        }}
+                        placeholder="- Please Select Make -"
+                        searchPlaceholder="Search make..."
                         disabled={brandsLoading}
-                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ backgroundPosition: 'right 0.75rem center' }}
-                      >
-                        <option value="">- Please Select Make -</option>
-                        {brands.map((brand) => (
-                          <option key={brand.id} value={brand.id}>{brand.name}</option>
-                        ))}
-                      </select>
+                        emptyMessage="No make found."
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-[#0c1b33] mb-1.5">Model</label>
-                      <select
+                      <VehicleComboboxLight
+                        options={modelOptions}
                         value={selectedModelId}
-                        onChange={(e) => setSelectedModelId(e.target.value)}
+                        onValueChange={(value) => {
+                          setSelectedModelId(value);
+                          setSelectedGenerationId("");
+                          setSelectedEnginePublicId("");
+                        }}
+                        placeholder="- Please Select Model -"
+                        searchPlaceholder="Search model..."
                         disabled={!selectedBrandId || modelsLoading}
-                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ backgroundPosition: 'right 0.75rem center' }}
-                      >
-                        <option value="">- Please Select Model -</option>
-                        {models.map((model) => (
-                          <option key={model.id} value={model.id}>{model.name}</option>
-                        ))}
-                      </select>
+                        emptyMessage="No model found."
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-[#0c1b33] mb-1.5">Generation</label>
-                      <select
+                      <label className="block text-xs font-semibold text-[#0c1b33] mb-1.5">Fuel</label>
+                      <VehicleComboboxLight
+                        options={generationOptions}
                         value={selectedGenerationId}
-                        onChange={(e) => setSelectedGenerationId(e.target.value)}
+                        onValueChange={(value) => {
+                          setSelectedGenerationId(value);
+                          setSelectedEnginePublicId("");
+                        }}
+                        placeholder="- Please Select Generation -"
+                        searchPlaceholder="Search generation..."
                         disabled={!selectedModelId || generationsLoading}
-                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ backgroundPosition: 'right 0.75rem center' }}
-                      >
-                        <option value="">- Please Select Generation -</option>
-                        {generations.map((generation) => (
-                          <option key={generation.id} value={generation.id}>{generation.name}</option>
-                        ))}
-                      </select>
+                        emptyMessage="No generation found."
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-[#0c1b33] mb-1.5">Engine</label>
-                      <select
+                      <VehicleComboboxLight
+                        options={engineOptions}
                         value={selectedEnginePublicId}
-                        onChange={(e) => setSelectedEnginePublicId(e.target.value)}
+                        onValueChange={setSelectedEnginePublicId}
+                        placeholder="- Please Select Engine -"
+                        searchPlaceholder="Search engine..."
                         disabled={!selectedGenerationId || enginesLoading}
-                        className="w-full rounded-[8px] border border-gray-300 bg-white px-4 py-3 text-sm text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-10 disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ backgroundPosition: 'right 0.75rem center' }}
-                      >
-                        <option value="">- Please Select Engine -</option>
-                        {engines.map((engine) => (
-                          <option key={engine.publicid} value={engine.publicid}>
-                            {engine.name} {engine.energy ? `(${engine.energy})` : ''}
-                          </option>
-                        ))}
-                      </select>
+                        emptyMessage="No engine found."
+                      />
                     </div>
                     <button 
                       onClick={handleManualSelection}
@@ -1644,4 +1662,3 @@ export default function GainsCalculatorPage() {
     </Suspense>
   );
 }
-

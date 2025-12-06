@@ -2,91 +2,83 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { navLinks } from "@/lib/constants";
-
-// Dummy blog data
-const featuredArticle = {
-  title: "Tesla's Fight Against Louisiana Auto Sales Law Revived By Appeals Court",
-  author: "Kevin Mogill",
-  date: "25 August 2024",
-  readTime: "18 mins read",
-  image: "/images/hero/slider1.jpg",
-  category: "Blog",
-};
-
-const blogArticles = [
-  {
-    id: 1,
-    title: "Mobile ECU Remapping & Performance Tuning in Essex - Chelmsford Service",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas nulla quis, the venenatis euismod nu",
-    image: "/images/blog/latest1.png",
-  },
-  {
-    id: 2,
-    title: "Mobile ECU Remapping & Performance Tuning in Essex - Chelmsford Service",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas nulla quis, the venenatis euismod nu",
-    image: "/images/blog/latest2.png",
-  },
-  {
-    id: 3,
-    title: "Mobile ECU Remapping & Performance Tuning in Essex - Chelmsford Service",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas nulla quis, the venenatis euismod nu",
-    image: "/images/blog/latest3.png",
-  },
-  {
-    id: 4,
-    title: "Mobile ECU Remapping & Performance Tuning in Essex - Chelmsford Service",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas nulla quis, the venenatis euismod nu",
-    image: "/images/blog/latest4.png",
-  },
-  {
-    id: 5,
-    title: "Mobile ECU Remapping & Performance Tuning in Essex - Chelmsford Service",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas nulla quis, the venenatis euismod nu",
-    image: "/images/blog/latest2.png",
-  },
-  {
-    id: 6,
-    title: "Mobile ECU Remapping & Performance Tuning in Essex - Chelmsford Service",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas nulla quis, the venenatis euismod nu",
-    image: "/images/blog/latest3.png",
-  },
-];
+import { useState, useMemo } from "react";
+import { navLinks, blogPosts } from "@/lib/constants";
+import { useGetPublishedBlogsQuery } from "@/lib/store/api/blogsApi";
 
 export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Category");
-  
-  // Blog carousel state
   const [currentBlogIndex, setCurrentBlogIndex] = useState(0);
   const blogsPerPage = 6;
-  
-  // Add dummy blog articles
-  const dummyBlogArticles = Array.from({ length: 6 }).map((_, i) => ({
-    id: 100 + i,
-    title: `Latest Performance Tuning News ${i + 1}`,
-    description: "Stay updated with the latest trends in car performance tuning and ECU remapping.",
-    image: blogArticles[i % blogArticles.length]?.image || "/images/blog/latest1.png",
-    date: "25 August 2024",
-    author: "MS Performance",
-    category: "News",
+
+  const { data: blogsData, isLoading } = useGetPublishedBlogsQuery({
+    page: 1,
+    per_page: 50,
+    order_by: "published_at",
+    order: "desc",
+  });
+
+  // Transform static blog posts to match dynamic blog structure
+  const staticBlogs = blogPosts.map((blog, index) => ({
+    id: `static-${index + 1}`,
+    slug: `static-blog-${index + 1}`,
+    title: blog.title,
+    excerpt: blog.summary,
+    featured_image: blog.image,
+    author_name: "MS Performance",
+    published_at: new Date().toISOString(), // Use current date for static blogs
+    view_count: 0,
+    status: "published",
+    isStatic: true, // Flag to identify static blogs
   }));
+
+  // Combine static and dynamic blogs (static blogs first, then dynamic)
+  const allBlogs = [...staticBlogs, ...(blogsData?.blogs || [])];
   
-  const allBlogArticles = [...blogArticles, ...dummyBlogArticles];
-  const totalBlogPages = Math.ceil(allBlogArticles.length / blogsPerPage);
-  
+  // Sort by published_at (most recent first)
+  const sortedBlogs = allBlogs.sort((a, b) => {
+    const dateA = new Date(a.published_at || 0).getTime();
+    const dateB = new Date(b.published_at || 0).getTime();
+    return dateB - dateA;
+  });
+
+  const featuredBlog = sortedBlogs[0];
+  const otherBlogs = sortedBlogs.slice(1);
+
+  const filteredBlogs = useMemo(() => {
+    if (!searchQuery) return otherBlogs;
+    return otherBlogs.filter((blog) =>
+      blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (blog.excerpt && blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }, [otherBlogs, searchQuery]);
+
+  const totalBlogPages = Math.max(1, Math.ceil(filteredBlogs.length / blogsPerPage));
+
   const nextBlogs = () => {
     setCurrentBlogIndex((prev) => (prev + 1) % totalBlogPages);
   };
-  
+
   const prevBlogs = () => {
     setCurrentBlogIndex((prev) => (prev - 1 + totalBlogPages) % totalBlogPages);
   };
-  
+
   const getVisibleBlogs = () => {
     const start = currentBlogIndex * blogsPerPage;
-    return allBlogArticles.slice(start, start + blogsPerPage);
+    return filteredBlogs.slice(start, start + blogsPerPage);
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "";
+    try {
+      return new Date(dateString).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      return "";
+    }
   };
 
   return (
@@ -160,60 +152,63 @@ export default function BlogPage() {
           </header>
           <main className="space-y-12">
             {/* Hero Section / Featured Article */}
-            <section className="relative overflow-hidden bg-[#030814] text-white h-[700px]">
-              <Image
-                src="/images/blog/blogHero.png"
-                alt={featuredArticle.title}
-                width={1600}
-                height={500}
-                className="absolute inset-0 h-full w-full object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-black/70" />
-              <div className="relative h-full flex items-end px-8 pb-12 lg:px-12">
-                <div className="grid gap-8 lg:grid-cols-[2fr_1fr] w-full items-end">
-                  {/* Left Side - Article Info */}
-                  <div className="space-y-4">
-                    <span className="inline-block rounded-[8px] bg-white/20 px-3 py-1 text-xs font-semibold text-white">
-                      {featuredArticle.category}
-                    </span>
-                    <h1 className="text-4xl font-black leading-tight lg:text-5xl animate-heading">
-                      {featuredArticle.title}
-                    </h1>
-                    {/* Carousel Dots */}
-                    <div className="flex gap-2">
-                      {[1, 2, 3].map((dot) => (
-                        <div
-                          key={dot}
-                          className={`h-2 w-2 rounded-full ${
-                            dot === 1 ? "bg-white" : "bg-white/40"
-                          }`}
+            {isLoading ? (
+              <section className="relative overflow-hidden bg-[#030814] text-white h-[700px] flex items-center justify-center">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                  <p>Loading blog posts...</p>
+                </div>
+              </section>
+            ) : featuredBlog ? (
+              <section className="relative overflow-hidden bg-[#030814] text-white h-[700px]">
+                <Image
+                  src={featuredBlog.featured_image || "/images/blog/blogHero.png"}
+                  alt={featuredBlog.title}
+                  width={1600}
+                  height={500}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-black/70" />
+                <div className="relative h-full flex items-end px-8 pb-12 lg:px-12">
+                  <div className="grid gap-8 lg:grid-cols-[2fr_1fr] w-full items-end">
+                    <div className="space-y-4">
+                      <span className="inline-block rounded-[8px] bg-white/20 px-3 py-1 text-xs font-semibold text-white">
+                        Featured
+                      </span>
+                      <Link href={featuredBlog.isStatic ? "/blog/detail" : `/blog/${featuredBlog.slug || featuredBlog.id}`}>
+                        <h1 className="text-4xl font-black leading-tight lg:text-5xl animate-heading cursor-pointer hover:text-[#1d70ff] transition">
+                          {featuredBlog.title}
+                        </h1>
+                      </Link>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-12 w-12 flex-shrink-0 rounded-full overflow-hidden bg-gray-600">
+                        <Image
+                          src="/images/logos/ms-logo.png"
+                          alt={featuredBlog.author_name || "MS Performance"}
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover"
                         />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Right Side - Author Info */}
-                  <div className="flex items-center gap-4">
-                    <div className="relative h-12 w-12 flex-shrink-0 rounded-full overflow-hidden bg-gray-600">
-                      <Image
-                        src="/images/hero/slider1.jpg"
-                        alt={featuredArticle.author}
-                        width={48}
-                        height={48}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="text-sm">
-                      <p className="font-semibold text-white">By {featuredArticle.author}</p>
-                      <p className="text-white/70">
-                        {featuredArticle.date} • {featuredArticle.readTime}
-                      </p>
+                      </div>
+                      <div className="text-sm">
+                        <p className="font-semibold text-white">By {featuredBlog.author_name || "MS Performance"}</p>
+                        <p className="text-white/70">
+                          {formatDate(featuredBlog.published_at)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            ) : sortedBlogs.length === 0 && !isLoading ? (
+              <section className="relative overflow-hidden bg-[#030814] text-white h-[700px] flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-xl">No blog posts available at the moment.</p>
+                </div>
+              </section>
+            ) : null}
 
             {/* Highlighted Articles Section */}
             <section className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12">
@@ -242,18 +237,6 @@ export default function BlogPage() {
                     <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" />
                   </svg>
                 </div>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-xs text-[#0c1b33] focus:border-[#1d70ff] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E')] bg-no-repeat bg-right pr-8 sm:w-auto sm:rounded-[8px] sm:px-4 sm:py-3 sm:text-sm sm:pr-10"
-                  style={{ backgroundPosition: 'right 0.5rem center' }}
-                >
-                  <option>Category</option>
-                  <option>ECU Remapping</option>
-                  <option>Dyno Tests</option>
-                  <option>Custom Exhausts</option>
-                  <option>News</option>
-                </select>
                 <button className="flex h-10 w-full items-center justify-center rounded-lg bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition sm:h-12 sm:w-12 sm:rounded-[8px] animate-button">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
@@ -263,46 +246,48 @@ export default function BlogPage() {
               </div>
 
               {/* Top Article Grid - 3 Cards */}
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
-                {blogArticles.slice(0, 3).map((article, index) => (
-                  <Link
-                    key={article.id}
-                    href="/blog/detail"
-                    className={`bg-white rounded-[16px] overflow-hidden hover:shadow-lg transition-shadow cursor-pointer shadow-sm card-hover ${
-                      index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : 'animate-card-delay-2'
-                    }`}
-                  >
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={article.image}
-                        alt={article.title}
-                        width={400}
-                        height={200}
-                        className="w-full h-full object-cover animate-image-hover"
-                      />
-                    </div>
-                    <div className="p-6 space-y-4">
-                      <h3 className="text-lg font-bold text-[#0c1b33] line-clamp-2">
-                        {article.title}
-                      </h3>
-                      <p className="text-sm text-[#5c6c86] line-clamp-2">
-                        {article.description}
-                      </p>
-                      <button className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path
-                            d="M5 12h14M12 5l7 7-7 7"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+              {sortedBlogs.length > 1 && (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
+                  {sortedBlogs.slice(1, 4).map((blog, index) => (
+                    <Link
+                      key={blog.id}
+                      href={blog.isStatic ? "/blog/detail" : `/blog/${blog.slug || blog.id}`}
+                      className={`bg-white rounded-[16px] overflow-hidden hover:shadow-lg transition-shadow cursor-pointer shadow-sm card-hover ${
+                        index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : 'animate-card-delay-2'
+                      }`}
+                    >
+                      <div className="relative h-48 overflow-hidden">
+                        <Image
+                          src={blog.featured_image || "/images/blog/latest1.png"}
+                          alt={blog.title}
+                          width={400}
+                          height={200}
+                          className="w-full h-full object-cover animate-image-hover"
+                        />
+                      </div>
+                      <div className="p-6 space-y-4">
+                        <h3 className="text-lg font-bold text-[#0c1b33] line-clamp-2">
+                          {blog.title}
+                        </h3>
+                        <p className="text-sm text-[#5c6c86] line-clamp-2">
+                          {blog.excerpt || "Read more about this topic..."}
+                        </p>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path
+                              d="M5 12h14M12 5l7 7-7 7"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
 
               {/* Recent Blogs Section */}
               <div className="flex items-center justify-between mb-6">
@@ -334,14 +319,14 @@ export default function BlogPage() {
                   {getVisibleBlogs().map((article, index) => (
                     <Link
                       key={article.id}
-                      href="/blog/detail"
+                      href={article.isStatic ? "/blog/detail" : `/blog/${article.slug || article.id}`}
                       className={`bg-white rounded-[16px] overflow-hidden hover:shadow-lg transition-shadow cursor-pointer shadow-sm card-hover ${
                         index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : index === 2 ? 'animate-card-delay-2' : index === 3 ? 'animate-card-delay-3' : 'animate-card animate-stagger-4'
                       }`}
                     >
                       <div className="relative h-48 overflow-hidden">
                         <Image
-                          src={article.image}
+                          src={article.featured_image || article.image || "/images/blog/latest1.png"}
                           alt={article.title}
                           width={400}
                           height={200}
@@ -353,9 +338,9 @@ export default function BlogPage() {
                           {article.title}
                         </h3>
                         <p className="text-sm text-[#5c6c86] line-clamp-2">
-                          {article.description}
+                          {article.excerpt || article.description || "Read more about this topic..."}
                         </p>
-                        <button className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition animate-button">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition animate-button">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                             <path
                               d="M5 12h14M12 5l7 7-7 7"
@@ -365,7 +350,7 @@ export default function BlogPage() {
                               strokeLinejoin="round"
                             />
                           </svg>
-                        </button>
+                        </div>
                       </div>
                     </Link>
                   ))}

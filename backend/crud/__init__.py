@@ -7,4 +7,6 @@ from .category import category
 from .discount import discount
 from .product_image import product_image
 from .product_variant import product_variant
+from .product_review import product_review
 from .tax import tax_class, tax_rate
+from .blog import blog

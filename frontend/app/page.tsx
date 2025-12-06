@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { useGetPublishedBlogsQuery } from "@/lib/store/api/blogsApi";
 
 const navLinks = [
   "Home",
@@ -116,30 +118,24 @@ const testimonials = [
   },
 ];
 
-const newsCards = [
-  {
-    title: "Mobile ECU Remapping & Performance Tuning in Essex",
-    copy: "Purus dui sollicitudin dignissim habitant egestas nullam cras sed.",
-    image: "/latest1.png",
-  },
-  {
-    title: "Mobile ECU Remapping & Performance Tuning in Essex",
-    copy: "Amet cursus sit amet dictum sit amet justo donec pretium vulputate.",
-    image: "/latest2.png",
-  },
-  {
-    title: "Mobile ECU Remapping & Performance Tuning in Essex",
-    copy: "Elementum sagittis vitae et leo duis ut diam quam nulla porttitor.",
-    image: "/latest3.png",
-  },
-  {
-    title: "Mobile ECU Remapping & Performance Tuning in Essex",
-    copy: "Olestie at elementum eu facilisis sed odio morbi quis commodo odio.",
-    image: "/latest4.png",
-  },
-];
-
 export default function Home() {
+  const router = useRouter();
+  
+  // Redirect to /home page
+  useEffect(() => {
+    router.replace("/home");
+  }, [router]);
+
+  // Return null to prevent rendering while redirecting
+  return null;
+
+  // Fetch published blogs
+  const { data: blogsData, isLoading: blogsLoading } = useGetPublishedBlogsQuery({
+    page: 1,
+    per_page: 10,
+    order_by: 'published_at',
+    order: 'desc',
+  });
   // Service cards carousel state
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
   const serviceItemsPerPage = 4;
@@ -210,25 +206,41 @@ export default function Home() {
     },
   ];
 
-  // Add dummy news
-  const dummyNews = [
-    {
-      title: "Understanding ECU Remapping: A Complete Guide",
-      copy: "Learn everything you need to know about ECU remapping.",
-      image: "/latest1.png",
-    },
-    {
-      title: "Top 5 Performance Modifications",
-      copy: "Discover the best modifications for your vehicle.",
-      image: "/latest2.png",
-    },
-  ];
+  // Transform blogs for display
+  const allNewsCards = useMemo(() => {
+    if (!blogsData?.blogs || blogsData.blogs.length === 0) {
+      // Fallback to dummy news if no blogs available
+      return [
+        {
+          id: null,
+          title: "Understanding ECU Remapping: A Complete Guide",
+          copy: "Learn everything you need to know about ECU remapping.",
+          image: "/latest1.png",
+          slug: null,
+        },
+        {
+          id: null,
+          title: "Top 5 Performance Modifications",
+          copy: "Discover the best modifications for your vehicle.",
+          image: "/latest2.png",
+          slug: null,
+        },
+      ];
+    }
+    
+    return blogsData.blogs.map((blog) => ({
+      id: blog.id,
+      title: blog.title,
+      copy: blog.excerpt || "Read more about this topic...",
+      image: blog.featured_image || "/latest1.png",
+      slug: blog.slug,
+    }));
+  }, [blogsData]);
 
   // Combine real and dummy data
   const allServiceCards = [...serviceCards, ...dummyServiceCards];
   const allAdvantages = [...advantages, ...dummyAdvantages];
   const allTestimonials = [...testimonials, ...dummyTestimonials];
-  const allNewsCards = [...newsCards, ...dummyNews];
 
   // Service cards carousel functions
   const totalServicePages = Math.ceil(allServiceCards.length / serviceItemsPerPage);
@@ -690,39 +702,66 @@ export default function Home() {
                   <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-              <button className="w-full rounded-full bg-[#12a7ff] px-4 py-2 text-xs font-semibold text-black sm:w-auto sm:px-6 sm:text-sm animate-button">
+              <Link 
+                href="/blog"
+                className="w-full rounded-full bg-[#12a7ff] px-4 py-2 text-xs font-semibold text-black sm:w-auto sm:px-6 sm:text-sm animate-button text-center"
+              >
                 View All
-              </button>
+              </Link>
             </div>
           </div>
           <div className="relative overflow-hidden">
-            <div className="mt-6 grid gap-4 px-4 sm:mt-8 sm:gap-6 md:grid-cols-2 md:px-6 lg:px-8">
-              {getVisibleNews().map((news, index) => (
-              <div
-                key={news.title + news.image}
-                className={`flex w-full flex-col gap-3 rounded-xl bg-[#090909] p-4 sm:gap-4 sm:rounded-2xl sm:p-5 md:flex-row card-hover ${
-                  index === 0 ? 'animate-card' : 'animate-card-delay-1'
-                }`}
-              >
-                <div className="h-40 w-full overflow-hidden rounded-xl sm:h-44 md:h-32 md:w-40">
-                  <Image
-                    src={news.image}
-                    alt={news.title}
-                    width={320}
-                    height={200}
-                    className="h-full w-full object-cover animate-image-hover"
-                  />
-                </div>
-                <div className="flex flex-1 flex-col">
-                  <h3 className="text-base font-semibold sm:text-lg">{news.title}</h3>
-                  <p className="mt-2 flex-1 text-xs text-white/70 sm:text-sm">{news.copy}</p>
-                  <button className="mt-3 self-start rounded-lg border border-[#12a7ff] px-2.5 py-1 text-xs text-[#12a7ff] sm:mt-4 sm:rounded-xl sm:px-3 sm:text-sm animate-button">
-                    View
-                  </button>
-                </div>
+            {blogsLoading ? (
+              <div className="mt-6 grid gap-4 px-4 sm:mt-8 sm:gap-6 md:grid-cols-2 md:px-6 lg:px-8">
+                {[1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="flex w-full flex-col gap-3 rounded-xl bg-[#090909] p-4 sm:gap-4 sm:rounded-2xl sm:p-5 md:flex-row animate-pulse"
+                  >
+                    <div className="h-40 w-full rounded-xl bg-white/10 sm:h-44 md:h-32 md:w-40" />
+                    <div className="flex flex-1 flex-col gap-2">
+                      <div className="h-4 w-3/4 rounded bg-white/10" />
+                      <div className="h-3 w-full rounded bg-white/10" />
+                      <div className="h-3 w-2/3 rounded bg-white/10" />
+                    </div>
+                  </div>
+                ))}
               </div>
-              ))}
-            </div>
+            ) : (
+              <div className="mt-6 grid gap-4 px-4 sm:mt-8 sm:gap-6 md:grid-cols-2 md:px-6 lg:px-8">
+                {getVisibleNews().map((news, index) => {
+                  const blogUrl = news.slug ? `/blog/${news.slug}` : news.id ? `/blog/${news.id}` : '#';
+                  return (
+                    <div
+                      key={news.id || news.title + news.image}
+                      className={`flex w-full flex-col gap-3 rounded-xl bg-[#090909] p-4 sm:gap-4 sm:rounded-2xl sm:p-5 md:flex-row card-hover ${
+                        index === 0 ? 'animate-card' : 'animate-card-delay-1'
+                      }`}
+                    >
+                      <div className="h-40 w-full overflow-hidden rounded-xl sm:h-44 md:h-32 md:w-40">
+                        <Image
+                          src={news.image}
+                          alt={news.title}
+                          width={320}
+                          height={200}
+                          className="h-full w-full object-cover animate-image-hover"
+                        />
+                      </div>
+                      <div className="flex flex-1 flex-col">
+                        <h3 className="text-base font-semibold sm:text-lg">{news.title}</h3>
+                        <p className="mt-2 flex-1 text-xs text-white/70 sm:text-sm line-clamp-3">{news.copy}</p>
+                        <Link
+                          href={blogUrl}
+                          className="mt-3 self-start rounded-lg border border-[#12a7ff] px-2.5 py-1 text-xs text-[#12a7ff] transition hover:bg-[#12a7ff] hover:text-black sm:mt-4 sm:rounded-xl sm:px-3 sm:text-sm animate-button"
+                        >
+                          View
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
           
           {/* News Carousel Indicators */}

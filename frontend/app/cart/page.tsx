@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { navLinks } from "@/lib/constants";
+import { isCustomerAuthenticated } from "@/lib/utils/auth";
 
 // Dummy cart items
 const cartItems = [
@@ -31,8 +33,27 @@ const cartItems = [
 ];
 
 export default function CartPage() {
+  const router = useRouter();
   const [items, setItems] = useState(cartItems);
   const [promoCode, setPromoCode] = useState("");
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    if (!isCustomerAuthenticated()) {
+      router.push("/login?redirect=/cart");
+      return;
+    }
+    setIsChecking(false);
+  }, [router]);
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   const updateQuantity = (id: number, change: number) => {
     setItems((prevItems) =>
@@ -297,12 +318,12 @@ export default function CartPage() {
                     </div>
 
                     {/* Checkout Button */}
-                    <Link
-                      href="/checkout"
+                    <button
+                      onClick={() => router.push("/checkout")}
                       className="block w-full rounded-[12px] bg-[#1d70ff] px-6 py-4 text-center text-base font-semibold text-white hover:bg-[#1a5fdd] transition animate-button"
                     >
                       Go to Checkout →
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </div>

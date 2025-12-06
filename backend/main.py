@@ -85,3 +85,10 @@ app.mount(
 Add versioned routing information here
 """
 RoutingV1(app).map_urls()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on application shutdown."""
+    from core.email_queue import email_queue
+    await email_queue.shutdown()

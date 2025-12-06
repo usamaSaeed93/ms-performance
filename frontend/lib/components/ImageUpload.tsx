@@ -13,6 +13,9 @@ interface ImageUploadProps {
   onUploadError?: (error: string) => void;
   className?: string;
   multiple?: boolean;
+  buttonText?: string;
+  variant?: "default" | "outline" | "ghost" | "link" | "destructive" | "secondary";
+  size?: "default" | "sm" | "lg" | "icon";
 }
 
 interface UploadProgress {
@@ -28,6 +31,9 @@ export default function ImageUpload({
   onUploadError,
   className = "",
   multiple = true,
+  buttonText,
+  variant = "outline",
+  size = "default",
 }: ImageUploadProps) {
   const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
   const [backendAvailable, setBackendAvailable] = useState<boolean | null>(null);
@@ -297,33 +303,39 @@ export default function ImageUpload({
 
       <Button
         type="button"
-        variant="outline"
+        variant={variant}
+        size={size}
         onClick={handleClick}
         disabled={uploading || backendAvailable === false}
-        className="w-full h-48 flex flex-col items-center justify-center gap-2 border-dashed"
+        className={buttonText ? "" : "w-full h-48 flex flex-col items-center justify-center gap-2 border-dashed"}
       >
         {uploading ? (
           <>
             <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="font-medium">{getUploadStatusText() || "Uploading..."}</span>
-            {uploadProgress.length > 0 && (
-              <div className="w-full max-w-xs mt-2">
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-300"
-                    style={{ 
-                      width: `${(uploadProgress.filter(p => p.status === 'success' || p.status === 'uploading').length / uploadProgress.length) * 100}%` 
-                    }}
-                  />
-                </div>
-              </div>
+            {!buttonText && (
+              <>
+                <span className="font-medium">{getUploadStatusText() || "Uploading..."}</span>
+                {uploadProgress.length > 0 && (
+                  <div className="w-full max-w-xs mt-2">
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-300"
+                        style={{ 
+                          width: `${(uploadProgress.filter(p => p.status === 'success' || p.status === 'uploading').length / uploadProgress.length) * 100}%` 
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
             )}
+            {buttonText && <span>{getUploadStatusText() || "Uploading..."}</span>}
           </>
         ) : (
           <>
-            <Upload className="h-8 w-8" />
-            <span>{multiple ? "Click to upload images" : "Click to upload image"}</span>
-            <span className="text-xs text-muted-foreground">Max 10MB per file</span>
+            {!buttonText && <Upload className="h-8 w-8" />}
+            <span>{buttonText || (multiple ? "Click to upload images" : "Click to upload image")}</span>
+            {!buttonText && <span className="text-xs text-muted-foreground">Max 10MB per file</span>}
           </>
         )}
       </Button>

@@ -5,7 +5,7 @@ from crud.schemas import Category
 
 
 class GetCategoriesRequest(PaginatedRequest):
-    ...
+    search: str | None = None
 
 
 class GetCategoriesResponse(BaseModel):

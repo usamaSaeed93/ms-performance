@@ -57,7 +57,10 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
         per_page: int,
         order_by: str,
         order: str,
-    ) -> Iterable:
+        search: str | None = None,
+    ) -> tuple[Iterable, int]:
+        from sqlalchemy import func
+        
         if not getattr(self.model, order_by, None):
             order_by = "id"
         stmt = select(
@@ -76,20 +79,39 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
             self.model.weight,
             self.model.is_active,
             self.model.is_featured,
+            self.model.average_rating,
+            self.model.review_count,
             self.model.created_at,
             self.model.updated_at,
             Category.category_name,
             Category.category_slug,
         ).join(Category, self.model.category_id == Category.id)
+        
         if category_ids:
             stmt = stmt.filter(self.model.category_id.in_(category_ids))
+        
+        if search:
+            search_filter = self.model.product_name.ilike(f"%{search}%")
+            stmt = stmt.filter(search_filter)
+        
+        # Count total before pagination
+        count_stmt = select(func.count()).select_from(self.model).join(Category, self.model.category_id == Category.id)
+        if category_ids:
+            count_stmt = count_stmt.filter(self.model.category_id.in_(category_ids))
+        if search:
+            search_filter = self.model.product_name.ilike(f"%{search}%")
+            count_stmt = count_stmt.filter(search_filter)
+        
+        count_result = await db.execute(count_stmt)
+        total = count_result.scalar() or 0
+        
         stmt = (
             stmt.order_by(text(f"product.{order_by} {order}"))
             .offset((page - 1) * per_page)
             .limit(per_page)
         )
         result = await db.execute(stmt)
-        return result.all()
+        return result.all(), total
 
 
 product = CRUDProduct(Product)

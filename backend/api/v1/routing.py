@@ -3,6 +3,7 @@ from api.base_routing import BaseRouting
 from .endpoints.register_user import RegisterUser
 from .endpoints.signup import Signup
 from .endpoints.login_user import LoginUser
+from .endpoints.confirm_email import ConfirmEmailGet, ConfirmEmailPost, ResendConfirmationEmail
 from .endpoints.create_product import CreateProduct
 from .endpoints.add_inventory import AddInventory
 from .endpoints.get_product import GetProduct
@@ -25,6 +26,16 @@ from .endpoints.get_discounts import GetDiscounts
 from .endpoints.create_product_image import CreateProductImage
 from .endpoints.get_product_images import GetProductImages
 from .endpoints.update_product_images import UpdateProductImages
+from .endpoints.create_product_review import CreateProductReview
+from .endpoints.get_product_reviews import GetProductReviews
+from .endpoints.update_product_review import UpdateProductReview
+from .endpoints.delete_product_review import DeleteProductReview
+from .endpoints.create_blog import CreateBlog
+from .endpoints.update_blog import UpdateBlog
+from .endpoints.get_blog import GetBlog
+from .endpoints.get_blogs import GetBlogs
+from .endpoints.get_published_blogs import GetPublishedBlogs
+from .endpoints.delete_blog import DeleteBlog
 
 
 class RoutingV1(BaseRouting):
@@ -40,6 +51,9 @@ class RoutingV1(BaseRouting):
             Signup.api_url,
         )
         self.routing_collection[LoginUser.api_name] = (LoginUser(), LoginUser.api_url)
+        self.routing_collection[ConfirmEmailGet.api_name] = (ConfirmEmailGet(), ConfirmEmailGet.api_url)
+        self.routing_collection[ConfirmEmailPost.api_name] = (ConfirmEmailPost(), ConfirmEmailPost.api_url)
+        self.routing_collection[ResendConfirmationEmail.api_name] = (ResendConfirmationEmail(), ResendConfirmationEmail.api_url)
         self.routing_collection[CreateProduct.api_name] = (
             CreateProduct(),
             CreateProduct.api_url,
@@ -127,4 +141,44 @@ class RoutingV1(BaseRouting):
         self.routing_collection[UpdateProductImages.api_name] = (
             UpdateProductImages(),
             UpdateProductImages.api_url,
+        )
+        self.routing_collection[CreateProductReview.api_name] = (
+            CreateProductReview(),
+            CreateProductReview.api_url,
+        )
+        self.routing_collection[GetProductReviews.api_name] = (
+            GetProductReviews(),
+            GetProductReviews.api_url,
+        )
+        self.routing_collection[UpdateProductReview.api_name] = (
+            UpdateProductReview(),
+            UpdateProductReview.api_url,
+        )
+        self.routing_collection[DeleteProductReview.api_name] = (
+            DeleteProductReview(),
+            DeleteProductReview.api_url,
+        )
+        self.routing_collection[CreateBlog.api_name] = (
+            CreateBlog(),
+            CreateBlog.api_url,
+        )
+        self.routing_collection[UpdateBlog.api_name] = (
+            UpdateBlog(),
+            UpdateBlog.api_url,
+        )
+        self.routing_collection[GetBlog.api_name] = (
+            GetBlog(),
+            GetBlog.api_url,
+        )
+        self.routing_collection[GetBlogs.api_name] = (
+            GetBlogs(),
+            GetBlogs.api_url,
+        )
+        self.routing_collection[GetPublishedBlogs.api_name] = (
+            GetPublishedBlogs(),
+            GetPublishedBlogs.api_url,
+        )
+        self.routing_collection[DeleteBlog.api_name] = (
+            DeleteBlog(),
+            DeleteBlog.api_url,
         )

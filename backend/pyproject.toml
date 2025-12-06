@@ -4,6 +4,7 @@ version = "1.0.0"
 description = ""
 authors = ["Muhammad Fahad Baig <fadi@fahadbaig.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
@@ -29,6 +30,9 @@ cryptography = "^41.0.0"
 pymysql = "^1.1.0"
 boto3 = "^1.34.0"
 pillow = "^10.4.0"
+aiosmtplib = "^3.0.0"
+apscheduler = "^3.10.4"
+jinja2 = "^3.1.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"

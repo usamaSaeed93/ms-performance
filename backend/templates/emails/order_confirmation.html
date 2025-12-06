@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f5f5f5; padding: 20px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0c1b33 0%, #1d70ff 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">Order Confirmed! 🎉</h1>
+                            <p style="margin: 15px 0 0 0; color: #ffffff; font-size: 18px; opacity: 0.9;">Order #{{ order_number }}</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <h2 style="margin: 0 0 20px 0; color: #0c1b33; font-size: 24px; font-weight: 600;">Hello {{ first_name }},</h2>
+                            
+                            <p style="margin: 0 0 30px 0; color: #5c6c86; font-size: 16px; line-height: 1.6;">
+                                Thank you for your order! We've received your order and will process it shortly.
+                            </p>
+                            
+                            <!-- Order Items -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0; background-color: #f8f9fa; border-radius: 8px; overflow: hidden;">
+                                <tr>
+                                    <td style="padding: 20px; background-color: #0c1b33;">
+                                        <h3 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 600;">Order Details</h3>
+                                    </td>
+                                </tr>
+                                {% for item in order_items %}
+                                <tr>
+                                    <td style="padding: 15px 20px; border-bottom: 1px solid #dfe6f2;">
+                                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="width: 70%;">
+                                                    <p style="margin: 0 0 5px 0; color: #0c1b33; font-size: 16px; font-weight: 600;">{{ item.name }}</p>
+                                                    <p style="margin: 0; color: #9aa6bd; font-size: 14px;">Quantity: {{ item.quantity }} × £{{ "%.2f"|format(item.price) }}</p>
+                                                </td>
+                                                <td align="right" style="vertical-align: top;">
+                                                    <p style="margin: 0; color: #0c1b33; font-size: 16px; font-weight: 600;">£{{ "%.2f"|format(item.total) }}</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                            
+                            <!-- Order Summary -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                                <tr>
+                                    <td style="padding: 10px 0; border-bottom: 1px solid #dfe6f2;">
+                                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="color: #5c6c86; font-size: 14px;">Subtotal</td>
+                                                <td align="right" style="color: #0c1b33; font-size: 14px; font-weight: 600;">£{{ "%.2f"|format(subtotal) }}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 0; border-bottom: 1px solid #dfe6f2;">
+                                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="color: #5c6c86; font-size: 14px;">Tax (VAT)</td>
+                                                <td align="right" style="color: #0c1b33; font-size: 14px; font-weight: 600;">£{{ "%.2f"|format(tax) }}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 0; border-bottom: 1px solid #dfe6f2;">
+                                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="color: #5c6c86; font-size: 14px;">Shipping</td>
+                                                <td align="right" style="color: #0c1b33; font-size: 14px; font-weight: 600;">£{{ "%.2f"|format(shipping_cost) }}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 15px 0 0 0;">
+                                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="color: #0c1b33; font-size: 18px; font-weight: bold;">Total</td>
+                                                <td align="right" style="color: #1d70ff; font-size: 24px; font-weight: bold;">£{{ "%.2f"|format(total) }}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 30px 0 0 0; color: #5c6c86; font-size: 16px; line-height: 1.6;">
+                                We'll send you another email when your order ships. You can track your order status anytime in your account.
+                            </p>
+                            
+                            <!-- CTA Button -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ frontend_url }}/orders" style="display: inline-block; padding: 16px 32px; background-color: #1d70ff; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(29, 112, 255, 0.3);">
+                                            View Order Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #dfe6f2;">
+                            <p style="margin: 0 0 10px 0; color: #5c6c86; font-size: 14px;">
+                                Questions? We're here to help!<br>
+                                Email us at <a href="mailto:info@msperformance.co.uk" style="color: #1d70ff; text-decoration: none;">info@msperformance.co.uk</a>
+                            </p>
+                            <p style="margin: 20px 0 0 0; color: #9aa6bd; font-size: 12px;">
+                                <strong style="color: #0c1b33;">MS Performance</strong><br>
+                                Unit 16, Bakers Ln, Chelmsford CM2 8LD<br>
+                                © 2025 MS Performance. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -15,11 +15,27 @@ import {
   blogPosts,
   footerLinks,
 } from "@/lib/constants";
-import { resolveVRM, type VRMResponse } from "@/lib/api/vrm";
+import { 
+  resolveVRM, 
+  getBrands,
+  getModels,
+  getGenerations,
+  getEngines,
+  type VRMResponse,
+  type Brand,
+  type Model,
+  type Generation,
+  type Engine
+} from "@/lib/api/vrm";
 import { useHomePageProducts } from "@/lib/hooks/useHomePageProducts";
 import { ProductCard } from "@/components/products/ProductCard";
+import { useGetPublishedBlogsQuery } from "@/lib/store/api/blogsApi";
+import { useRouter } from "next/navigation";
+import { VehicleCombobox } from "@/components/VehicleCombobox";
 
 export default function HomePage() {
+  const router = useRouter();
+  
   // Services carousel state
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
   const itemsPerPage = 4;
@@ -30,6 +46,25 @@ export default function HomePage() {
   const [vrmLoading, setVrmLoading] = useState(false);
   const [vrmError, setVrmError] = useState<string | null>(null);
 
+  // Vehicle selection state
+  const [selectedBrandId, setSelectedBrandId] = useState<string>("");
+  const [selectedModelId, setSelectedModelId] = useState<string>("");
+  const [selectedGenerationId, setSelectedGenerationId] = useState<string>("");
+  const [selectedEnginePublicId, setSelectedEnginePublicId] = useState<string>("");
+  
+  // Dropdown data state
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [models, setModels] = useState<Model[]>([]);
+  const [generations, setGenerations] = useState<Generation[]>([]);
+  const [engines, setEngines] = useState<Engine[]>([]);
+  
+  
+  // Loading states
+  const [brandsLoading, setBrandsLoading] = useState(false);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [generationsLoading, setGenerationsLoading] = useState(false);
+  const [enginesLoading, setEnginesLoading] = useState(false);
+
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
   const productsPerPage = 4;
 
@@ -39,13 +74,19 @@ export default function HomePage() {
     limit: 8,
   });
 
+  // Fetch published blogs
+  const { data: blogsData, isLoading: blogsLoading } = useGetPublishedBlogsQuery({
+    page: 1,
+    per_page: 10,
+    order_by: 'published_at',
+    order: 'desc',
+  });
+
   // Testimonials carousel state
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const testimonialsPerPage = 3;
 
-  // Blog carousel state
-  const [currentBlogIndex, setCurrentBlogIndex] = useState(0);
-  const blogsPerPage = 2;
+  // Blog display - no carousel, just show 4 blogs
 
   // Add dummy services to extend the carousel
   const dummyServices = [
@@ -72,39 +113,111 @@ export default function HomePage() {
   ];
 
 
-  // Add dummy testimonials
-  const dummyTestimonials = [
-    {
-      quote: "Outstanding service and results. My car runs better than ever!",
-      name: "James Wilson",
-      role: "Car Enthusiast",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-    },
-    {
-      quote: "Professional team with excellent attention to detail.",
-      name: "Sarah Thompson",
-      role: "Performance Car Owner",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
-    },
-  ];
+  // No need for dummy testimonials, we have enough in constants
 
-  // Add dummy blog posts
-  const dummyBlogPosts = [
-    {
-      title: "Understanding ECU Remapping: A Complete Guide",
-      summary: "Learn everything you need to know about ECU remapping and performance tuning.",
-      image: "/images/blog/latest1.png",
-    },
-    {
-      title: "Top 5 Performance Modifications for Your Vehicle",
-      summary: "Discover the best modifications to enhance your car's performance.",
-      image: "/images/blog/latest2.png",
-    },
-  ];
+  // Transform blogs for display - combine dynamic blogs with static ones
+  const allBlogPosts = useMemo(() => {
+    const dynamicBlogs = blogsData?.blogs?.map((blog) => ({
+      id: blog.id,
+      title: blog.title,
+      summary: blog.excerpt || "Read more about this topic...",
+      image: blog.featured_image || "/images/blog/latest1.png",
+      slug: blog.slug,
+    })) || [];
+
+    // Combine with static blog posts from constants
+    const staticBlogs = blogPosts.map((post) => ({
+      id: null,
+      title: post.title,
+      summary: post.summary,
+      image: post.image,
+      slug: null,
+    }));
+
+    // Combine dynamic and static, prioritizing dynamic blogs
+    return [...dynamicBlogs, ...staticBlogs];
+  }, [blogsData]);
 
   const allServices = [...services, ...dummyServices];
-  const allTestimonials = [...testimonials, ...dummyTestimonials];
-  const allBlogPosts = [...blogPosts, ...dummyBlogPosts];
+  const allTestimonials = [...testimonials];
+
+  // Stats animation state
+  const [animatedStats, setAnimatedStats] = useState<{ [key: string]: number }>({});
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const productsCarouselRef = useRef<HTMLDivElement>(null);
+  const testimonialsCarouselRef = useRef<HTMLDivElement>(null);
+
+  // Extract numeric values from stats
+  const getNumericValue = (value: string): number => {
+    const num = parseFloat(value.replace(/[^0-9.]/g, ''));
+    return isNaN(num) ? 0 : num;
+  };
+
+  // Get suffix from stat value (+, %, etc.)
+  const getSuffix = (value: string): string => {
+    const match = value.match(/[^0-9.]+$/);
+    return match ? match[0] : '';
+  };
+
+
+  // Animate stats when they come into view
+  useEffect(() => {
+    if (hasAnimated || !statsRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            setHasAnimated(true);
+            
+            // Initialize all stats to 0
+            const initialStats: { [key: string]: number } = {};
+            stats.forEach((stat) => {
+              initialStats[stat.value] = 0;
+            });
+            setAnimatedStats(initialStats);
+
+            // Animate each stat
+            stats.forEach((stat) => {
+              const targetValue = getNumericValue(stat.value);
+              const duration = 2000; // 2 seconds
+              const steps = 60;
+              const increment = targetValue / steps;
+              const stepDuration = duration / steps;
+
+              let currentStep = 0;
+              const timer = setInterval(() => {
+                currentStep++;
+                const currentValue = Math.min(increment * currentStep, targetValue);
+                
+                setAnimatedStats((prev) => ({
+                  ...prev,
+                  [stat.value]: Math.floor(currentValue),
+                }));
+
+                if (currentStep >= steps) {
+                  clearInterval(timer);
+                  // Ensure final value is exact
+                  setAnimatedStats((prev) => ({
+                    ...prev,
+                    [stat.value]: targetValue,
+                  }));
+                }
+              }, stepDuration);
+            });
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(statsRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasAnimated]);
 
   // Services carousel functions
   const totalServicePages = Math.ceil(allServices.length / itemsPerPage);
@@ -121,41 +234,190 @@ export default function HomePage() {
 
   const totalProductPages = Math.max(1, Math.ceil(homeProducts.length / productsPerPage));
   const nextProducts = () => {
+    if (productsCarouselRef.current) {
+      const cardWidth = 300; // Approximate card width + gap
+      const scrollAmount = cardWidth * productsPerPage;
+      productsCarouselRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
     setCurrentProductIndex((prev) => (prev + 1) % totalProductPages);
   };
   const prevProducts = () => {
+    if (productsCarouselRef.current) {
+      const cardWidth = 300; // Approximate card width + gap
+      const scrollAmount = cardWidth * productsPerPage;
+      productsCarouselRef.current.scrollBy({
+        left: -scrollAmount,
+        behavior: 'smooth'
+      });
+    }
     setCurrentProductIndex((prev) => (prev - 1 + totalProductPages) % totalProductPages);
   };
   const getVisibleProducts = () => {
-    const start = currentProductIndex * productsPerPage;
-    return homeProducts.slice(start, start + productsPerPage);
+    return homeProducts;
   };
 
-  // Testimonials carousel functions
-  const totalTestimonialPages = Math.ceil(allTestimonials.length / testimonialsPerPage);
+  // Testimonials carousel functions with smooth scrolling
+  const totalTestimonialPages = Math.max(1, Math.ceil(allTestimonials.length / testimonialsPerPage));
   const nextTestimonials = () => {
+    if (testimonialsCarouselRef.current) {
+      const cardWidth = 340; // Approximate card width + gap
+      const scrollAmount = cardWidth * testimonialsPerPage;
+      testimonialsCarouselRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
     setCurrentTestimonialIndex((prev) => (prev + 1) % totalTestimonialPages);
   };
   const prevTestimonials = () => {
+    if (testimonialsCarouselRef.current) {
+      const cardWidth = 340; // Approximate card width + gap
+      const scrollAmount = cardWidth * testimonialsPerPage;
+      testimonialsCarouselRef.current.scrollBy({
+        left: -scrollAmount,
+        behavior: 'smooth'
+      });
+    }
     setCurrentTestimonialIndex((prev) => (prev - 1 + totalTestimonialPages) % totalTestimonialPages);
   };
   const getVisibleTestimonials = () => {
-    const start = currentTestimonialIndex * testimonialsPerPage;
-    return allTestimonials.slice(start, start + testimonialsPerPage);
+    return allTestimonials;
   };
 
-  // Blog carousel functions
-  const totalBlogPages = Math.ceil(allBlogPosts.length / blogsPerPage);
-  const nextBlogs = () => {
-    setCurrentBlogIndex((prev) => (prev + 1) % totalBlogPages);
-  };
-  const prevBlogs = () => {
-    setCurrentBlogIndex((prev) => (prev - 1 + totalBlogPages) % totalBlogPages);
-  };
-  const getVisibleBlogs = () => {
-    const start = currentBlogIndex * blogsPerPage;
-    return allBlogPosts.slice(start, start + blogsPerPage);
-  };
+  // Auto-scroll testimonials carousel
+  useEffect(() => {
+    if (allTestimonials.length <= testimonialsPerPage) return;
+    
+    const interval = setInterval(() => {
+      setCurrentTestimonialIndex((prev) => {
+        const nextIndex = (prev + 1) % totalTestimonialPages;
+        if (testimonialsCarouselRef.current) {
+          const cardWidth = 340;
+          const scrollAmount = cardWidth * testimonialsPerPage * nextIndex;
+          testimonialsCarouselRef.current.scrollTo({
+            left: scrollAmount,
+            behavior: 'smooth'
+          });
+        }
+        return nextIndex;
+      });
+    }, 5000); // Auto-scroll every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [allTestimonials.length, testimonialsPerPage, totalTestimonialPages]);
+
+  // Get first 4 blogs for display
+  const displayedBlogs = allBlogPosts.slice(0, 4);
+
+  // Load brands on mount
+  useEffect(() => {
+    const fetchBrands = async () => {
+      setBrandsLoading(true);
+      try {
+        const data = await getBrands();
+        setBrands(data);
+      } catch (error) {
+        console.error("Failed to load brands:", error);
+      } finally {
+        setBrandsLoading(false);
+      }
+    };
+    fetchBrands();
+  }, []);
+
+  // Load models when brand is selected
+  useEffect(() => {
+    if (!selectedBrandId) {
+      setModels([]);
+      setSelectedModelId("");
+      return;
+    }
+    const fetchModels = async () => {
+      setModelsLoading(true);
+      try {
+        const data = await getModels(selectedBrandId);
+        setModels(data);
+      } catch (error) {
+        console.error("Failed to load models:", error);
+      } finally {
+        setModelsLoading(false);
+      }
+    };
+    fetchModels();
+    // Reset dependent selections
+    setSelectedModelId("");
+    setSelectedGenerationId("");
+    setSelectedEnginePublicId("");
+    setGenerations([]);
+    setEngines([]);
+  }, [selectedBrandId]);
+
+  // Load generations when model is selected
+  useEffect(() => {
+    if (!selectedModelId) {
+      setGenerations([]);
+      setSelectedGenerationId("");
+      return;
+    }
+    const fetchGenerations = async () => {
+      setGenerationsLoading(true);
+      try {
+        const data = await getGenerations(selectedModelId);
+        setGenerations(data);
+      } catch (error) {
+        console.error("Failed to load generations:", error);
+      } finally {
+        setGenerationsLoading(false);
+      }
+    };
+    fetchGenerations();
+    // Reset dependent selections
+    setSelectedGenerationId("");
+    setSelectedEnginePublicId("");
+    setEngines([]);
+  }, [selectedModelId]);
+
+  // Load engines when generation is selected
+  useEffect(() => {
+    if (!selectedGenerationId) {
+      setEngines([]);
+      setSelectedEnginePublicId("");
+      return;
+    }
+    const fetchEngines = async () => {
+      setEnginesLoading(true);
+      try {
+        const data = await getEngines(selectedGenerationId);
+        setEngines(data);
+      } catch (error) {
+        console.error("Failed to load engines:", error);
+      } finally {
+        setEnginesLoading(false);
+      }
+    };
+    fetchEngines();
+    setSelectedEnginePublicId("");
+  }, [selectedGenerationId]);
+
+  // Prepare options for comboboxes
+  const brandOptions = useMemo(() => 
+    brands.map(b => ({ value: b.id, label: b.name }))
+  , [brands]);
+
+  const modelOptions = useMemo(() => 
+    models.map(m => ({ value: m.id, label: m.name }))
+  , [models]);
+
+  const generationOptions = useMemo(() => 
+    generations.map(g => ({ value: g.id, label: g.name }))
+  , [generations]);
+
+  const engineOptions = useMemo(() => 
+    engines.map(e => ({ value: e.publicid, label: `${e.name}${e.energy ? ` (${e.energy})` : ''}` }))
+  , [engines]);
 
   // VRM handler
   const handleVRMLookup = async () => {
@@ -171,6 +433,8 @@ export default function HomePage() {
     try {
       const data = await resolveVRM(vrmInput.trim(), "msperformance.co.uk");
       setVrmData(data);
+      // Navigate to gains calculator with registration
+      router.push(`/gains-calculator?reg=${encodeURIComponent(vrmInput.trim())}`);
     } catch (error) {
       setVrmError(error instanceof Error ? error.message : "Failed to resolve VRM. Please try again.");
     } finally {
@@ -181,6 +445,20 @@ export default function HomePage() {
   const handleVRMKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleVRMLookup();
+    }
+  };
+
+  // Handle View Gains button
+  const handleViewGains = () => {
+    if (vrmInput.trim()) {
+      // If VRM is entered, navigate with registration
+      router.push(`/gains-calculator?reg=${encodeURIComponent(vrmInput.trim())}`);
+    } else if (selectedEnginePublicId) {
+      // If manual selection is complete, navigate with engine ID
+      router.push(`/gains-calculator?engine=${encodeURIComponent(selectedEnginePublicId)}`);
+    } else {
+      // Just navigate to gains calculator
+      router.push("/gains-calculator");
     }
   };
 
@@ -264,7 +542,7 @@ export default function HomePage() {
               className="absolute inset-0 h-full w-full object-cover"
               priority
             />
-            <div className="absolute inset-0 " />
+            <div className="absolute inset-0 pointer-events-none" />
             <div className="relative grid gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:gap-10 md:px-8 md:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:py-14">
               <div className="space-y-4 animate-slide-left sm:space-y-5 md:space-y-6">
                 <p className="flex items-center gap-2 text-xs font-semibold text-white sm:gap-3 sm:text-sm animate-subtitle">
@@ -360,36 +638,81 @@ export default function HomePage() {
                     </div>
                   )}
 
-                  <p className="mt-3 text-[10px] text-white/70 sm:mt-4 sm:text-xs">or find your vehicle below</p>
+                  <p className="mt-3 text-[10px] text-red-400 sm:mt-4 sm:text-xs">or find your vehicle below</p>
                   <div className="mt-3 space-y-3 sm:mt-4 sm:space-y-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">
                         Make
                       </p>
-                      <select className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-[#7ab6ff] focus:outline-none">
-                        <option className="bg-[#030814] text-white">- Please Select Make -</option>
-                        {vehicleMakes.map((make) => (
-                          <option key={make} className="bg-[#030814] text-white">
-                            {make}
-                          </option>
-                        ))}
-                      </select>
+                      <VehicleCombobox
+                        options={brandOptions}
+                        value={selectedBrandId}
+                        onValueChange={(value) => {
+                          setSelectedBrandId(value);
+                          setSelectedModelId("");
+                          setSelectedGenerationId("");
+                          setSelectedEnginePublicId("");
+                        }}
+                        placeholder="- Please Select Make -"
+                        searchPlaceholder="Search make..."
+                        disabled={brandsLoading}
+                        emptyMessage="No make found."
+                      />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">
-                        Model / Engine
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">
+                        Model
                       </p>
-                      <select className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-[#7ab6ff] focus:outline-none">
-                        <option className="bg-[#030814] text-white">- Please Select Model -</option>
-                        {vehicleModels.map((model) => (
-                          <option key={model} className="bg-[#030814] text-white">
-                            {model}
-                          </option>
-                        ))}
-                      </select>
+                      <VehicleCombobox
+                        options={modelOptions}
+                        value={selectedModelId}
+                        onValueChange={(value) => {
+                          setSelectedModelId(value);
+                          setSelectedGenerationId("");
+                          setSelectedEnginePublicId("");
+                        }}
+                        placeholder="- Please Select Model -"
+                        searchPlaceholder="Search model..."
+                        disabled={!selectedBrandId || modelsLoading}
+                        emptyMessage="No model found."
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">
+                        Fuel
+                      </p>
+                      <VehicleCombobox
+                        options={generationOptions}
+                        value={selectedGenerationId}
+                        onValueChange={(value) => {
+                          setSelectedGenerationId(value);
+                          setSelectedEnginePublicId("");
+                        }}
+                        placeholder="- Please Select Generation -"
+                        searchPlaceholder="Search generation..."
+                        disabled={!selectedModelId || generationsLoading}
+                        emptyMessage="No generation found."
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">
+                        Engine
+                      </p>
+                      <VehicleCombobox
+                        options={engineOptions}
+                        value={selectedEnginePublicId}
+                        onValueChange={setSelectedEnginePublicId}
+                        placeholder="- Please Select Engine -"
+                        searchPlaceholder="Search engine..."
+                        disabled={!selectedGenerationId || enginesLoading}
+                        emptyMessage="No engine found."
+                      />
                     </div>
                   </div>
-                  <button className="mt-6 w-full rounded-[14px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_15px_35px_rgba(29,112,255,0.35)]">
+                  <button 
+                    onClick={handleViewGains}
+                    className="mt-6 w-full rounded-[14px] bg-[#ffd200] px-6 py-3 text-sm font-semibold text-black shadow-[0_15px_35px_rgba(255,210,0,0.35)] hover:bg-[#e6c000] transition-colors animate-button"
+                  >
                     View Gains
                   </button>
                 </div>
@@ -544,14 +867,22 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid gap-6 px-4 pb-6 sm:gap-8 sm:px-6 sm:pb-8 md:grid-cols-2 md:px-8 md:pb-10 lg:grid-cols-4">
-              {stats.map((stat) => (
-                <div key={stat.value} className="space-y-2">
-                  <p className="text-3xl font-black text-[#0c1b33] sm:text-4xl">{stat.value}</p>
-                  <div className="h-px w-10 bg-[#1d70ff] sm:w-12" />
-                  <p className="text-xs text-[#5c6c86] sm:text-sm">{stat.label}</p>
-                </div>
-              ))}
+            <div ref={statsRef} className="grid gap-6 px-4 pb-6 sm:gap-8 sm:px-6 sm:pb-8 md:grid-cols-2 md:px-8 md:pb-10 lg:grid-cols-4">
+              {stats.map((stat) => {
+                const numericValue = hasAnimated 
+                  ? (animatedStats[stat.value] ?? getNumericValue(stat.value))
+                  : 0;
+                const suffix = getSuffix(stat.value);
+                const displayValue = `${Math.floor(numericValue)}${suffix}`;
+                
+                return (
+                  <div key={stat.value} className="space-y-2">
+                    <p className="text-3xl font-black text-[#0c1b33] sm:text-4xl">{displayValue}</p>
+                    <div className="h-px w-10 bg-[#1d70ff] sm:w-12" />
+                    <p className="text-xs text-[#5c6c86] sm:text-sm">{stat.label}</p>
+                  </div>
+                );
+              })}
             </div>
           </section>
 
@@ -585,13 +916,13 @@ export default function HomePage() {
 
             <div className="relative overflow-hidden">
               {productsLoading ? (
-                <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
                   {Array.from({ length: 4 }).map((_, idx) => (
                     <div
                       key={idx}
-                      className="relative flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-[0_10px_40px_rgba(16,53,106,0.05)] sm:gap-4 sm:rounded-[24px] sm:p-5 md:rounded-[28px] md:p-6 animate-pulse"
+                      className="relative flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-[0_10px_40px_rgba(16,53,106,0.05)] sm:gap-4 sm:rounded-[24px] sm:p-5 md:rounded-[28px] md:p-6 animate-pulse flex-shrink-0 w-[280px] sm:w-[300px]"
                     >
-                      <div className="h-48 bg-gray-200 rounded-2xl" />
+                      <div className="h-48 bg-gray-200 rounded-xl aspect-square" />
                       <div className="space-y-2">
                         <div className="h-4 bg-gray-200 rounded w-3/4" />
                         <div className="h-6 bg-gray-200 rounded w-1/2" />
@@ -604,195 +935,256 @@ export default function HomePage() {
                   <p className="text-[#5c6c86]">No products available at the moment.</p>
                 </div>
               ) : (
-                <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+                <div 
+                  ref={productsCarouselRef}
+                  className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+                >
                   {getVisibleProducts().map((product, index) => (
-                    <ProductCard key={product.id} product={product} index={index} />
+                    <div key={product.id} className="flex-shrink-0 w-[280px] sm:w-[300px]">
+                      <ProductCard product={product} index={index} />
+                    </div>
                   ))}
                 </div>
               )}
             </div>
             
             {/* Products Carousel Indicators */}
-            <div className="flex justify-center gap-2 mt-6">
-              {Array.from({ length: totalProductPages }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentProductIndex(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentProductIndex
-                      ? 'w-8 bg-[#1d70ff]'
-                      : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
-                  }`}
-                  aria-label={`Go to page ${index + 1}`}
-                />
-              ))}
-            </div>
+            {homeProducts.length > productsPerPage && (
+              <div className="flex justify-center gap-2 mt-6">
+                {Array.from({ length: totalProductPages }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setCurrentProductIndex(index);
+                      if (productsCarouselRef.current) {
+                        const cardWidth = 300; // Approximate card width + gap
+                        const scrollAmount = cardWidth * productsPerPage * index;
+                        productsCarouselRef.current.scrollTo({
+                          left: scrollAmount,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
+                    className={`h-2 rounded-full transition-all ${
+                      index === currentProductIndex
+                        ? 'w-8 bg-[#1d70ff]'
+                        : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
+                    }`}
+                    aria-label={`Go to page ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </section>
 
-          <section id="testimonials" className="space-y-6 rounded-xl bg-white px-4 py-6 sm:space-y-8 sm:rounded-2xl sm:px-6 sm:py-8 md:rounded-[32px] md:px-8 md:py-10 md:mx-4 lg:mx-8">
+          <section id="testimonials" className="relative space-y-6 bg-[#f5f7fa] px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
+            {/* Left border line */}
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1d70ff]" />
+            
             <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#1d70ff] sm:text-xs">
-                What people say
+                  What People Say
                 </p>
-                <h2 className="mt-1 text-xl font-black text-[#0c1b33] sm:mt-2 sm:text-2xl md:text-3xl">Our testimonials</h2>
+                <h2 className="mt-1 text-xl font-black text-[#0c1b33] sm:mt-2 sm:text-2xl md:text-3xl">Our Testimonials</h2>
               </div>
-              <div className="flex gap-2 sm:gap-3">
+              <div className="flex gap-2">
                 <button 
                   onClick={prevTestimonials}
-                  className="rounded-lg border border-[#d9e0ef] px-3 py-1.5 text-xs text-[#5c6c86] sm:rounded-full sm:px-4 sm:py-2 sm:text-sm animate-button"
+                  className="rounded-lg border border-[#d9e0ef] bg-white p-2.5 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-xl sm:p-3 animate-button"
                   aria-label="Previous testimonials"
-                >
-                  Prev
-                </button>
-                <button 
-                  onClick={nextTestimonials}
-                  className="rounded-lg border border-[#d9e0ef] px-3 py-1.5 text-xs text-[#5c6c86] sm:rounded-full sm:px-4 sm:py-2 sm:text-sm animate-button"
-                  aria-label="Next testimonials"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden">
-              <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
-                {getVisibleTestimonials().map((testimonial, index) => (
-                <div
-                  key={testimonial.name}
-                  className={`flex w-full flex-col gap-3 rounded-xl bg-white p-4 shadow-[0_10px_30px_rgba(0,0,0,0.05)] sm:gap-4 sm:rounded-2xl sm:p-5 md:p-6 card-hover ${
-                    index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : 'animate-card-delay-2'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Image
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      width={50}
-                      height={50}
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
-                    <div>
-                      <p className="font-semibold text-[#0c1b33]">{testimonial.name}</p>
-                      <p className="text-xs text-[#5c6c86]">{testimonial.role}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-1 text-[#ffb200]">
-                    {Array.from({ length: 5 }).map((_, idx) => (
-                      <span key={idx}>★</span>
-                    ))}
-                  </div>
-                  <p className="text-sm text-[#5c6c86]">"{testimonial.quote}"</p>
-                </div>
-              ))}
-              </div>
-            </div>
-            
-            {/* Testimonials Carousel Indicators */}
-            <div className="flex justify-center gap-2 mt-6">
-              {Array.from({ length: totalTestimonialPages }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentTestimonialIndex(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentTestimonialIndex
-                      ? 'w-8 bg-[#1d70ff]'
-                      : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
-                  }`}
-                  aria-label={`Go to page ${index + 1}`}
-                />
-              ))}
-            </div>
-          </section>
-
-          <section id="blog" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
-            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-              <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl">Latest Blogs</h2>
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={prevBlogs}
-                  className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button"
-                  aria-label="Previous blogs"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
                 <button 
-                  onClick={nextBlogs}
-                  className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button"
-                  aria-label="Next blogs"
+                  onClick={nextTestimonials}
+                  className="rounded-lg border border-[#d9e0ef] bg-white p-2.5 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-xl sm:p-3 animate-button"
+                  aria-label="Next testimonials"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <button className="w-full rounded-xl bg-[#1d70ff] px-4 py-2.5 text-xs font-semibold text-white sm:w-auto sm:rounded-[12px] sm:px-6 sm:py-3 sm:text-sm animate-button">
-                  View All
-                </button>
               </div>
             </div>
 
             <div className="relative overflow-hidden">
-              <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-6">
-                {getVisibleBlogs().map((post, index) => (
-                <article
-                  key={index}
-                  className={`flex w-full flex-col gap-3 rounded-2xl bg-white p-4 shadow-[0_10px_40px_rgba(16,53,106,0.05)] sm:gap-4 sm:rounded-[24px] sm:p-5 md:rounded-[28px] md:p-6 card-hover ${
-                    index === 0 ? 'animate-card' : 'animate-card-delay-1'
-                  }`}
-                >
-                  <div className="overflow-hidden rounded-xl sm:rounded-2xl">
-                    <Image
-                      src={post.image}
-                      alt={post.title}
-                      width={360}
-                      height={220}
-                      className="h-40 w-full object-cover sm:h-44 md:h-48 animate-image-hover"
-                    />
-                  </div>
-                  <div className="space-y-2 sm:space-y-3">
-                    <h3 className="text-base font-bold text-[#0c1b33] sm:text-lg">{post.title}</h3>
-                    <p className="text-xs text-[#5c6c86] sm:text-sm">{post.summary}</p>
-                    <div className="mt-auto">
-                      <button
-                        className={`flex h-10 w-10 items-center justify-center rounded-lg transition animate-button sm:h-12 sm:w-12 sm:rounded-[12px] ${
-                          index === 0
-                            ? "bg-[#1d70ff] text-white"
-                            : "border border-[#1d70ff] text-[#1d70ff]"
-                        }`}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                          <path
-                            d="M7 17L17 7M17 7H7M17 7V17"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
+              <div 
+                ref={testimonialsCarouselRef}
+                className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+              >
+                {getVisibleTestimonials().map((testimonial, index) => (
+                  <div
+                    key={`${testimonial.name}-${index}`}
+                    className="flex flex-shrink-0 w-[320px] sm:w-[340px] md:w-[360px] flex-col gap-4 rounded-2xl bg-white p-5 sm:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.08)] card-hover"
+                  >
+                    {/* Header with profile and Google logo */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <Image
+                          src={testimonial.image}
+                          alt={testimonial.name}
+                          width={50}
+                          height={50}
+                          className="h-12 w-12 rounded-full object-cover"
+                        />
+                        <div>
+                          <p className="font-bold text-[#0c1b33]">{testimonial.name}</p>
+                          <p className="text-xs text-[#5c6c86]">{testimonial.date}</p>
+                        </div>
+                      </div>
+                      {testimonial.source === "google" && (
+                        <div className="flex-shrink-0">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                          </svg>
+                        </div>
+                      )}
                     </div>
+                    
+                    {/* Rating stars */}
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, idx) => (
+                        <svg
+                          key={idx}
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill={idx < (testimonial.rating || 5) ? "#FFB200" : "none"}
+                          stroke={idx < (testimonial.rating || 5) ? "#FFB200" : "#E0E0E0"}
+                          strokeWidth="1"
+                          className="flex-shrink-0"
+                        >
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                      ))}
+                    </div>
+                    
+                    {/* Quote */}
+                    <p className="text-sm leading-relaxed text-[#5c6c86]">"{testimonial.quote}"</p>
                   </div>
-                </article>
-              ))}
+                ))}
               </div>
             </div>
             
-            {/* Blog Carousel Indicators */}
-            <div className="flex justify-center gap-2 mt-6">
-              {Array.from({ length: totalBlogPages }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentBlogIndex(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentBlogIndex
-                      ? 'w-8 bg-[#1d70ff]'
-                      : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
-                  }`}
-                  aria-label={`Go to page ${index + 1}`}
-                />
-              ))}
+            {/* Testimonials Carousel Indicators */}
+            {allTestimonials.length > testimonialsPerPage && (
+              <div className="flex justify-center gap-2 mt-6">
+                {Array.from({ length: totalTestimonialPages }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setCurrentTestimonialIndex(index);
+                      if (testimonialsCarouselRef.current) {
+                        const cardWidth = 340; // Approximate card width + gap
+                        const scrollAmount = cardWidth * testimonialsPerPage * index;
+                        testimonialsCarouselRef.current.scrollTo({
+                          left: scrollAmount,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
+                    className={`h-2 rounded-full transition-all ${
+                      index === currentTestimonialIndex
+                        ? 'w-8 bg-[#1d70ff]'
+                        : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
+                    }`}
+                    aria-label={`Go to page ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section id="blog" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
+            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+              <div className="space-y-2">
+                <p className="text-sm text-[#9aa6bd] font-medium">Company Insights</p>
+                <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl">Latest Blogs</h2>
+              </div>
+              <Link 
+                href="/blog"
+                className="rounded-xl bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white hover:bg-[#1a5fdd] transition shadow-sm"
+              >
+                View All
+              </Link>
+            </div>
+
+            <div className="relative overflow-hidden">
+              {blogsLoading && displayedBlogs.length === 0 ? (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="flex w-full gap-4 rounded-2xl bg-white p-4 shadow-sm animate-pulse"
+                    >
+                      <div className="h-32 w-32 flex-shrink-0 rounded-xl bg-gray-200" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-3/4 rounded bg-gray-200" />
+                        <div className="h-3 w-full rounded bg-gray-200" />
+                        <div className="h-3 w-2/3 rounded bg-gray-200" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {displayedBlogs.map((post, index) => {
+                    const blogUrl = post.slug 
+                      ? `/blog/${post.slug}` 
+                      : post.id 
+                        ? `/blog/${post.id}` 
+                        : '#';
+                    return (
+                      <Link
+                        key={post.id || index}
+                        href={blogUrl}
+                        className="flex w-full gap-4 rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl">
+                          <Image
+                            src={post.image}
+                            alt={post.title}
+                            width={128}
+                            height={128}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between space-y-2">
+                          <div>
+                            <h3 className="text-base font-bold text-[#0c1b33] leading-tight line-clamp-2 mb-2">{post.title}</h3>
+                            <p className="text-xs text-[#5c6c86] line-clamp-2">{post.summary}</p>
+                          </div>
+                          <div className="mt-auto">
+                            <div
+                              className={`flex h-10 w-10 items-center justify-center rounded-lg transition ${
+                                index === 0
+                                  ? "bg-[#1d70ff] text-white hover:bg-[#1a5fdd]"
+                                  : "border border-[#1d70ff] text-[#1d70ff] hover:bg-[#1d70ff] hover:text-white"
+                              }`}
+                            >
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path
+                                  d="M7 17L17 7M17 7H7M17 7V17"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </section>
 

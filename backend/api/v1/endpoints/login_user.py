@@ -36,6 +36,17 @@ class LoginUser(PostResource):
             self.response_message = "User with specified credentials does not exists."
             self.response_data = {}
 
+    async def check_email_confirmation(self):
+        """Check if user's email is confirmed."""
+        if not self.user.email_confirmed:
+            self.early_response = True
+            self.status_code = status.HTTP_403_FORBIDDEN
+            self.response_message = "Please confirm your email address before logging in. Check your inbox for the confirmation email."
+            self.response_data = {
+                "email_confirmed": False,
+                "email": self.user.email
+            }
+
     async def generate_access_token(self):
         payload = {
             "user_id": self.user.id,
@@ -61,6 +72,11 @@ class LoginUser(PostResource):
 
         # Verify Password
         await self.verify_password()
+        if self.early_response:
+            return
+
+        # Check email confirmation
+        await self.check_email_confirmation()
         if self.early_response:
             return
 

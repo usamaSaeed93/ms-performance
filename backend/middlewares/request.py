@@ -35,11 +35,28 @@ class RequestPreProcessor(object):
         # Process query_params (safe - doesn't consume body)
         if request.query_params:
             try:
-                data = dict(request.query_params)
+                # Handle repeated query parameters (e.g., category_ids=1&category_ids=2)
+                # QueryParams supports getlist() for repeated parameters
+                data = {}
+                for key in request.query_params.keys():
+                    # Get all values for this key (handles repeated parameters)
+                    values = request.query_params.getlist(key)
+                    if len(values) == 1:
+                        # Single value - keep as is (will be converted by field_validator if needed)
+                        data[key] = values[0]
+                    else:
+                        # Multiple values - keep as list
+                        data[key] = values
                 await process_dict_val_as_json(data)
                 return_dict.update(data)
             except:
-                pass
+                # Fallback to simple dict conversion if getlist doesn't work
+                try:
+                    data = dict(request.query_params)
+                    await process_dict_val_as_json(data)
+                    return_dict.update(data)
+                except:
+                    pass
 
         # Check content type - SKIP body reading for multipart/form-data (file uploads)
         content_type = request.headers.get("content-type", "")

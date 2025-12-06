@@ -7,6 +7,8 @@ from models.product import Product
 from api.base_resource import PostResource
 from crud.schemas import SaleCreate, SaleItemCreate
 from core.tax import TaxCalculator
+from core.email import email_service
+from core.email_queue import email_queue
 from ..schemas.purchase_products import (
     Item,
     PurchaseProductsRequest,
@@ -27,6 +29,25 @@ class PurchaseProducts(PostResource):
         self.failed_purchases = []
         self.successful_purchases = []
         self.products_cache = {}  # Cache products to avoid multiple DB queries
+    
+    async def check_email_confirmation(self):
+        """Check if user's email is confirmed."""
+        user = context.data.get("user")
+        if not user:
+            self.early_response = True
+            self.status_code = status.HTTP_403_FORBIDDEN
+            self.response_message = "Authentication required"
+            self.response_data = {}
+            return
+        
+        # Get user from DB to check email confirmation
+        user_obj = await crud.user.get(self.db, id=user["id"])
+        if not user_obj or not user_obj.email_confirmed:
+            self.early_response = True
+            self.status_code = status.HTTP_403_FORBIDDEN
+            self.response_message = "Please confirm your email address before placing an order."
+            self.response_data = {"email_confirmed": False}
+            return
 
     async def purchase_product(self, item: Item):
         # Important
@@ -166,6 +187,36 @@ class PurchaseProducts(PostResource):
         self.successful_purchases_created = await crud.sale_item.bulk_create(
             self.db, objs_in=sale_items_to_create
         )
+        
+        # Get order items for email
+        self.order_items = []
+        for sale_item in self.successful_purchases_created:
+            product = await crud.product.get(self.db, id=sale_item.product_id)
+            if product:
+                self.order_items.append({
+                    "name": product.name,
+                    "quantity": sale_item.quantity,
+                    "price": float(sale_item.price_per_unit),
+                    "total": float(sale_item.line_total)
+                })
+
+    async def send_order_confirmation_email(self):
+        """Send order confirmation email."""
+        user = context.data.get("user")
+        if user and self.order_items:
+            user_obj = await crud.user.get(self.db, id=user["id"])
+            if user_obj:
+                await email_queue.add_email_task(
+                    email_service.send_order_confirmation_email,
+                    to_email=user_obj.email,
+                    first_name=user_obj.first_name,
+                    order_number=self.sale.order_number or f"ORD-{self.sale.id}",
+                    order_items=self.order_items,
+                    subtotal=float(self.sale.subtotal),
+                    tax=float(self.sale.tax),
+                    shipping_cost=float(self.sale.shipping_cost or 0),
+                    total=float(self.sale.total_amount)
+                )
 
     async def generate_response(self):
         self.status_code = status.HTTP_200_OK
@@ -178,6 +229,10 @@ class PurchaseProducts(PostResource):
 
     async def process_flow(self):
         await self.initialize()
+        await self.check_email_confirmation()
+        if self.early_response:
+            return
         await self.purchase_products()
         await self.create_sales_data()
+        await self.send_order_confirmation_email()
         await self.generate_response()

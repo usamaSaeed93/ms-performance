@@ -87,5 +87,59 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         await db.refresh(db_obj)
         return db_obj
 
+    async def set_email_confirmation_token(
+        self, db: AsyncSession, *, db_obj: User, token: str
+    ) -> User:
+        """Set email confirmation token for a user.
+
+        Args:
+            db (AsyncSession): SQLAlchemy session
+            db_obj (User): The user object
+            token (str): The confirmation token
+
+        Returns:
+            User: The updated user object
+        """
+        from datetime import datetime
+        db_obj.email_confirmation_token = token
+        db_obj.email_confirmation_sent_at = datetime.utcnow()
+        db.add(db_obj)
+        await db.commit()
+        await db.refresh(db_obj)
+        return db_obj
+
+    async def confirm_email(self, db: AsyncSession, *, db_obj: User) -> User:
+        """Confirm a user's email address.
+
+        Args:
+            db (AsyncSession): SQLAlchemy session
+            db_obj (User): The user object
+
+        Returns:
+            User: The updated user object
+        """
+        db_obj.email_confirmed = True
+        db_obj.email_confirmation_token = None
+        db.add(db_obj)
+        await db.commit()
+        await db.refresh(db_obj)
+        return db_obj
+
+    async def get_by_confirmation_token(
+        self, db: AsyncSession, *, token: str
+    ) -> Optional[User]:
+        """Get a user by email confirmation token.
+
+        Args:
+            db (AsyncSession): SQLAlchemy session
+            token (str): The confirmation token
+
+        Returns:
+            Optional[User]: The user object or None
+        """
+        stmt = select(self.model).filter(self.model.email_confirmation_token == token)
+        result = await db.execute(stmt)
+        return result.scalar_one_or_none()
+
 
 user = CRUDUser(User)

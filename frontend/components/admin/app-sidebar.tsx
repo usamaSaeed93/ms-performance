@@ -24,12 +24,14 @@ import {
   ShoppingCart,
   Users,
   BarChart3,
+  FileText,
   LogOut,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Products", href: "/admin/products", icon: Package },
+  { label: "Blog", href: "/admin/blogs", icon: FileText },
   { label: "Categories", href: "/admin/categories", icon: Tag },
   { label: "Discounts", href: "/admin/discounts", icon: Ticket },
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart },

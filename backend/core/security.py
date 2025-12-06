@@ -1,4 +1,5 @@
 import jwt
+import secrets
 from datetime import datetime, timedelta
 from passlib.hash import argon2
 
@@ -27,3 +28,8 @@ def create_jwt_token(payload: dict, typ: str = "access") -> str:
         algorithm=config.JWT_CONFIG.JWT_ALGORITHM,
     )
     return encoded_jwt
+
+
+def generate_email_confirmation_token() -> str:
+    """Generate a secure random token for email confirmation."""
+    return secrets.token_urlsafe(32)

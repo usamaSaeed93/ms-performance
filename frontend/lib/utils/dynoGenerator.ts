@@ -283,12 +283,19 @@ export function estimateEngineParams(
       break;
   }
 
-  // Adjust based on peak HP RPM (if HP peaks very high, torque likely peaks lower)
-  if (peakHPRPM && peakHPRPM > 0) {
-    typicalPeakHPRPM = Math.min(peakHPRPM, estimatedRedline * 0.9);
-    // Torque typically peaks before HP
-    typicalPeakTorqueRPM = Math.max(1500, typicalPeakHPRPM * 0.5);
+  // Adjust based on engine characteristics
+  // For higher HP engines, peak HP typically occurs at higher RPM
+  if (peakHP > 300) {
+    typicalPeakHPRPM = Math.min(estimatedRedline * 0.85, typicalPeakHPRPM * 1.1);
+  } else if (peakHP < 150) {
+    typicalPeakHPRPM = Math.max(estimatedRedline * 0.65, typicalPeakHPRPM * 0.9);
   }
+
+  // Ensure peak HP RPM doesn't exceed redline
+  typicalPeakHPRPM = Math.min(typicalPeakHPRPM, estimatedRedline * 0.9);
+  
+  // Torque typically peaks before HP (usually 40-60% of HP peak RPM)
+  typicalPeakTorqueRPM = Math.max(1500, Math.min(typicalPeakHPRPM * 0.6, estimatedRedline * 0.5));
 
   return {
     peakTorqueRPM: typicalPeakTorqueRPM,

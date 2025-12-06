@@ -6,6 +6,7 @@ import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { navLinks } from "@/lib/constants";
 import { useGetProductQuery, useGetProductImagesQuery } from "@/lib/store/api/productsApi";
+import ProductReviews from "@/components/products/ProductReviews";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -356,10 +357,8 @@ export default function ProductDetailPage() {
                   </div>
                 )}
 
-                {activeTab === "Reviews" && (
-                  <div className="space-y-6">
-                    <p className="text-sm text-[#5c6c86]">No reviews yet. Be the first to review this product!</p>
-                  </div>
+                {activeTab === "Reviews" && product && (
+                  <ProductReviews productId={product.id} productName={product.product_name} />
                 )}
               </div>
             </section>

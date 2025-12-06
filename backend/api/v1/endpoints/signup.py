@@ -3,6 +3,9 @@ from fastapi import status
 import crud
 from api.base_resource import PostResource
 from crud.schemas import User, UserCreate
+from core.security import generate_email_confirmation_token
+from core.email import email_service
+from core.email_queue import email_queue
 
 
 class Signup(PostResource):
@@ -37,9 +40,36 @@ class Signup(PostResource):
                 await session.commit()
                 await session.refresh(created_user)
         
+        # Generate confirmation token and save it
+        confirmation_token = generate_email_confirmation_token()
+        created_user = await crud.user.set_email_confirmation_token(
+            self.db, db_obj=created_user, token=confirmation_token
+        )
+        
+        # Send confirmation email asynchronously via queue
+        try:
+            from core.logger import Logger
+            signup_logger = Logger.get_logger(__file__, "signup")
+            signup_logger.info(f"Adding email confirmation task to queue for {created_user.email}")
+            
+            await email_queue.add_email_task(
+                email_service.send_confirmation_email,
+                to_email=created_user.email,
+                first_name=created_user.first_name,
+                confirmation_token=confirmation_token
+            )
+            signup_logger.info("Email task added to queue successfully")
+        except Exception as e:
+            import traceback
+            from core.logger import Logger
+            signup_logger = Logger.get_logger(__file__, "signup")
+            signup_logger.error(f"Failed to add email task to queue: {str(e)}")
+            signup_logger.error(f"Traceback: {''.join(traceback.format_exc())}")
+            # Don't fail the signup if email queue fails
+        
         self.response_data = created_user.to_dict()
         self.status_code = status.HTTP_201_CREATED
-        self.response_message = "User registered successfully"
+        self.response_message = "User registered successfully. Please check your email to confirm your account."
 
     async def process_flow(self):
         await self.check_user_exists()

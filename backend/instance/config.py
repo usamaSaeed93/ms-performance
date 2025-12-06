@@ -40,6 +40,15 @@ class Environment(BaseSettings):
     APP_ENVIRONMENT: str
 
 
+class EmailConfig(BaseSettings):
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str
+    SMTP_PASSWORD: str
+    SMTP_FROM_EMAIL: str
+    FRONTEND_URL: str = "http://localhost:3000"
+
+
 class Configuration:
     ENVIRONMENT: Environment = Environment()
     APP_ENVIRONMENT: str = ENVIRONMENT.APP_ENVIRONMENT
@@ -47,6 +56,9 @@ class Configuration:
     # DB Configuration
     DEV_DB_CONFIG: DevelopmentDBConfig = DevelopmentDBConfig()
     PROD_DB_CONFIG: ProductionDBConfig = ProductionDBConfig()
+    
+    # Email Configuration
+    EMAIL_CONFIG: EmailConfig = EmailConfig()
 
     # SQLAlchemy Engines
     # Enable echo=True for SQL query logging (controlled by LOG_LEVEL env var)
