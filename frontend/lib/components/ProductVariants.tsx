@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProductVariant } from "@/lib/api/admin";
 import ImageUpload from "./ImageUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ValidatedInput, ValidatedSelect } from "@/lib/components/ValidatedField";
 import {
   Select,
   SelectContent,
@@ -27,11 +28,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 interface ProductVariantsProps {
   variants: ProductVariant[];
   onVariantsChange: (variants: ProductVariant[]) => void;
+  validationErrors?: { [key: string]: string };
+  onFieldTouched?: (field: string) => void;
+  touchedFields?: Set<string>;
 }
 
-export default function ProductVariants({ variants, onVariantsChange }: ProductVariantsProps) {
+export default function ProductVariants({ 
+  variants, 
+  onVariantsChange,
+  validationErrors = {},
+  onFieldTouched,
+  touchedFields = new Set(),
+}: ProductVariantsProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [localTouchedFields, setLocalTouchedFields] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState<Partial<ProductVariant>>({
     sku: "",
     name: "",
@@ -49,7 +60,31 @@ export default function ProductVariants({ variants, onVariantsChange }: ProductV
     is_active: true,
   });
 
+  const validateVariant = (): boolean => {
+    // Validate variant name
+    if (!formData.name || formData.name.trim().length === 0) {
+      return false;
+    }
+    // Validate price
+    const price = typeof formData.price === "string" ? parseFloat(formData.price) : formData.price;
+    if (!price || isNaN(price) || price <= 0) {
+      return false;
+    }
+    // Validate sale price if provided
+    if (formData.sale_price) {
+      const salePrice = typeof formData.sale_price === "string" ? parseFloat(formData.sale_price) : formData.sale_price;
+      if (isNaN(salePrice) || salePrice < 0 || (price && salePrice >= price)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleAddVariant = () => {
+    if (!validateVariant()) {
+      setLocalTouchedFields(new Set(["name", "price", "sale_price"]));
+      return;
+    }
     const newVariant: ProductVariant = {
       id: Date.now(),
       product_id: 0,
@@ -147,43 +182,88 @@ export default function ProductVariants({ variants, onVariantsChange }: ProductV
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="variant-name">Variant Name</Label>
-                <Input
-                  id="variant-name"
-                  value={formData.name || ""}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., Small - Red"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="variant-sku">SKU</Label>
-                <Input
-                  id="variant-sku"
-                  value={formData.sku || ""}
-                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="variant-price">Price</Label>
-                <Input
-                  id="variant-price"
-                  type="number"
-                  step="0.01"
-                  value={formData.price || ""}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="variant-sale-price">Sale Price</Label>
-                <Input
-                  id="variant-sale-price"
-                  type="number"
-                  step="0.01"
-                  value={formData.sale_price || ""}
-                  onChange={(e) => setFormData({ ...formData, sale_price: e.target.value })}
-                />
-              </div>
+              <ValidatedInput
+                id="variant-name"
+                label="Variant Name"
+                value={formData.name || ""}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onBlur={() => {
+                  setLocalTouchedFields((prev) => new Set(prev).add("name"));
+                  onFieldTouched?.("variant_name");
+                }}
+                error={localTouchedFields.has("name") && !formData.name ? "Variant name is required" : undefined}
+                required
+                placeholder="e.g., Small - Red"
+              />
+              <ValidatedInput
+                id="variant-sku"
+                label="SKU"
+                value={formData.sku || ""}
+                onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                onBlur={() => {
+                  setLocalTouchedFields((prev) => new Set(prev).add("sku"));
+                  onFieldTouched?.("variant_sku");
+                }}
+                error={localTouchedFields.has("sku") && formData.sku && !/^[A-Za-z0-9_-]+$/.test(formData.sku) 
+                  ? "SKU must contain only letters, numbers, hyphens, and underscores" 
+                  : undefined}
+                placeholder="SKU code"
+              />
+              <ValidatedInput
+                id="variant-price"
+                label="Price"
+                type="number"
+                step="0.01"
+                value={formData.price || ""}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                onBlur={() => {
+                  setLocalTouchedFields((prev) => new Set(prev).add("price"));
+                  onFieldTouched?.("variant_price");
+                }}
+                error={localTouchedFields.has("price") && (!formData.price || parseFloat(formData.price as string) <= 0)
+                  ? "Price must be greater than 0"
+                  : undefined}
+                required
+                placeholder="0.00"
+              />
+              <ValidatedInput
+                id="variant-sale-price"
+                label="Sale Price"
+                type="number"
+                step="0.01"
+                value={formData.sale_price || ""}
+                onChange={(e) => {
+                  setFormData({ ...formData, sale_price: e.target.value });
+                  if (localTouchedFields.has("sale_price")) {
+                    const salePrice = parseFloat(e.target.value);
+                    const price = parseFloat(formData.price as string);
+                    if (salePrice >= price) {
+                      setLocalTouchedFields((prev) => new Set(prev).add("sale_price"));
+                    }
+                  }
+                }}
+                onBlur={() => {
+                  setLocalTouchedFields((prev) => new Set(prev).add("sale_price"));
+                  onFieldTouched?.("variant_sale_price");
+                  if (formData.sale_price && formData.price) {
+                    const salePrice = parseFloat(formData.sale_price as string);
+                    const price = parseFloat(formData.price as string);
+                    if (salePrice >= price) {
+                      setLocalTouchedFields((prev) => new Set(prev).add("sale_price"));
+                    }
+                  }
+                }}
+                error={localTouchedFields.has("sale_price") && formData.sale_price && formData.price
+                  ? (() => {
+                      const salePrice = parseFloat(formData.sale_price as string);
+                      const price = parseFloat(formData.price as string);
+                      if (isNaN(salePrice) || salePrice < 0) return "Sale price must be 0 or greater";
+                      if (salePrice >= price) return "Sale price must be less than regular price";
+                      return undefined;
+                    })()
+                  : undefined}
+                placeholder="0.00"
+              />
               <div className="space-y-2">
                 <Label htmlFor="variant-quantity">Quantity</Label>
                 <Input

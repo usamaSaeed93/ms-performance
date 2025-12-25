@@ -42,6 +42,8 @@ export interface Product {
   shipping_class?: string | null;
   shipping_required?: boolean;
   shipping_taxable?: boolean;
+  tax_class_id?: number | null;
+  tax_status?: "taxable" | "shipping" | "none";
   image_url: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
@@ -78,6 +80,34 @@ export interface Category {
   category_name: string;
   category_slug: string;
   created_at: string;
+}
+
+export interface TaxClass {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TaxRate {
+  id: number;
+  tax_class_id?: number | null;
+  name: string;
+  country_code: string;
+  state_code?: string | null;
+  postcode?: string | null;
+  city?: string | null;
+  rate: string; // Decimal as string, e.g., "0.2000" for 20%
+  priority: number;
+  compound: boolean;
+  shipping: boolean;
+  order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface User {
@@ -199,6 +229,8 @@ export const adminApi = createApi({
     'Discounts',
     'Sales',
     'LowStock',
+    'TaxClasses',
+    'TaxRates',
   ],
   endpoints: (builder) => ({
     // Auth
@@ -415,6 +447,122 @@ export const adminApi = createApi({
         body: { category_id: categoryId, ...category },
       }),
       invalidatesTags: ['Categories'],
+    }),
+
+    // Tax Classes
+    getTaxClasses: builder.query<
+      { tax_classes: TaxClass[] },
+      { page?: number; per_page?: number; order_by?: string; order?: string; search?: string } | void
+    >({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params && params.page) queryParams.append('page', params.page.toString());
+        if (params && params.per_page) queryParams.append('per_page', params.per_page.toString());
+        if (params && params.order_by) queryParams.append('order_by', params.order_by);
+        if (params && params.order) queryParams.append('order', params.order);
+        if (params && params.search) queryParams.append('search', params.search);
+        
+        return `get_tax_classes${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      },
+      transformResponse: (response: any) => {
+        if (response && typeof response === 'object') {
+          if ('tax_classes' in response && Array.isArray(response.tax_classes)) {
+            return { tax_classes: response.tax_classes };
+          }
+          if (Array.isArray(response)) {
+            return { tax_classes: response };
+          }
+        }
+        console.warn('Unexpected response structure for getTaxClasses:', response);
+        return { tax_classes: [] };
+      },
+      providesTags: ['TaxClasses'],
+    }),
+
+    createTaxClass: builder.mutation<TaxClass, { name: string; slug: string; description?: string; is_active?: boolean }>({
+      query: (taxClass) => ({
+        url: 'create_tax_class',
+        method: 'PUT',
+        body: taxClass,
+      }),
+      invalidatesTags: ['TaxClasses'],
+    }),
+
+    updateTaxClass: builder.mutation<TaxClass, { id: number; name?: string; slug?: string; description?: string; is_active?: boolean }>({
+      query: ({ id, ...taxClass }) => ({
+        url: 'update_tax_class',
+        method: 'PUT',
+        body: { id, ...taxClass },
+      }),
+      invalidatesTags: ['TaxClasses'],
+    }),
+
+    deleteTaxClass: builder.mutation<void, number>({
+      query: (id) => ({
+        url: 'delete_tax_class',
+        method: 'POST',
+        body: { id },
+      }),
+      invalidatesTags: ['TaxClasses'],
+    }),
+
+    // Tax Rates
+    getTaxRates: builder.query<
+      { tax_rates: TaxRate[] },
+      { page?: number; per_page?: number; order_by?: string; order?: string; search?: string; tax_class_id?: number; country_code?: string } | void
+    >({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params && params.page) queryParams.append('page', params.page.toString());
+        if (params && params.per_page) queryParams.append('per_page', params.per_page.toString());
+        if (params && params.order_by) queryParams.append('order_by', params.order_by);
+        if (params && params.order) queryParams.append('order', params.order);
+        if (params && params.search) queryParams.append('search', params.search);
+        if (params && params.tax_class_id) queryParams.append('tax_class_id', params.tax_class_id.toString());
+        if (params && params.country_code) queryParams.append('country_code', params.country_code);
+        
+        return `get_tax_rates${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      },
+      transformResponse: (response: any) => {
+        if (response && typeof response === 'object') {
+          if ('tax_rates' in response && Array.isArray(response.tax_rates)) {
+            return { tax_rates: response.tax_rates };
+          }
+          if (Array.isArray(response)) {
+            return { tax_rates: response };
+          }
+        }
+        console.warn('Unexpected response structure for getTaxRates:', response);
+        return { tax_rates: [] };
+      },
+      providesTags: ['TaxRates'],
+    }),
+
+    createTaxRate: builder.mutation<TaxRate, Partial<TaxRate>>({
+      query: (taxRate) => ({
+        url: 'create_tax_rate',
+        method: 'PUT',
+        body: taxRate,
+      }),
+      invalidatesTags: ['TaxRates'],
+    }),
+
+    updateTaxRate: builder.mutation<TaxRate, { id: number } & Partial<TaxRate>>({
+      query: ({ id, ...taxRate }) => ({
+        url: 'update_tax_rate',
+        method: 'PUT',
+        body: { id, ...taxRate },
+      }),
+      invalidatesTags: ['TaxRates'],
+    }),
+
+    deleteTaxRate: builder.mutation<void, number>({
+      query: (id) => ({
+        url: 'delete_tax_rate',
+        method: 'POST',
+        body: { id },
+      }),
+      invalidatesTags: ['TaxRates'],
     }),
 
     // Users
@@ -663,10 +811,16 @@ export const adminApi = createApi({
             throw fetchError;
           }
           
+          const headersObj: Record<string, string> = {};
+          if (response.headers) {
+            response.headers.forEach((value, key) => {
+              headersObj[key] = value;
+            });
+          }
           console.log('[RTK Query] Response received:', {
             status: response.status,
             statusText: response.statusText,
-            headers: Object.fromEntries(response.headers.entries()),
+            headers: headersObj,
           });
           
           if (!response.ok) {
@@ -774,6 +928,18 @@ export const {
   // Discounts
   useGetDiscountsQuery,
   useCreateDiscountMutation,
+  
+  // Tax Classes
+  useGetTaxClassesQuery,
+  useCreateTaxClassMutation,
+  useUpdateTaxClassMutation,
+  useDeleteTaxClassMutation,
+  
+  // Tax Rates
+  useGetTaxRatesQuery,
+  useCreateTaxRateMutation,
+  useUpdateTaxRateMutation,
+  useDeleteTaxRateMutation,
   
   // Image Upload
   useUploadImageMutation,

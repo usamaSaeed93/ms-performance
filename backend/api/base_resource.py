@@ -35,7 +35,22 @@ class BaseResource(Resource):
 
     async def run_preprocess(self, request: Request):
         if self.request_schema:
-            self.request_data = self.request_schema(**request.state.data)
+            try:
+                self.request_data = self.request_schema(**request.state.data)
+            except Exception as e:
+                # Handle Pydantic validation errors
+                from pydantic import ValidationError
+                if isinstance(e, ValidationError):
+                    self.early_response = True
+                    self.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+                    self.response_message = "Validation error"
+                    self.response_data = {
+                        "errors": e.errors(),
+                        "request_data_received": request.state.data
+                    }
+                    self.logger.warning(f"Validation error in {self.api_name}: {e.errors()}")
+                    return
+                raise
 
     async def run_postprocess(self):
         # Close DB connection

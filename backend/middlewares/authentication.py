@@ -32,16 +32,20 @@ class AuthenticationContext(Plugin):
             return
 
         # Split the bearer token
-        bearer_token = bearer_token.split(" ")[1]
+        try:
+            token = bearer_token.split(" ")[1] if " " in bearer_token else bearer_token
+        except:
+            return
 
         # Verify jwt token
         try:
             jwt_data = jwt.decode(
-                bearer_token,
+                token,
                 key=config.JWT_CONFIG.JWT_SECRET_KEY,
                 algorithms=[config.JWT_CONFIG.JWT_ALGORITHM],
             )
-        except:
+        except Exception as e:
+            # Token is invalid or expired
             return
 
         # Verify expiry

@@ -42,3 +42,12 @@ class ProductReviewInDB(ProductReviewBase):
 class ProductReview(ProductReviewInDB):
     pass
 
+
+
+
+
+
+
+
+
+

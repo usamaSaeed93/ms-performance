@@ -126,6 +126,10 @@ class ProductBase(BaseModel):
     shipping_required: bool = Field(default=True)
     shipping_taxable: bool = Field(default=True)
     
+    # Tax
+    tax_class_id: Optional[int] = Field(None, gt=0)
+    tax_status: str = Field(default="taxable", pattern="^(taxable|shipping|none)$")
+    
     # Images
     image_url: Optional[str] = Field(None, max_length=500)  # Primary image
     
@@ -275,6 +279,8 @@ class ProductUpdate(BaseModel):
     shipping_class: Optional[str] = Field(None, max_length=50)
     shipping_required: Optional[bool] = None
     shipping_taxable: Optional[bool] = None
+    tax_class_id: Optional[int] = Field(None, gt=0)
+    tax_status: Optional[str] = Field(None, pattern="^(taxable|shipping|none)$")
     image_url: Optional[str] = Field(None, max_length=500)
     category_id: Optional[int] = Field(None, gt=0)
     meta_title: Optional[str] = Field(None, max_length=255)

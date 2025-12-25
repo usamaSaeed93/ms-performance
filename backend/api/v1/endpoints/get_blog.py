@@ -49,3 +49,12 @@ class GetBlog(GetResource):
         await self.generate_response()
 
 
+
+
+
+
+
+
+
+
+

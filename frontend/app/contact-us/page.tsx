@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navLinks, brandLogos, footerLinks } from "@/lib/constants";
+import { Navbar } from "@/components/Navbar";
 
 export default function ContactUsPage() {
   const pathname = usePathname();
@@ -11,73 +12,8 @@ export default function ContactUsPage() {
   return (
     <div className="min-h-screen bg-black">
       <div className="pt-8">
-        <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-          {/* Top Bar */}
-          <header className="text-white">
-            <div className="space-y-3 bg-black px-6 py-4 shadow-[0_20px_60px_rgba(1,4,13,0.65)] rounded-t-[20px]">
-              <div className="flex flex-wrap items-center justify-between border-b-2 border-gray-700 pb-2 text-xs text-white/70">
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                      <path
-                        d="M12 2C7.03 2 3 5.58 3 10.01c0 5.39 6.39 11.42 8.76 13.37.13.12.31.19.49.19s.36-.07.49-.19c2.37-1.95 8.76-7.98 8.76-13.37C21 5.58 16.97 2 12 2Zm0 18.21C9.18 18.05 5 13.38 5 10.01 5 6.69 8.13 4 12 4s7 2.69 7 6.01c0 3.37-4.18 8.04-7 10.2Z"
-                        fill="currentColor"
-                      />
-                      <circle cx="12" cy="10" r="3" fill="currentColor" />
-                    </svg>
-                    <span>Unit 16, Bakers Ln, Chelmsford CM2 8LD</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                      <path
-                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 12h16V9.49l-8 5.33-8-5.33V18Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <span>info@msperformance.co.uk</span>
-                  </div>
-                </div>
-                <Link href="/cart" className="flex items-center gap-2 text-white">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M7 6h-2l-1 2v1h2l3.6 7.59c.18.34.52.56.9.56H19v-2h-7.42l-.1-.2L12.55 13H17c.38 0 .72-.21.89-.55L21 6H7Z"
-                      fill="currentColor"
-                    />
-                    <circle cx="9" cy="21" r="1" fill="currentColor" />
-                    <circle cx="17" cy="21" r="1" fill="currentColor" />
-                  </svg>
-                  <span>Shop</span>
-                </Link>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-6">
-                <Link href="/home">
-                  <Image src="/images/logos/ms-logo.png" alt="MS Performance" width={160} height={48} priority />
-                </Link>
-
-                <nav className="flex flex-1 flex-wrap items-center justify-end gap-6 text-sm font-semibold">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.label}
-                      href={link.href}
-                      className={`relative pb-1 transition hover:text-[#1d70ff] ${
-                        pathname === link.href ? "text-[#1d70ff]" : "text-white/80"
-                      }`}
-                    >
-                      {link.label}
-                      {pathname === link.href && (
-                        <span className="absolute -bottom-2 left-0 right-0 mx-auto h-[2px] w-6 rounded-full bg-gradient-to-r from-transparent via-[#1d70ff] to-transparent" />
-                      )}
-                    </Link>
-                  ))}
-                </nav>
-
-                <button className="rounded-[12px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)]">
-                  Become A Dealer
-                </button>
-              </div>
-            </div>
-          </header>
+        <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
+          <Navbar ctaText="Become A Dealer" />
 
           <main>
             {/* Hero Section */}
@@ -236,18 +172,8 @@ export default function ContactUsPage() {
                     </div>
 
                     {/* Contact Details */}
-                    <div
-                      className="opacity-100"
-                      style={{
-                        width: '583px',
-                        height: '65px',
-                        top: '1058px',
-                        left: '893px',
-                        borderRadius: '8px',
-                        position: 'absolute',
-                      }}
-                    >
-                      <div className="grid grid-cols-2 gap-4">
+                    <div className="mt-6 bg-white rounded-[16px] p-6 border border-[#dfe6f2] shadow-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex items-center gap-4">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1d70ff]/10 flex-shrink-0">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
@@ -259,7 +185,7 @@ export default function ContactUsPage() {
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-[#0c1b33]">Requesting A Call:</p>
-                            <p className="text-sm text-[#5c6c86]">(629) 555-0129</p>
+                            <p className="text-sm text-[#5c6c86]">0775 1798827 / 01277 715069</p>
                           </div>
                         </div>
 
@@ -274,7 +200,7 @@ export default function ContactUsPage() {
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-[#0c1b33]">E-mail:</p>
-                            <p className="text-sm text-[#5c6c86]">info@example.com</p>
+                            <p className="text-sm text-[#5c6c86]">info@msperformance.co.uk</p>
                           </div>
                         </div>
                       </div>
@@ -285,7 +211,7 @@ export default function ContactUsPage() {
             </section>
 
             {/* Footer */}
-            <footer className="border-t border-[#dfe6f2] bg-white px-8 py-12 lg:px-12 rounded-b-[20px]">
+            <footer className="border-t border-[#dfe6f2] bg-white px-8 py-12 lg:px-12">
               <div className="mx-auto max-w-7xl">
                 <div className="grid gap-8 lg:grid-cols-4">
                   {/* About MSPerformance */}

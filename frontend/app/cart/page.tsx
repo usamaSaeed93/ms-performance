@@ -4,8 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { navLinks } from "@/lib/constants";
 import { isCustomerAuthenticated } from "@/lib/utils/auth";
+import { Navbar } from "@/components/Navbar";
+import { toast } from "sonner";
+import { getCartItems, saveCartItems, removeFromCart, updateCartItemQuantity } from "@/lib/utils/cart";
 
 // Dummy cart items
 const cartItems = [
@@ -34,7 +36,7 @@ const cartItems = [
 
 export default function CartPage() {
   const router = useRouter();
-  const [items, setItems] = useState(cartItems);
+  const [items, setItems] = useState<typeof cartItems>([]);
   const [promoCode, setPromoCode] = useState("");
   const [isChecking, setIsChecking] = useState(true);
 
@@ -44,8 +46,26 @@ export default function CartPage() {
       router.push("/login?redirect=/cart");
       return;
     }
+
+    // Load cart from localStorage
+    const cartItems = getCartItems();
+    setItems(cartItems);
     setIsChecking(false);
   }, [router]);
+
+  // Save cart to localStorage whenever items change
+  useEffect(() => {
+    if (!isChecking) {
+      if (items.length === 0) {
+        // Clear localStorage if cart is empty
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('cart');
+        }
+      } else {
+        saveCartItems(items);
+      }
+    }
+  }, [items, isChecking]);
 
   if (isChecking) {
     return (
@@ -56,17 +76,22 @@ export default function CartPage() {
   }
 
   const updateQuantity = (id: number, change: number) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
+    setItems((prevItems) => {
+      const updatedItems = prevItems.map((item) =>
         item.id === id
           ? { ...item, quantity: Math.max(1, item.quantity + change) }
           : item
-      )
-    );
+      );
+      // Update localStorage
+      saveCartItems(updatedItems);
+      return updatedItems;
+    });
   };
 
   const removeItem = (id: number) => {
+    removeFromCart(id);
     setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    toast.success("Item removed from cart");
   };
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -80,72 +105,7 @@ export default function CartPage() {
     <div className="min-h-screen bg-black">
       <div className="pt-8">
         <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
-          {/* Header */}
-          <header className="text-white">
-            <div className="space-y-3 bg-black px-6 py-4 shadow-[0_20px_60px_rgba(1,4,13,0.65)]">
-              <div className="flex flex-wrap items-center justify-between border-b-2 border-gray-700 pb-2 text-xs text-white/70">
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                      <path
-                        d="M12 2C7.03 2 3 5.58 3 10.01c0 5.39 6.39 11.42 8.76 13.37.13.12.31.19.49.19s.36-.07.49-.19c2.37-1.95 8.76-7.98 8.76-13.37C21 5.58 16.97 2 12 2Zm0 18.21C9.18 18.05 5 13.38 5 10.01 5 6.69 8.13 4 12 4s7 2.69 7 6.01c0 3.37-4.18 8.04-7 10.2Z"
-                        fill="currentColor"
-                      />
-                      <circle cx="12" cy="10" r="3" fill="currentColor" />
-                    </svg>
-                    <span>Unit 16, Bakers Ln, Chelmsford CM2 8LD</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                      <path
-                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Zm0 2v.51l8 5.33 8-5.33V6H4zm0 12h16V9.49l-8 5.33-8-5.33V18Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <span>info@msperformance.co.uk</span>
-                  </div>
-                </div>
-                <Link href="/cart" className="flex items-center gap-2 text-white">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M7 6h-2l-1 2v1h2l3.6 7.59c.18.34.52.56.9.56H19v-2h-7.42l-.1-.2L12.55 13H17c.38 0 .72-.21.89-.55L21 6H7Z"
-                      fill="currentColor"
-                    />
-                    <circle cx="9" cy="21" r="1" fill="currentColor" />
-                    <circle cx="17" cy="21" r="1" fill="currentColor" />
-                  </svg>
-                  <span>Shop</span>
-                </Link>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-6">
-                <Link href="/">
-                  <Image src="/images/logos/ms-logo.png" alt="MS Performance" width={160} height={48} priority />
-                </Link>
-
-                <nav className="flex flex-1 flex-wrap items-center justify-end gap-6 text-sm font-semibold">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.label}
-                      href={link.href}
-                      className={`relative pb-1 transition hover:text-[#1d70ff] ${
-                        link.href === "/products" ? "text-[#1d70ff]" : "text-white/80"
-                      }`}
-                    >
-                      {link.label}
-                      {link.href === "/products" && (
-                        <span className="absolute -bottom-2 left-0 right-0 mx-auto h-[2px] w-6 rounded-full bg-gradient-to-r from-transparent via-[#1d70ff] to-transparent" />
-                      )}
-                    </Link>
-                  ))}
-                </nav>
-
-                <button className="rounded-[12px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)] animate-button">
-                  Become A Dealer
-                </button>
-              </div>
-            </div>
-          </header>
+          <Navbar ctaText="Become A Dealer" />
 
           <main className="space-y-12">
             {/* Hero Section */}
@@ -268,14 +228,18 @@ export default function CartPage() {
                         <span className="text-[#5c6c86]">Discount (-20%)</span>
                         <span className="font-semibold text-red-500">-£{discount.toFixed(2)}</span>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#5c6c86]">Delivery Fee</span>
-                        <span className="font-semibold text-[#0c1b33]">£{deliveryFee.toFixed(2)}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#5c6c86]">VAT on Delivery (20%)</span>
-                        <span className="font-semibold text-[#0c1b33]">£{deliveryVat.toFixed(2)}</span>
-                      </div>
+                      {items.length > 0 && (
+                        <>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-[#5c6c86]">Delivery Fee</span>
+                            <span className="font-semibold text-[#0c1b33]">£{deliveryFee.toFixed(2)}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-[#5c6c86]">VAT on Delivery (20%)</span>
+                            <span className="font-semibold text-[#0c1b33]">£{deliveryVat.toFixed(2)}</span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     {/* Total */}
@@ -319,7 +283,15 @@ export default function CartPage() {
 
                     {/* Checkout Button */}
                     <button
-                      onClick={() => router.push("/checkout")}
+                      onClick={() => {
+                        // Ensure cart is saved before navigating
+                        if (items.length > 0) {
+                          localStorage.setItem('cart', JSON.stringify(items));
+                          router.push("/checkout");
+                        } else {
+                          toast.error("Your cart is empty");
+                        }
+                      }}
                       className="block w-full rounded-[12px] bg-[#1d70ff] px-6 py-4 text-center text-base font-semibold text-white hover:bg-[#1a5fdd] transition animate-button"
                     >
                       Go to Checkout →

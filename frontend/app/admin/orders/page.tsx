@@ -52,23 +52,72 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState<Partial<Order>>({});
+  
+  // Filters
+  const [filters, setFilters] = useState({
+    order_status: undefined as string | undefined,
+    payment_status: undefined as string | undefined,
+    payment_method: undefined as string | undefined,
+    search: "",
+    start_date: "",
+    end_date: "",
+    user_id: "",
+  });
 
   useEffect(() => {
     fetchOrders();
-  }, [page]);
+  }, [page, filters]);
 
   const fetchOrders = async () => {
     try {
-      const response = await adminApi.getOrders({ page, per_page: 20 });
+      setLoading(true);
+      const params: any = {
+        page,
+        per_page: 10,
+        order_by: "created_at",
+        order: "desc",
+      };
+      
+      if (filters.order_status) params.order_status = filters.order_status;
+      if (filters.payment_status) params.payment_status = filters.payment_status;
+      if (filters.payment_method) params.payment_method = filters.payment_method;
+      if (filters.search) params.search = filters.search;
+      if (filters.start_date) params.start_date = filters.start_date;
+      if (filters.end_date) params.end_date = filters.end_date;
+      if (filters.user_id) params.user_id = parseInt(filters.user_id);
+      
+      const response = await adminApi.getOrders(params);
       setOrders(response.orders || []);
+      setTotal(response.total || 0);
+      setTotalPages(response.total_pages || 1);
     } catch (error) {
       console.error("Failed to fetch orders:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPage(1); // Reset to first page when filter changes
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      order_status: undefined,
+      payment_status: undefined,
+      payment_method: undefined,
+      search: "",
+      start_date: "",
+      end_date: "",
+      user_id: "",
+    });
+    setPage(1);
   };
 
   const handleEdit = (order: Order) => {
@@ -121,6 +170,105 @@ export default function AdminOrdersPage() {
         </p>
       </div>
 
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label>Order Status</Label>
+              <Select
+                value={filters.order_status}
+                onValueChange={(value) => handleFilterChange("order_status", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="shipped">Shipped</SelectItem>
+                  <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Payment Status</Label>
+              <Select
+                value={filters.payment_status}
+                onValueChange={(value) => handleFilterChange("payment_status", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Payment Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                  <SelectItem value="refunded">Refunded</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Payment Method</Label>
+              <Select
+                value={filters.payment_method}
+                onValueChange={(value) => handleFilterChange("payment_method", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Methods" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="stripe">Stripe</SelectItem>
+                  <SelectItem value="paypal">PayPal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Search</Label>
+              <Input
+                placeholder="Order # or Payment ID"
+                value={filters.search}
+                onChange={(e) => handleFilterChange("search", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Start Date</Label>
+              <Input
+                type="date"
+                value={filters.start_date}
+                onChange={(e) => handleFilterChange("start_date", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>End Date</Label>
+              <Input
+                type="date"
+                value={filters.end_date}
+                onChange={(e) => handleFilterChange("end_date", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>User ID</Label>
+              <Input
+                type="number"
+                placeholder="Filter by User ID"
+                value={filters.user_id}
+                onChange={(e) => handleFilterChange("user_id", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2 flex items-end">
+              <Button variant="outline" onClick={clearFilters} className="w-full">
+                Clear Filters
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {loading ? (
         <Card>
           <CardContent className="py-8">
@@ -132,7 +280,7 @@ export default function AdminOrdersPage() {
           <CardHeader>
             <CardTitle>Order List</CardTitle>
             <CardDescription>
-              {orders.length} order{orders.length !== 1 ? "s" : ""} found
+              {total} order{total !== 1 ? "s" : ""} found
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -188,6 +336,33 @@ export default function AdminOrdersPage() {
                 )}
               </TableBody>
             </Table>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                <div className="text-sm text-muted-foreground">
+                  Page {page} of {totalPages} ({total} total orders)
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1 || loading}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages || loading}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

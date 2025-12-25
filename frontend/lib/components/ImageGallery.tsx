@@ -19,9 +19,25 @@ interface ImageGalleryProps {
   images: ImageGalleryItem[];
   onImagesChange: (images: ImageGalleryItem[]) => void;
   folder?: string;
+  validationError?: string;
+  onValidationChange?: (hasError: boolean) => void;
 }
 
-export default function ImageGallery({ images, onImagesChange, folder = "products" }: ImageGalleryProps) {
+interface ImageGalleryProps {
+  images: ImageGalleryItem[];
+  onImagesChange: (images: ImageGalleryItem[]) => void;
+  folder?: string;
+  validationError?: string;
+  onValidationChange?: (hasError: boolean) => void;
+}
+
+export default function ImageGallery({ 
+  images, 
+  onImagesChange, 
+  folder = "products",
+  validationError,
+  onValidationChange,
+}: ImageGalleryProps) {
   // Use ref to track current images state to avoid stale closure issues with multiple uploads
   const imagesRef = useRef<ImageGalleryItem[]>(images);
   
@@ -29,6 +45,12 @@ export default function ImageGallery({ images, onImagesChange, folder = "product
   useEffect(() => {
     imagesRef.current = images;
   }, [images]);
+
+  // Validate images
+  useEffect(() => {
+    const hasError = !!validationError;
+    onValidationChange?.(hasError);
+  }, [validationError, onValidationChange]);
   
   const handleAddImage = (url: string) => {
     // Use ref to get the most current images state, avoiding stale closures
@@ -171,6 +193,9 @@ export default function ImageGallery({ images, onImagesChange, folder = "product
           }}
           multiple={true}
         />
+        {validationError && (
+          <p className="text-sm text-destructive mt-2">{validationError}</p>
+        )}
       </div>
     </div>
   );

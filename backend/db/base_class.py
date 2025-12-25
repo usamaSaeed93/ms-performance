@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 from sqlalchemy.orm import as_declarative, declared_attr
 
@@ -22,6 +23,9 @@ class Base:
             # Convert datetime objects to ISO format strings
             if isinstance(value, datetime):
                 ret[key] = value.isoformat() if value else None
+            # Convert Decimal objects to strings
+            elif isinstance(value, Decimal):
+                ret[key] = str(value) if value is not None else None
             else:
                 ret[key] = value
         return ret

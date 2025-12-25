@@ -47,34 +47,41 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="rounded-[8px] border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-[#0c1b33] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+        className="rounded-[6px] sm:rounded-[8px] border border-gray-300 bg-white px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-[#0c1b33] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors whitespace-nowrap"
       >
-        ← Previous
+        <span className="hidden sm:inline">← Previous</span>
+        <span className="sm:hidden">←</span>
       </button>
       
       {pageNumbers.map((page, idx) => {
         if (page === 'ellipsis') {
           return (
-            <span key={`ellipsis-${idx}`} className="px-2 text-sm text-[#5c6c86]">
+            <span key={`ellipsis-${idx}`} className="px-1.5 sm:px-2 text-xs sm:text-sm text-[#5c6c86] hidden sm:inline">
               ...
             </span>
           );
         }
         
         const pageNum = page as number;
+        // Hide some page numbers on very small screens
+        const isVisibleOnMobile = totalPages <= 5 || 
+          pageNum === 1 || 
+          pageNum === totalPages || 
+          (pageNum >= currentPage - 1 && pageNum <= currentPage + 1);
+        
         return (
           <button
             key={pageNum}
             onClick={() => onPageChange(pageNum)}
-            className={`rounded-[8px] px-4 py-2 text-sm font-semibold transition-colors ${
+            className={`rounded-[6px] sm:rounded-[8px] px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold transition-colors ${
               currentPage === pageNum
                 ? "bg-[#1d70ff] text-white"
                 : "bg-white border border-gray-300 text-[#0c1b33] hover:bg-gray-50"
-            }`}
+            } ${isVisibleOnMobile ? "inline-flex" : "hidden sm:inline-flex"}`}
           >
             {pageNum}
           </button>
@@ -84,9 +91,10 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className="rounded-[8px] border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-[#0c1b33] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+        className="rounded-[6px] sm:rounded-[8px] border border-gray-300 bg-white px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-[#0c1b33] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors whitespace-nowrap"
       >
-        Next →
+        <span className="hidden sm:inline">Next →</span>
+        <span className="sm:hidden">→</span>
       </button>
     </div>
   );

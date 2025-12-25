@@ -31,6 +31,12 @@ class GetProduct(GetResource):
         )
         self.inventories = list(map(lambda x: x.to_dict(), self.inventories))
 
+    async def get_variants(self):
+        self.variants = await crud.product_variant.get_by_product_id(
+            self.db, product_id=self.request_data.product_id, is_active=True
+        )
+        self.variants = list(map(lambda x: x.to_dict(), self.variants))
+
     async def normalize_product_data(self):
         """Normalize product data to ensure all required fields have valid values."""
         product_dict = self.product.to_dict()
@@ -71,6 +77,7 @@ class GetProduct(GetResource):
         self.response_data = {
             **product_dict,
             "inventory": self.inventories,
+            "variants": self.variants,
         }
 
     async def process_flow(self):
@@ -78,4 +85,5 @@ class GetProduct(GetResource):
         if self.early_response:
             return
         await self.get_inventory()
+        await self.get_variants()
         await self.generate_response()

@@ -29,9 +29,16 @@ class RequestPreProcessor(object):
         IMPORTANT: For multipart/form-data (file uploads), we MUST NOT read the body
         or form_data here, as it will consume the stream and prevent FastAPI from
         parsing UploadFile parameters.
+        
+        IMPORTANT: For Stripe webhooks, we need to preserve the raw body bytes
+        for signature verification, so we skip body processing for webhook endpoints.
         """
         return_dict = {}
 
+        # Check if this is a Stripe webhook endpoint - skip body processing
+        # Webhooks need raw body bytes for signature verification
+        is_webhook = "/stripe/webhook" in str(request.url.path)
+        
         # Process query_params (safe - doesn't consume body)
         if request.query_params:
             try:
@@ -58,35 +65,37 @@ class RequestPreProcessor(object):
                 except:
                     pass
 
-        # Check content type - SKIP body reading for multipart/form-data (file uploads)
-        content_type = request.headers.get("content-type", "")
-        is_multipart = "multipart/form-data" in content_type
-        
-        if not is_multipart:
-            # Process body (only for non-multipart requests like JSON)
-            try:
-                body = await request.body()
-                if body:
-                    try:
-                        return_dict.update(json.loads(body))
-                    except:
-                        pass
-            except:
-                pass
+        # Skip body processing for webhook endpoints (they need raw bytes)
+        if not is_webhook:
+            # Check content type - SKIP body reading for multipart/form-data (file uploads)
+            content_type = request.headers.get("content-type", "")
+            is_multipart = "multipart/form-data" in content_type
+            
+            if not is_multipart:
+                # Process body (only for non-multipart requests like JSON)
+                try:
+                    body = await request.body()
+                    if body:
+                        try:
+                            return_dict.update(json.loads(body))
+                        except:
+                            pass
+                except:
+                    pass
 
-        # Process form_data (only for non-multipart - multipart is handled by FastAPI)
-        if not is_multipart:
-            try:
-                form = await request.form()
-                if form:
-                    try:
-                        data = dict(form)
-                        await process_dict_val_as_json(data)
-                        return_dict.update(data)
-                    except:
-                        pass
-            except:
-                pass
+            # Process form_data (only for non-multipart - multipart is handled by FastAPI)
+            if not is_multipart:
+                try:
+                    form = await request.form()
+                    if form:
+                        try:
+                            data = dict(form)
+                            await process_dict_val_as_json(data)
+                            return_dict.update(data)
+                        except:
+                            pass
+                except:
+                    pass
 
         request.state.data = return_dict
 

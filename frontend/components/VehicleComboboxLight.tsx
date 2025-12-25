@@ -73,7 +73,15 @@ export function VehicleComboboxLight({
         align="start"
         className="z-[99999] w-[var(--radix-popover-trigger-width)] p-0 bg-white rounded-md shadow-md"
       >
-        <Command>
+        <Command 
+          shouldFilter={true}
+          filter={(value, search) => {
+            // value is the CommandItem's value prop (which is opt.label)
+            const label = value.toLowerCase();
+            const searchLower = search.toLowerCase();
+            return label.includes(searchLower) ? 1 : 0;
+          }}
+        >
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
             <CommandEmpty>{emptyMessage}</CommandEmpty>
@@ -81,9 +89,10 @@ export function VehicleComboboxLight({
               {options.map((opt) => (
                 <CommandItem
                   key={opt.value}
-                  value={opt.value}
-                  onSelect={(val) => {
-                    onValueChange(val === value ? "" : val);
+                  value={opt.label}
+                  keywords={[opt.label, opt.value]}
+                  onSelect={() => {
+                    onValueChange(opt.value === value ? "" : opt.value);
                     setOpen(false);
                   }}
                   className="cursor-pointer"

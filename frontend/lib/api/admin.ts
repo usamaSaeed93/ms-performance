@@ -236,15 +236,34 @@ export const adminApi = {
     return apiClient.put<User>('update_user', { user_id: userId, ...user });
   },
 
-  async getOrders(params?: { page?: number; per_page?: number; order_by?: string; order?: string }) {
+  async getOrders(params?: { 
+    page?: number; 
+    per_page?: number; 
+    order_by?: string; 
+    order?: string;
+    order_status?: string;
+    payment_status?: string;
+    payment_method?: string;
+    start_date?: string;
+    end_date?: string;
+    search?: string;
+    user_id?: number;
+  }) {
     const query = new URLSearchParams();
     if (params?.page) query.append('page', params.page.toString());
     if (params?.per_page) query.append('per_page', params.per_page.toString());
     if (params?.order_by) query.append('order_by', params.order_by);
     if (params?.order) query.append('order', params.order);
+    if (params?.order_status) query.append('order_status', params.order_status);
+    if (params?.payment_status) query.append('payment_status', params.payment_status);
+    if (params?.payment_method) query.append('payment_method', params.payment_method);
+    if (params?.start_date) query.append('start_date', params.start_date);
+    if (params?.end_date) query.append('end_date', params.end_date);
+    if (params?.search) query.append('search', params.search);
+    if (params?.user_id) query.append('user_id', params.user_id.toString());
     
     const endpoint = `get_orders${query.toString() ? `?${query.toString()}` : ''}`;
-    return apiClient.get<{ orders: any[] }>(endpoint);
+    return apiClient.get<{ orders: any[]; total?: number; page?: number; per_page?: number; total_pages?: number }>(endpoint);
   },
 
   async updateOrder(orderId: number, order: {

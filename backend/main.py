@@ -86,6 +86,10 @@ Add versioned routing information here
 """
 RoutingV1(app).map_urls()
 
+# Add Stripe webhook endpoint (needs to be added directly, not through routing)
+from api.v1.endpoints.stripe_webhook import stripe_webhook
+app.post(f"/{config.API_PREFIX}/v1/stripe/webhook")(stripe_webhook)
+
 
 @app.on_event("shutdown")
 async def shutdown_event():

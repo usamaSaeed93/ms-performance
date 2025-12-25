@@ -29,3 +29,12 @@ class GetBlogsResponse(BaseModel):
     total_pages: int | None = None
 
 
+
+
+
+
+
+
+
+
+

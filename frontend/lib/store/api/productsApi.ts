@@ -1,5 +1,26 @@
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 
+export interface ProductVariant {
+  id: number;
+  product_id: number;
+  sku?: string | null;
+  name?: string | null;
+  price?: string | null;
+  sale_price?: string | null;
+  quantity: number;
+  stock_status: "in_stock" | "out_of_stock" | "on_backorder";
+  manage_stock: boolean;
+  stock_threshold?: number | null;
+  weight?: string | null;
+  length?: string | null;
+  width?: string | null;
+  height?: string | null;
+  image_url?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Product {
   id: number;
   product_name: string;
@@ -12,6 +33,7 @@ export interface Product {
   sale_price?: string | null;
   sale_start_date?: string | null;
   sale_end_date?: string | null;
+  product_type?: "simple" | "variable" | "grouped" | "external";
   sku: string | null;
   quantity: number;
   image_url: string | null;
@@ -19,6 +41,8 @@ export interface Product {
   is_featured?: boolean;
   average_rating?: string | null;
   review_count?: number;
+  weight?: string | null;
+  variants?: ProductVariant[];
   created_at: string;
   updated_at: string;
 }

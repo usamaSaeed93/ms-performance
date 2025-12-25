@@ -27,3 +27,12 @@ class ProductReviewResponse(BaseModel):
 class UpdateProductReviewResponse(BaseModel):
     review: ProductReviewResponse
 
+
+
+
+
+
+
+
+
+

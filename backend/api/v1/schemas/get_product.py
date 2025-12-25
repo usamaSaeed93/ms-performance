@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from crud.schemas import Product, Inventory
+from crud.schemas import Product, Inventory, ProductVariant
 
 
 class GetProductRequest(BaseModel):
@@ -8,3 +8,4 @@ class GetProductRequest(BaseModel):
 
 class GetProductResponse(Product):
     inventory: list[Inventory]
+    variants: list[ProductVariant] = []

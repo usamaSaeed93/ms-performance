@@ -32,3 +32,12 @@ class GetProductReviewsResponse(BaseModel):
     per_page: int
     total_pages: int
 
+
+
+
+
+
+
+
+
+

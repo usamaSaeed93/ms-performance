@@ -10,3 +10,5 @@ from .product_variant import product_variant
 from .product_review import product_review
 from .tax import tax_class, tax_rate
 from .blog import blog
+from .webhook_event import webhook_event
+from .webhook_task import webhook_task

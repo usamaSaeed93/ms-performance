@@ -20,6 +20,7 @@ class Sale(Base):
     order_status = Column(String(20), nullable=False, default="pending", index=True)  # pending, processing, shipped, delivered, cancelled
     payment_status = Column(String(20), nullable=False, default="pending", index=True)  # pending, paid, failed, refunded
     payment_method = Column(String(50), nullable=True)
+    payment_intent_id = Column(String(255), nullable=True, unique=True, index=True)  # Stripe Payment Intent ID
     shipping_address = Column(TEXT, nullable=True)
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow, index=True)
     updated_at = Column(

@@ -26,6 +26,7 @@ import {
   BarChart3,
   FileText,
   LogOut,
+  Receipt,
 } from "lucide-react";
 
 const navItems = [
@@ -34,6 +35,7 @@ const navItems = [
   { label: "Blog", href: "/admin/blogs", icon: FileText },
   { label: "Categories", href: "/admin/categories", icon: Tag },
   { label: "Discounts", href: "/admin/discounts", icon: Ticket },
+  { label: "Tax Settings", href: "/admin/tax", icon: Receipt },
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },

@@ -8,3 +8,12 @@ class DeleteProductReviewRequest(BaseModel):
 class DeleteProductReviewResponse(BaseModel):
     pass
 
+
+
+
+
+
+
+
+
+

@@ -29,3 +29,12 @@ class CreateProductImageResponse(BaseModel):
 
 
 
+
+
+
+
+
+
+
+
+

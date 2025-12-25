@@ -1,0 +1,18 @@
+2025-12-06 17:40:07,883 - core.email - ERROR - Failed to send email to usama69saeed@gmail.com: Error connecting to smtp.gmail.com on port 587: [SSL: WRONG_VERSION_NUMBER] wrong version number (_ssl.c:1010)
+2025-12-06 17:43:02,326 - core.email - ERROR - Failed to send email to usama69saeed@gmail.com: Connection already using TLS
+2025-12-06 17:44:25,177 - core.email - ERROR - Failed to send email to usama69saeed@gmail.com: Connection already using TLS
+2025-12-06 18:07:15,865 - core.email - ERROR - Exception during SMTP operation: Connection already using TLS
+2025-12-06 18:07:16,296 - core.email - ERROR - Failed to send email to usama69saeed@gmail.com: Connection already using TLS
+2025-12-06 18:07:16,297 - core.email - ERROR - Error type: SMTPException
+2025-12-06 18:07:16,303 - core.email - ERROR - Full traceback:
+Traceback (most recent call last):
+  File "/Users/usamasaeed/Desktop/untitled folder/backend/core/email.py", line 103, in send_email
+    await asyncio.wait_for(smtp.starttls(), timeout=10.0)
+  File "/usr/local/Cellar/python@3.12/3.12.12/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 978, in starttls
+    raise SMTPException("Connection already using TLS")
+aiosmtplib.errors.SMTPException: Connection already using TLS
+
+2025-12-06 18:12:05,204 - core.email - WARNING - SMTP send_message returned errors: ({}, '2.0.0 OK  1765026725 98e67ed59e1d1-3494e836badsm7395351a91.2 - gsmtp')

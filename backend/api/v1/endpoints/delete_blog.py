@@ -37,3 +37,12 @@ class DeleteBlog(PostResource):
         await self.generate_response()
 
 
+
+
+
+
+
+
+
+
+

@@ -77,3 +77,12 @@ async def seed_product_images():
 if __name__ == "__main__":
     asyncio.run(seed_product_images())
 
+
+
+
+
+
+
+
+
+

@@ -5,14 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useGetPublishedBlogsQuery } from "@/lib/store/api/blogsApi";
-
-const navLinks = [
-  "Home",
-  "Services",
-  "Gains Calculator",
-  "Blog",
-  "Contact Us",
-];
+import { Navbar } from "@/components/Navbar";
 
 const calculatorFields = [
   "Vehicle Make",
@@ -280,44 +273,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#010101] text-white">
+      <Navbar ctaText="Call us Now" showTopBar={false} />
       <div className="flex flex-col gap-16 pt-8">
-        <header className="flex h-auto min-h-[85px] w-full flex-col items-center gap-4 border-b border-[#1cadee] bg-[#010101] px-4 py-4 md:flex-row md:justify-between lg:gap-6 lg:px-6">
-          <div className="flex w-full items-center justify-between md:w-auto">
-            <Image
-              src="/images/logos/ms-logo.png"
-              alt="MS Performance"
-              width={160}
-              height={48}
-              className="h-8 w-auto md:h-10"
-              priority
-            />
-            <button className="md:hidden" aria-label="Menu">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
-                <path d="M3 12h18M3 6h18M3 18h18" />
-              </svg>
-            </button>
-          </div>
-          <nav className="hidden flex-1 items-center justify-center gap-4 text-sm font-normal leading-none text-white/80 md:flex md:gap-6 lg:text-[15px] [font-family:var(--font-montserrat)]">
-            <span
-              aria-hidden
-              className="hidden h-5 w-[2px] rounded-full bg-[#1cadee] lg:block"
-            />
-            {navLinks.map((link) =>
-              link === "Home" ? (
-                <Link key={link} href="/home" className="hover:text-[#12a7ff]">
-                  {link}
-                </Link>
-              ) : (
-                <span key={link} className="hover:text-[#12a7ff]">
-                  {link}
-                </span>
-              ),
-            )}
-          </nav>
-          <button className="hidden h-[42px] w-[148px] items-center justify-center gap-[10px] rounded-[10px] bg-[#12a7ff] px-[30px] py-[12px] text-sm font-semibold text-black shadow-[0_10px_25px_rgba(18,167,255,0.35)] md:flex animate-button">
-            Call us Now
-          </button>
-        </header>
 
         <section className="relative px-4 md:px-6 lg:px-8">
           <div className="relative h-[400px] w-full overflow-hidden rounded-lg bg-black sm:h-[500px] md:h-[600px] lg:h-[700px]">

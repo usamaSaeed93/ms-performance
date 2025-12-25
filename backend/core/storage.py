@@ -1,6 +1,6 @@
 """
 Flexible storage service for handling file uploads
-Supports AWS S3 (and compatible providers) as well as local filesystem storage.
+Supports Cloudflare R2 and local filesystem storage.
 """
 import logging
 import os
@@ -46,14 +46,28 @@ class StorageInterface(ABC):
         pass
 
 
-class S3Storage(StorageInterface):
-    """AWS S3 storage implementation"""
+class R2Storage(StorageInterface):
+    """Cloudflare R2 storage implementation"""
 
     def __init__(self):
-        self.access_key = os.getenv("AWS_ACCESS_KEY_ID", "")
-        self.secret_key = os.getenv("AWS_SECRET_ACCESS_KEY", "")
-        self.region = os.getenv("AWS_REGION", "us-east-1")
-        self.endpoint_url = os.getenv("AWS_ENDPOINT_URL")  # None for AWS, URL for DigitalOcean
+        self.access_key_id = os.getenv("R2_ACCESS_KEY_ID", "")
+        self.secret_access_key = os.getenv("R2_SECRET_ACCESS_KEY", "")
+        self.account_id = os.getenv("R2_ACCOUNT_ID", "")
+        self.bucket_name = os.getenv("R2_BUCKET_NAME", "")
+        # R2 endpoint URL format: https://<account-id>.r2.cloudflarestorage.com
+        self.endpoint_url = os.getenv("R2_ENDPOINT_URL") or f"https://{self.account_id}.r2.cloudflarestorage.com"
+        # Public URL for accessing files (custom domain or R2 public URL)
+        # If using custom domain, set this to your custom domain (e.g., https://cdn.example.com)
+        # If using R2 public bucket, this will be auto-generated from endpoint_url
+        self.public_url = os.getenv("R2_PUBLIC_URL")
+        
+        if not self.access_key_id or not self.secret_access_key:
+            raise ValueError("R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY must be set")
+        if not self.account_id:
+            raise ValueError("R2_ACCOUNT_ID must be set")
+        if not self.bucket_name:
+            raise ValueError("R2_BUCKET_NAME must be set")
+        
         # Lower the timeout so a misconfigured or firewalled endpoint fails fast
         self._client_timeout = Config(
             signature_version="s3v4",
@@ -61,59 +75,78 @@ class S3Storage(StorageInterface):
             read_timeout=15,
             retries={"max_attempts": 2},
         )
-        self.s3_client = boto3.client(
+        self.r2_client = boto3.client(
             "s3",
-            aws_access_key_id=self.access_key,
-            aws_secret_access_key=self.secret_key,
-            region_name=self.region,
+            aws_access_key_id=self.access_key_id,
+            aws_secret_access_key=self.secret_access_key,
             endpoint_url=self.endpoint_url,
+            region_name="auto",  # R2 uses "auto" as region
             config=self._client_timeout,
         )
 
     async def upload_file(
         self, file_obj: BinaryIO, bucket_name: str, object_name: str, content_type: Optional[str] = None
     ) -> str:
-        """Upload file to S3/Spaces"""
+        """Upload file to Cloudflare R2"""
         try:
+            # Use the configured bucket name, ignore the parameter for consistency
+            bucket = self.bucket_name
+            
             # Get file size for logging
             file_obj.seek(0, 2)  # Seek to end
             file_size = file_obj.tell()
             file_obj.seek(0)  # Reset to beginning
             
-            logger.debug(f"Uploading file to S3 - object_name: {object_name}, size: {file_size} bytes, bucket: {bucket_name}, content_type: {content_type}")
+            logger.debug(f"Uploading file to R2 - object_name: {object_name}, size: {file_size} bytes, bucket: {bucket}, content_type: {content_type}")
             
             extra_args = {}
             if content_type:
                 extra_args["ContentType"] = content_type
             
-            self.s3_client.upload_fileobj(
+            self.r2_client.upload_fileobj(
                 file_obj,
-                bucket_name,
+                bucket,
                 object_name,
                 ExtraArgs=extra_args,
             )
             
-            # Return public URL
-            if self.endpoint_url:
-                # DigitalOcean Spaces
-                file_url = f"{self.endpoint_url}/{bucket_name}/{object_name}"
+            # Return public URL or presigned URL
+            if self.public_url:
+                # Custom domain or public URL configured
+                # Remove trailing slash and ensure object_name doesn't start with /
+                base_url = self.public_url.rstrip("/")
+                object_path = object_name.lstrip("/")
+                file_url = f"{base_url}/{object_path}"
             else:
-                # AWS S3
-                file_url = f"https://{bucket_name}.s3.{self.region}.amazonaws.com/{object_name}"
+                # Generate presigned URL for private buckets
+                # Presigned URLs are valid for 7 days (604800 seconds)
+                # This ensures images are accessible even if bucket is not public
+                try:
+                    file_url = self.r2_client.generate_presigned_url(
+                        "get_object",
+                        Params={"Bucket": bucket, "Key": object_name},
+                        ExpiresIn=604800,  # 7 days
+                    )
+                    logger.debug(f"Generated presigned URL for R2 object: {object_name}")
+                except Exception as e:
+                    logger.warning(f"Failed to generate presigned URL, falling back to direct URL: {str(e)}")
+                    # Fallback to direct URL (will only work if bucket is public)
+                    file_url = f"{self.endpoint_url}/{bucket}/{object_name}"
             
-            logger.info(f"Successfully uploaded file to S3: {file_url} (size: {file_size} bytes)")
+            logger.info(f"Successfully uploaded file to R2: {file_url} (size: {file_size} bytes)")
             return file_url
         except ClientError as e:
-            logger.exception(f"Failed to upload file to S3 - object_name: {object_name}, bucket: {bucket_name}, error: {str(e)}")
+            logger.exception(f"Failed to upload file to R2 - object_name: {object_name}, bucket: {bucket}, error: {str(e)}")
             raise Exception(f"Failed to upload file: {str(e)}")
         except Exception as e:
-            logger.exception(f"Unexpected error during S3 upload - object_name: {object_name}, bucket: {bucket_name}, error: {str(e)}")
+            logger.exception(f"Unexpected error during R2 upload - object_name: {object_name}, bucket: {bucket}, error: {str(e)}")
             raise
 
     async def delete_file(self, bucket_name: str, object_name: str) -> bool:
-        """Delete file from S3/Spaces"""
+        """Delete file from R2"""
         try:
-            self.s3_client.delete_object(Bucket=bucket_name, Key=object_name)
+            bucket = self.bucket_name
+            self.r2_client.delete_object(Bucket=bucket, Key=object_name)
             return True
         except ClientError as e:
             raise Exception(f"Failed to delete file: {str(e)}")
@@ -121,11 +154,12 @@ class S3Storage(StorageInterface):
     async def get_presigned_url(
         self, bucket_name: str, object_name: str, expiration: int = 3600
     ) -> str:
-        """Generate presigned URL"""
+        """Generate presigned URL for R2"""
         try:
-            url = self.s3_client.generate_presigned_url(
+            bucket = self.bucket_name
+            url = self.r2_client.generate_presigned_url(
                 "get_object",
-                Params={"Bucket": bucket_name, "Key": object_name},
+                Params={"Bucket": bucket, "Key": object_name},
                 ExpiresIn=expiration,
             )
             return url
@@ -133,9 +167,10 @@ class S3Storage(StorageInterface):
             raise Exception(f"Failed to generate presigned URL: {str(e)}")
 
     async def file_exists(self, bucket_name: str, object_name: str) -> bool:
-        """Check if file exists"""
+        """Check if file exists in R2"""
         try:
-            self.s3_client.head_object(Bucket=bucket_name, Key=object_name)
+            bucket = self.bucket_name
+            self.r2_client.head_object(Bucket=bucket, Key=object_name)
             return True
         except ClientError:
             return False
@@ -217,12 +252,12 @@ class StorageService:
                 "STORAGE_TYPE", getattr(config, "STORAGE_TYPE", "local")
             ).lower()
 
-            if storage_type == "s3":
-                cls._instance = S3Storage()
+            if storage_type == "r2":
+                cls._instance = R2Storage()
             elif storage_type == "local":
                 cls._instance = LocalStorage()
             else:
-                raise ValueError(f"Unsupported storage type: {storage_type}")
+                raise ValueError(f"Unsupported storage type: {storage_type}. Use 'r2' or 'local'")
 
         return cls._instance
 

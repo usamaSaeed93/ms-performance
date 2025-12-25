@@ -37,3 +37,12 @@ class DeleteProductReview(DeleteResource):
         await self.delete_review()
         await self.generate_response()
 
+
+
+
+
+
+
+
+
+

@@ -15,3 +15,5 @@ from models.product_review import ProductReview
 from models.product_category_relation import ProductCategoryRelation
 from models.tax import TaxClass, TaxRate
 from models.blog import Blog
+from models.webhook_event import WebhookEvent
+from models.webhook_task import WebhookTask

@@ -132,7 +132,52 @@ class GetSalesData(GetResource):
     async def generate_response(self):
         self.status_code = status.HTTP_200_OK
         self.response_message = "Sales and Revenue data retrieved successfully"
-        self.response_data = self.buckets
+        
+        # Transform buckets to frontend-friendly format
+        if self.request_data.buckets:
+            bucketed_sales = []
+            for (start_time, end_time), bucket_data in self.buckets.items():
+                # Format period based on bucket type
+                if self.request_data.buckets == "daily":
+                    period = start_time.strftime("%Y-%m-%d")
+                elif self.request_data.buckets == "weekly":
+                    period = f"{start_time.strftime('%Y-%m-%d')} to {end_time.strftime('%Y-%m-%d')}"
+                elif self.request_data.buckets == "monthly":
+                    period = start_time.strftime("%Y-%m")
+                elif self.request_data.buckets == "yearly":
+                    period = start_time.strftime("%Y")
+                else:
+                    period = start_time.strftime("%Y-%m-%d")
+                
+                bucketed_sales.append({
+                    "period": period,
+                    "revenue": float(bucket_data["total_revenue"]),
+                    "count": len(bucket_data["sales"]) if self.request_data.include_sales_items else 0,
+                    "start_time": start_time.isoformat(),
+                    "end_time": end_time.isoformat(),
+                })
+            
+            # Sort by start_time
+            bucketed_sales.sort(key=lambda x: x["start_time"])
+            
+            # Calculate total revenue
+            total_revenue = sum(b["revenue"] for b in bucketed_sales)
+            
+            self.response_data = {
+                "bucketed_sales": bucketed_sales,
+                "total_revenue": float(total_revenue),
+                "sales": [sale for bucket_data in self.buckets.values() for sale in bucket_data.get("sales", [])] if self.request_data.include_sales_items else [],
+            }
+        else:
+            # No buckets - return metrics format
+            self.response_data = {
+                "total_revenue": float(self.buckets["total_revenue"]),
+                "sales": self.buckets["sales"] if self.request_data.include_sales_items else [],
+                "revenue_by_categories": {f"{k[1]} (ID: {k[0]})": float(v) for k, v in self.buckets["revenue_by_categories"].items()},
+                "revenue_by_products": {f"{k[1]} (ID: {k[0]})": float(v) for k, v in self.buckets["revenue_by_products"].items()},
+                "quantity_by_categories": {f"{k[1]} (ID: {k[0]})": int(v) for k, v in self.buckets["quantity_by_categories"].items()},
+                "quantity_by_products": {f"{k[1]} (ID: {k[0]})": int(v) for k, v in self.buckets["quantity_by_products"].items()},
+            }
 
     async def process_flow(self):
         await self.get_sales_data()

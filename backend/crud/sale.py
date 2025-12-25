@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Optional
 from datetime import datetime
 
 from sqlalchemy import select
@@ -13,6 +13,16 @@ from crud.schemas import SaleCreate, SaleUpdate
 
 
 class CRUDSale(CRUDBase[Sale, SaleCreate, SaleUpdate]):
+    async def get_by_payment_intent_id(
+        self, db: AsyncSession, *, payment_intent_id: str
+    ) -> Optional[Sale]:
+        """Get sale by Stripe payment intent ID for idempotency checks."""
+        stmt = select(self.model).filter(
+            self.model.payment_intent_id == payment_intent_id
+        )
+        result = await db.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def get_sales_data(
         self,
         db: AsyncSession,

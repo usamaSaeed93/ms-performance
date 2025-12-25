@@ -3,14 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { navLinks, products } from "@/lib/constants";
+import { addToCart } from "@/lib/utils/cart";
+import { toast } from "sonner";
 
 // Use first product as dummy data
 const dummyProduct = products[0];
 
 export default function ProductDetailPage() {
+  const router = useRouter();
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState("Description");
+  const [quantity, setQuantity] = useState(1);
 
   // Generate thumbnail images (using the same image for now, but can be different)
   const productImages = [
@@ -269,15 +274,66 @@ export default function ProductDetailPage() {
                     </div>
                   </div>
 
+                  {/* Quantity Selector */}
+                  <div className="flex items-center gap-4 mb-3">
+                    <label className="text-sm font-semibold text-[#0c1b33]">Quantity:</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <path d="M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                      <span className="text-base font-semibold text-[#0c1b33] min-w-[2rem] text-center">
+                        {quantity}
+                      </span>
+                      <button
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Action Buttons */}
                   <div className="flex flex-col gap-3">
-                    <Link
-                      href="/cart"
+                    <button
+                      onClick={() => {
+                        // Extract numeric price from string like "£770.00"
+                        const priceValue = parseFloat(dummyProduct.price.replace(/[£,]/g, ''));
+                        addToCart({
+                          id: dummyProduct.id,
+                          name: dummyProduct.title,
+                          price: priceValue,
+                          quantity: quantity,
+                          image: dummyProduct.image,
+                        });
+                        toast.success("Item added to cart!");
+                      }}
                       className="block rounded-[12px] bg-[#1d70ff] px-6 py-4 text-center text-base font-semibold text-white hover:bg-[#1a5fdd] transition"
                     >
                       Add To Cart
-                    </Link>
-                    <button className="rounded-[12px] border-2 border-[#1d70ff] bg-white px-6 py-4 text-base font-semibold text-[#1d70ff] hover:bg-[#1d70ff]/5 transition">
+                    </button>
+                    <button
+                      onClick={() => {
+                        // Extract numeric price from string like "£770.00"
+                        const priceValue = parseFloat(dummyProduct.price.replace(/[£,]/g, ''));
+                        addToCart({
+                          id: dummyProduct.id,
+                          name: dummyProduct.title,
+                          price: priceValue,
+                          quantity: quantity,
+                          image: dummyProduct.image,
+                        });
+                        router.push("/checkout");
+                      }}
+                      className="rounded-[12px] border-2 border-[#1d70ff] bg-white px-6 py-4 text-base font-semibold text-[#1d70ff] hover:bg-[#1d70ff]/5 transition"
+                    >
                       Checkout Now
                     </button>
                     <Link href="#" className="text-sm text-[#1d70ff] hover:underline text-center">

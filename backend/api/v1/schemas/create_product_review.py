@@ -31,3 +31,12 @@ class ProductReviewResponse(BaseModel):
 class CreateProductReviewResponse(BaseModel):
     review: ProductReviewResponse
 
+
+
+
+
+
+
+
+
+

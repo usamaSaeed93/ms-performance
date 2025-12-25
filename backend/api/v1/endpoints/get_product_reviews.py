@@ -75,3 +75,12 @@ class GetProductReviews(GetResource):
         await self.get_reviews()
         await self.generate_response()
 
+
+
+
+
+
+
+
+
+

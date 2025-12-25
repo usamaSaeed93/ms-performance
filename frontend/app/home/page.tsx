@@ -32,6 +32,7 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { useGetPublishedBlogsQuery } from "@/lib/store/api/blogsApi";
 import { useRouter } from "next/navigation";
 import { VehicleCombobox } from "@/components/VehicleCombobox";
+import { Navbar } from "@/components/Navbar";
 
 export default function HomePage() {
   const router = useRouter();
@@ -464,74 +465,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="pt-8">
-          <header className="text-white">
-            <div className="space-y-3 bg-black px-6 py-4 shadow-[0_20px_60px_rgba(1,4,13,0.65)]">
-              <div className="flex flex-wrap items-center justify-between border-b-2 border-gray-700 pb-2 text-xs text-white/70">
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                    <path
-                      d="M12 2C7.03 2 3 5.58 3 10.01c0 5.39 6.39 11.42 8.76 13.37.13.12.31.19.49.19s.36-.07.49-.19c2.37-1.95 8.76-7.98 8.76-13.37C21 5.58 16.97 2 12 2Zm0 18.21C9.18 18.05 5 13.38 5 10.01 5 6.69 8.13 4 12 4s7 2.69 7 6.01c0 3.37-4.18 8.04-7 10.2Z"
-                      fill="currentColor"
-                    />
-                    <circle cx="12" cy="10" r="3" fill="currentColor" />
-                  </svg>
-                  <span>Unit 16, Bakers Ln, Chelmsford CM2 8LD</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                    <path
-                      d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 12h16V9.49l-8 5.33-8-5.33V18Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  <span>info@msperformance.co.uk</span>
-                </div>
-              </div>
-              <Link href="/cart" className="flex items-center gap-2 text-white">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M7 6h-2l-1 2v1h2l3.6 7.59c.18.34.52.56.9.56H19v-2h-7.42l-.1-.2L12.55 13H17c.38 0 .72-.21.89-.55L21 6H7Z"
-                    fill="currentColor"
-                  />
-                  <circle cx="9" cy="21" r="1" fill="currentColor" />
-                  <circle cx="17" cy="21" r="1" fill="currentColor" />
-                </svg>
-                <span>Shop</span>
-              </Link>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-6">
-              <Link href="/">
-                <Image src="/images/logos/ms-logo.png" alt="MS Performance" width={160} height={48} priority />
-              </Link>
-
-              <nav className="flex flex-1 flex-wrap items-center justify-end gap-6 text-sm font-semibold">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className={`relative pb-1 transition hover:text-[#1d70ff] ${
-                      link.href === "/home" ? "text-[#1d70ff]" : "text-white/80"
-                    }`}
-                  >
-                    {link.label}
-                    {link.href === "/home" && (
-                      <span className="absolute -bottom-2 left-0 right-0 mx-auto h-[2px] w-6 rounded-full bg-gradient-to-r from-transparent via-[#1d70ff] to-transparent" />
-                    )}
-                  </Link>
-                ))}
-              </nav>
-
-              <button className="rounded-[12px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)] animate-button">
-                Become A Dealer
-              </button>
-            </div>
-          </div>
-        </header>
-
-        <main className="mt-10 space-y-20">
+      <Navbar ctaText="Become A Dealer" />
+      <main className=" space-y-20">
           <div className="bg-white">
           <section className="relative overflow-hidden bg-[#030814] text-white">
             <Image
@@ -542,7 +477,7 @@ export default function HomePage() {
               className="absolute inset-0 h-full w-full object-cover"
               priority
             />
-            <div className="absolute inset-0 pointer-events-none" />
+            <div className="absolute inset-0 bg-black/20 pointer-events-none" />
             <div className="relative grid gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:gap-10 md:px-8 md:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:py-14">
               <div className="space-y-4 animate-slide-left sm:space-y-5 md:space-y-6">
                 <p className="flex items-center gap-2 text-xs font-semibold text-white sm:gap-3 sm:text-sm animate-subtitle">
@@ -554,7 +489,7 @@ export default function HomePage() {
                 </h1>
               </div>
               <div className="flex justify-center sm:justify-end animate-slide-right">
-                <div className="w-full max-w-[400px] rounded-xl backdrop-blur-[12px] p-4 text-white shadow-[0_30px_70px_rgba(2,6,14,0.7)] sm:rounded-2xl sm:p-6 md:rounded-[15px] md:p-8 animate-card" style={{ background: '#01010166' }}>
+                <div className="w-full max-w-[400px] rounded-xl backdrop-blur-[12px] p-4 text-white shadow-[0_30px_70px_rgba(2,6,14,0.7)] sm:rounded-2xl sm:p-6 md:rounded-[15px] md:p-8 animate-card" style={{ background: 'rgba(0, 0, 0, 0.4)' }}>
                   <p className="text-base font-semibold sm:text-lg">Select Your Vehicle</p>
                   <div className="mt-4 space-y-2 sm:mt-6">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/60 sm:text-xs">
@@ -887,12 +822,12 @@ export default function HomePage() {
           </section>
 
           <section id="products" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:space-y-10 md:px-8 md:py-10">
-            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-              <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl">Our Products</h2>
-              <div className="flex items-center gap-3">
+            <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
+              <h2 className="text-xl font-black text-[#0c1b33] sm:text-2xl md:text-3xl lg:text-4xl truncate min-w-0 flex-1">Our Products</h2>
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 <button 
                   onClick={prevProducts}
-                  className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button"
+                  className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button flex-shrink-0"
                   aria-label="Previous products"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -901,14 +836,14 @@ export default function HomePage() {
                 </button>
                 <button 
                   onClick={nextProducts}
-                  className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button"
+                  className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button flex-shrink-0"
                   aria-label="Next products"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <Link href="/products" className="w-full rounded-xl bg-[#1d70ff] px-4 py-2.5 text-xs font-semibold text-white sm:w-auto sm:rounded-[12px] sm:px-6 sm:py-3 sm:text-sm animate-button text-center">
+                <Link href="/products" className="rounded-xl bg-[#1d70ff] px-3 py-2 text-[10px] font-semibold text-white sm:rounded-[12px] sm:px-4 sm:py-2.5 sm:text-xs md:px-6 md:py-3 md:text-sm animate-button text-center whitespace-nowrap flex-shrink-0">
                   View All
                 </Link>
               </div>
@@ -981,17 +916,17 @@ export default function HomePage() {
             {/* Left border line */}
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1d70ff]" />
             
-            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-              <div>
+            <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
+              <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#1d70ff] sm:text-xs">
                   What People Say
                 </p>
-                <h2 className="mt-1 text-xl font-black text-[#0c1b33] sm:mt-2 sm:text-2xl md:text-3xl">Our Testimonials</h2>
+                <h2 className="mt-1 text-lg font-black text-[#0c1b33] sm:mt-2 sm:text-xl md:text-2xl lg:text-3xl truncate">Our Testimonials</h2>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button 
                   onClick={prevTestimonials}
-                  className="rounded-lg border border-[#d9e0ef] bg-white p-2.5 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-xl sm:p-3 animate-button"
+                  className="rounded-lg border border-[#d9e0ef] bg-white p-2.5 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-xl sm:p-3 animate-button flex-shrink-0"
                   aria-label="Previous testimonials"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -1000,7 +935,7 @@ export default function HomePage() {
                 </button>
                 <button 
                   onClick={nextTestimonials}
-                  className="rounded-lg border border-[#d9e0ef] bg-white p-2.5 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-xl sm:p-3 animate-button"
+                  className="rounded-lg border border-[#d9e0ef] bg-white p-2.5 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-xl sm:p-3 animate-button flex-shrink-0"
                   aria-label="Next testimonials"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -1102,14 +1037,14 @@ export default function HomePage() {
           </section>
 
           <section id="blog" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
-            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-              <div className="space-y-2">
-                <p className="text-sm text-[#9aa6bd] font-medium">Company Insights</p>
-                <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl">Latest Blogs</h2>
+            <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
+              <div className="space-y-2 min-w-0 flex-1">
+                <p className="text-xs sm:text-sm text-[#9aa6bd] font-medium">Company Insights</p>
+                <h2 className="text-xl font-black text-[#0c1b33] sm:text-2xl md:text-3xl lg:text-4xl truncate">Latest Blogs</h2>
               </div>
               <Link 
                 href="/blog"
-                className="rounded-xl bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white hover:bg-[#1a5fdd] transition shadow-sm"
+                className="rounded-xl bg-[#1d70ff] px-3 py-2 text-[10px] font-semibold text-white hover:bg-[#1a5fdd] transition shadow-sm sm:px-4 sm:py-2.5 sm:text-xs md:px-6 md:py-3 md:text-sm whitespace-nowrap flex-shrink-0"
               >
                 View All
               </Link>
@@ -1322,7 +1257,6 @@ export default function HomePage() {
           </footer>
           </div>
         </main>
-      </div>
     </div>
   );
 }

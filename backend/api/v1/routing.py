@@ -17,6 +17,7 @@ from .endpoints.get_users import GetUsers
 from .endpoints.update_product import UpdateProduct
 from .endpoints.delete_product import DeleteProduct
 from .endpoints.get_orders import GetOrders
+from .endpoints.get_order import GetOrder
 from .endpoints.update_order import UpdateOrder
 from .endpoints.update_category import UpdateCategory
 from .endpoints.update_user import UpdateUser
@@ -36,6 +37,17 @@ from .endpoints.get_blog import GetBlog
 from .endpoints.get_blogs import GetBlogs
 from .endpoints.get_published_blogs import GetPublishedBlogs
 from .endpoints.delete_blog import DeleteBlog
+from .endpoints.get_tax_classes import GetTaxClasses
+from .endpoints.create_tax_class import CreateTaxClass
+from .endpoints.update_tax_class import UpdateTaxClass
+from .endpoints.delete_tax_class import DeleteTaxClass
+from .endpoints.get_tax_rates import GetTaxRates
+from .endpoints.create_tax_rate import CreateTaxRate
+from .endpoints.update_tax_rate import UpdateTaxRate
+from .endpoints.delete_tax_rate import DeleteTaxRate
+from .endpoints.create_payment_intent import CreatePaymentIntent
+from .endpoints.check_order_status import CheckOrderStatus
+from .endpoints.check_webhook_status import CheckWebhookStatus
 
 
 class RoutingV1(BaseRouting):
@@ -105,6 +117,10 @@ class RoutingV1(BaseRouting):
         self.routing_collection[GetOrders.api_name] = (
             GetOrders(),
             GetOrders.api_url,
+        )
+        self.routing_collection[GetOrder.api_name] = (
+            GetOrder(),
+            GetOrder.api_url,
         )
         self.routing_collection[UpdateOrder.api_name] = (
             UpdateOrder(),
@@ -181,4 +197,48 @@ class RoutingV1(BaseRouting):
         self.routing_collection[DeleteBlog.api_name] = (
             DeleteBlog(),
             DeleteBlog.api_url,
+        )
+        self.routing_collection[GetTaxClasses.api_name] = (
+            GetTaxClasses(),
+            GetTaxClasses.api_url,
+        )
+        self.routing_collection[CreateTaxClass.api_name] = (
+            CreateTaxClass(),
+            CreateTaxClass.api_url,
+        )
+        self.routing_collection[UpdateTaxClass.api_name] = (
+            UpdateTaxClass(),
+            UpdateTaxClass.api_url,
+        )
+        self.routing_collection[DeleteTaxClass.api_name] = (
+            DeleteTaxClass(),
+            DeleteTaxClass.api_url,
+        )
+        self.routing_collection[GetTaxRates.api_name] = (
+            GetTaxRates(),
+            GetTaxRates.api_url,
+        )
+        self.routing_collection[CreateTaxRate.api_name] = (
+            CreateTaxRate(),
+            CreateTaxRate.api_url,
+        )
+        self.routing_collection[UpdateTaxRate.api_name] = (
+            UpdateTaxRate(),
+            UpdateTaxRate.api_url,
+        )
+        self.routing_collection[DeleteTaxRate.api_name] = (
+            DeleteTaxRate(),
+            DeleteTaxRate.api_url,
+        )
+        self.routing_collection[CreatePaymentIntent.api_name] = (
+            CreatePaymentIntent(),
+            CreatePaymentIntent.api_url,
+        )
+        self.routing_collection[CheckOrderStatus.api_name] = (
+            CheckOrderStatus(),
+            CheckOrderStatus.api_url,
+        )
+        self.routing_collection[CheckWebhookStatus.api_name] = (
+            CheckWebhookStatus(),
+            CheckWebhookStatus.api_url,
         )
