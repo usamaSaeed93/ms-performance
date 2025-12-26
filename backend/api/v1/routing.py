@@ -48,6 +48,9 @@ from .endpoints.delete_tax_rate import DeleteTaxRate
 from .endpoints.create_payment_intent import CreatePaymentIntent
 from .endpoints.check_order_status import CheckOrderStatus
 from .endpoints.check_webhook_status import CheckWebhookStatus
+from .endpoints.create_contact_message import CreateContactMessage
+from .endpoints.get_contact_messages import GetContactMessages
+from .endpoints.validate_discount import ValidateDiscount
 
 
 class RoutingV1(BaseRouting):
@@ -241,4 +244,16 @@ class RoutingV1(BaseRouting):
         self.routing_collection[CheckWebhookStatus.api_name] = (
             CheckWebhookStatus(),
             CheckWebhookStatus.api_url,
+        )
+        self.routing_collection[CreateContactMessage.api_name] = (
+            CreateContactMessage(),
+            CreateContactMessage.api_url,
+        )
+        self.routing_collection[GetContactMessages.api_name] = (
+            GetContactMessages(),
+            GetContactMessages.api_url,
+        )
+        self.routing_collection[ValidateDiscount.api_name] = (
+            ValidateDiscount(),
+            ValidateDiscount.api_url,
         )

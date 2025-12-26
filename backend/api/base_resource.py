@@ -62,11 +62,28 @@ class BaseResource(Resource):
             and not self.early_response
         ):
             if isinstance(self.response_data, list):
-                self.response_data = [
-                    self.response_schema(**data) for data in self.response_data
-                ]
+                processed_list = []
+                for data in self.response_data:
+                    if isinstance(data, self.response_schema):
+                        processed_list.append(data)
+                    elif isinstance(data, BaseModel):
+                        processed_list.append(self.response_schema(**data.model_dump()))
+                    elif isinstance(data, dict):
+                        processed_list.append(self.response_schema(**data))
+                    else:
+                        # SQLAlchemy model or other object - use jsonable_encoder
+                        processed_list.append(self.response_schema(**jsonable_encoder(data)))
+                self.response_data = processed_list
             else:
-                self.response_data = self.response_schema(**self.response_data)
+                if isinstance(self.response_data, self.response_schema):
+                    pass  # Already the correct type, no conversion needed
+                elif isinstance(self.response_data, BaseModel):
+                    self.response_data = self.response_schema(**self.response_data.model_dump())
+                elif isinstance(self.response_data, dict):
+                    self.response_data = self.response_schema(**self.response_data)
+                else:
+                    # SQLAlchemy model or other object - use jsonable_encoder
+                    self.response_data = self.response_schema(**jsonable_encoder(self.response_data))
 
         self.response_data = FinalResponse(
             status_code=self.status_code,

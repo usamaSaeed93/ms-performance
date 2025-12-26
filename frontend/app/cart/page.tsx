@@ -34,11 +34,24 @@ const cartItems = [
   },
 ];
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+interface AppliedDiscount {
+  code: string;
+  name: string;
+  discount_type: string;
+  discount_value: number;
+  discount_amount: number;
+}
+
 export default function CartPage() {
   const router = useRouter();
   const [items, setItems] = useState<typeof cartItems>([]);
   const [promoCode, setPromoCode] = useState("");
   const [isChecking, setIsChecking] = useState(true);
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [appliedDiscount, setAppliedDiscount] = useState<AppliedDiscount | null>(null);
+  const [promoError, setPromoError] = useState("");
 
   useEffect(() => {
     // Check if user is authenticated
@@ -50,6 +63,17 @@ export default function CartPage() {
     // Load cart from localStorage
     const cartItems = getCartItems();
     setItems(cartItems);
+
+    // Load applied discount from localStorage if any
+    const savedDiscount = localStorage.getItem('applied_discount');
+    if (savedDiscount) {
+      try {
+        setAppliedDiscount(JSON.parse(savedDiscount));
+      } catch (e) {
+        localStorage.removeItem('applied_discount');
+      }
+    }
+
     setIsChecking(false);
   }, [router]);
 
@@ -60,12 +84,99 @@ export default function CartPage() {
         // Clear localStorage if cart is empty
         if (typeof window !== 'undefined') {
           localStorage.removeItem('cart');
+          localStorage.removeItem('applied_discount');
+          setAppliedDiscount(null);
         }
       } else {
         saveCartItems(items);
       }
     }
   }, [items, isChecking]);
+
+  // Re-validate discount when subtotal changes
+  useEffect(() => {
+    if (appliedDiscount && items.length > 0) {
+      // Recalculate discount amount based on new subtotal
+      const newSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      validatePromoCode(appliedDiscount.code, newSubtotal, true);
+    }
+  }, [items]);
+
+  const validatePromoCode = async (code: string, orderAmount: number, silent: boolean = false) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/ecommerce/v1/validate-discount`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: code,
+          order_amount: orderAmount,
+        }),
+      });
+
+      const result = await response.json();
+      const data = result.data || result;
+
+      if (data.valid) {
+        const discount: AppliedDiscount = {
+          code: data.code,
+          name: data.name,
+          discount_type: data.discount_type,
+          discount_value: data.discount_value,
+          discount_amount: data.discount_amount,
+        };
+        setAppliedDiscount(discount);
+        localStorage.setItem('applied_discount', JSON.stringify(discount));
+        setPromoError("");
+        if (!silent) {
+          toast.success(data.message);
+        }
+        return true;
+      } else {
+        if (!silent) {
+          setPromoError(data.message);
+          toast.error(data.message);
+        }
+        // If validation fails on recalculation, remove the discount
+        if (silent) {
+          setAppliedDiscount(null);
+          localStorage.removeItem('applied_discount');
+        }
+        return false;
+      }
+    } catch (error) {
+      if (!silent) {
+        const errorMsg = "Failed to validate promo code";
+        setPromoError(errorMsg);
+        toast.error(errorMsg);
+      }
+      return false;
+    }
+  };
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) {
+      setPromoError("Please enter a promo code");
+      return;
+    }
+
+    setIsApplyingPromo(true);
+    setPromoError("");
+
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    await validatePromoCode(promoCode.trim(), subtotal);
+
+    setIsApplyingPromo(false);
+  };
+
+  const handleRemoveDiscount = () => {
+    setAppliedDiscount(null);
+    setPromoCode("");
+    setPromoError("");
+    localStorage.removeItem('applied_discount');
+    toast.success("Promo code removed");
+  };
 
   if (isChecking) {
     return (
@@ -96,7 +207,7 @@ export default function CartPage() {
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const vat = subtotal * 0.2; // 20% UK VAT
-  const discount = subtotal * 0.2; // 20% discount
+  const discount = appliedDiscount ? appliedDiscount.discount_amount : 0;
   const deliveryFee = 15;
   const deliveryVat = deliveryFee * 0.2; // VAT on delivery
   const total = subtotal + vat - discount + deliveryFee + deliveryVat;
@@ -141,9 +252,8 @@ export default function CartPage() {
                     items.map((item, index) => (
                       <div
                         key={item.id}
-                        className={`bg-white rounded-xl p-4 flex flex-col gap-3 shadow-sm sm:rounded-2xl sm:p-5 sm:flex-row sm:gap-4 md:rounded-[16px] md:p-6 card-hover ${
-                          index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : 'animate-card-delay-2'
-                        }`}
+                        className={`bg-white rounded-xl p-4 flex flex-col gap-3 shadow-sm sm:rounded-2xl sm:p-5 sm:flex-row sm:gap-4 md:rounded-[16px] md:p-6 card-hover ${index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : 'animate-card-delay-2'
+                          }`}
                       >
                         {/* Product Image */}
                         <div className="relative w-full h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 sm:w-24 sm:h-24 sm:rounded-[8px]">
@@ -224,10 +334,17 @@ export default function CartPage() {
                         <span className="text-[#5c6c86]">VAT (20%)</span>
                         <span className="font-semibold text-[#0c1b33]">£{(subtotal * 0.2).toFixed(2)}</span>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#5c6c86]">Discount (-20%)</span>
-                        <span className="font-semibold text-red-500">-£{discount.toFixed(2)}</span>
-                      </div>
+                      {appliedDiscount && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-[#5c6c86]">
+                            Discount ({appliedDiscount.code})
+                            {appliedDiscount.discount_type === 'percentage'
+                              ? ` -${appliedDiscount.discount_value}%`
+                              : ''}
+                          </span>
+                          <span className="font-semibold text-green-600">-£{discount.toFixed(2)}</span>
+                        </div>
+                      )}
                       {items.length > 0 && (
                         <>
                           <div className="flex items-center justify-between text-sm">
@@ -250,35 +367,77 @@ export default function CartPage() {
 
                     {/* Promo Code */}
                     <div className="space-y-2">
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <input
-                            type="text"
-                            placeholder="Add promo code"
-                            value={promoCode}
-                            onChange={(e) => setPromoCode(e.target.value)}
-                            className="w-full rounded-[8px] border border-gray-300 bg-gray-50 px-4 py-3 pl-10 pr-4 text-sm text-[#0c1b33] placeholder:text-gray-400 focus:border-[#1d70ff] focus:outline-none"
-                          />
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      {appliedDiscount ? (
+                        <div className="flex items-center justify-between p-3 bg-green-50 rounded-[8px] border border-green-200">
+                          <div className="flex items-center gap-2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-green-600">
+                              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <div>
+                              <span className="text-sm font-semibold text-green-700">{appliedDiscount.code}</span>
+                              <span className="text-xs text-green-600 ml-2">
+                                {appliedDiscount.discount_type === 'percentage'
+                                  ? `${appliedDiscount.discount_value}% off`
+                                  : `£${appliedDiscount.discount_value} off`}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={handleRemoveDiscount}
+                            className="text-sm text-red-500 hover:text-red-700 font-medium"
                           >
-                            <path
-                              d="M7 7h.01M7 3h5a2 2 0 012 2v5M7 7v5a2 2 0 002 2h5m0 0h5a2 2 0 002-2v-5a2 2 0 00-2-2h-5m0 0V5a2 2 0 012-2h5a2 2 0 012 2v5a2 2 0 01-2 2h-5"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
+                            Remove
+                          </button>
                         </div>
-                        <button className="rounded-[8px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white hover:bg-[#1a5fdd] transition animate-button">
-                          Apply
-                        </button>
-                      </div>
+                      ) : (
+                        <>
+                          <div className="flex gap-2">
+                            <div className="relative flex-1">
+                              <input
+                                type="text"
+                                placeholder="Add promo code"
+                                value={promoCode}
+                                onChange={(e) => {
+                                  setPromoCode(e.target.value.toUpperCase());
+                                  setPromoError("");
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleApplyPromo();
+                                  }
+                                }}
+                                className={`w-full rounded-[8px] border ${promoError ? 'border-red-400' : 'border-gray-300'} bg-gray-50 px-4 py-3 pl-10 pr-4 text-sm text-[#0c1b33] placeholder:text-gray-400 focus:border-[#1d70ff] focus:outline-none`}
+                              />
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                              >
+                                <path
+                                  d="M7 7h.01M7 3h5a2 2 0 012 2v5M7 7v5a2 2 0 002 2h5m0 0h5a2 2 0 002-2v-5a2 2 0 00-2-2h-5m0 0V5a2 2 0 012-2h5a2 2 0 012 2v5a2 2 0 01-2 2h-5"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </div>
+                            <button
+                              onClick={handleApplyPromo}
+                              disabled={isApplyingPromo || !promoCode.trim()}
+                              className="rounded-[8px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white hover:bg-[#1a5fdd] transition animate-button disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isApplyingPromo ? "..." : "Apply"}
+                            </button>
+                          </div>
+                          {promoError && (
+                            <p className="text-xs text-red-500">{promoError}</p>
+                          )}
+                        </>
+                      )}
                     </div>
 
                     {/* Checkout Button */}

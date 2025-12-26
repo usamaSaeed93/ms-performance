@@ -56,13 +56,23 @@ class CRUDDiscount(CRUDBase[Discount, DiscountCreate, DiscountUpdate]):
         if not discount.is_active:
             return None
         
-        # Check validity period
+        # Check validity period (normalize timezones for comparison)
         now = datetime.utcnow()
-        if discount.valid_from > now:
+        
+        # Handle timezone-aware timestamps
+        valid_from = discount.valid_from
+        if valid_from.tzinfo is not None:
+            valid_from = valid_from.replace(tzinfo=None)
+        
+        if valid_from > now:
             return None
         
-        if discount.valid_until and discount.valid_until < now:
-            return None
+        if discount.valid_until:
+            valid_until = discount.valid_until
+            if valid_until.tzinfo is not None:
+                valid_until = valid_until.replace(tzinfo=None)
+            if valid_until < now:
+                return None
         
         # Check usage limits
         if discount.usage_limit and discount.usage_count >= discount.usage_limit:

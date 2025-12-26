@@ -50,7 +50,7 @@ export default function AdminProductsPage() {
 
   const handleDelete = async (productId: number) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
-    
+
     try {
       await deleteProduct(productId).unwrap();
       toast.success("Product deleted successfully");
@@ -175,19 +175,18 @@ export default function AdminProductsPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredProducts.map((product) => (
-                    <TableRow key={product.id}>
+                  filteredProducts.map((product, index) => (
+                    <TableRow key={`${product.id}-${index}`}>
                       <TableCell className="font-medium">{product.id}</TableCell>
                       <TableCell>{product.product_name}</TableCell>
                       <TableCell>£{product.price}</TableCell>
                       <TableCell>{product.quantity}</TableCell>
                       <TableCell>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            product.is_active
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${product.is_active
                               ? "bg-green-500/20 text-green-400"
                               : "bg-red-500/20 text-red-400"
-                          }`}
+                            }`}
                         >
                           {product.is_active ? "Active" : "Inactive"}
                         </span>

@@ -15,8 +15,8 @@ import {
   blogPosts,
   footerLinks,
 } from "@/lib/constants";
-import { 
-  resolveVRM, 
+import {
+  resolveVRM,
   getBrands,
   getModels,
   getGenerations,
@@ -36,7 +36,7 @@ import { Navbar } from "@/components/Navbar";
 
 export default function HomePage() {
   const router = useRouter();
-  
+
   // Services carousel state
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
   const itemsPerPage = 4;
@@ -52,14 +52,14 @@ export default function HomePage() {
   const [selectedModelId, setSelectedModelId] = useState<string>("");
   const [selectedGenerationId, setSelectedGenerationId] = useState<string>("");
   const [selectedEnginePublicId, setSelectedEnginePublicId] = useState<string>("");
-  
+
   // Dropdown data state
   const [brands, setBrands] = useState<Brand[]>([]);
   const [models, setModels] = useState<Model[]>([]);
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [engines, setEngines] = useState<Engine[]>([]);
-  
-  
+
+
   // Loading states
   const [brandsLoading, setBrandsLoading] = useState(false);
   const [modelsLoading, setModelsLoading] = useState(false);
@@ -171,7 +171,7 @@ export default function HomePage() {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !hasAnimated) {
             setHasAnimated(true);
-            
+
             // Initialize all stats to 0
             const initialStats: { [key: string]: number } = {};
             stats.forEach((stat) => {
@@ -191,7 +191,7 @@ export default function HomePage() {
               const timer = setInterval(() => {
                 currentStep++;
                 const currentValue = Math.min(increment * currentStep, targetValue);
-                
+
                 setAnimatedStats((prev) => ({
                   ...prev,
                   [stat.value]: Math.floor(currentValue),
@@ -291,7 +291,7 @@ export default function HomePage() {
   // Auto-scroll testimonials carousel
   useEffect(() => {
     if (allTestimonials.length <= testimonialsPerPage) return;
-    
+
     const interval = setInterval(() => {
       setCurrentTestimonialIndex((prev) => {
         const nextIndex = (prev + 1) % totalTestimonialPages;
@@ -404,21 +404,21 @@ export default function HomePage() {
   }, [selectedGenerationId]);
 
   // Prepare options for comboboxes
-  const brandOptions = useMemo(() => 
+  const brandOptions = useMemo(() =>
     brands.map(b => ({ value: b.id, label: b.name }))
-  , [brands]);
+    , [brands]);
 
-  const modelOptions = useMemo(() => 
+  const modelOptions = useMemo(() =>
     models.map(m => ({ value: m.id, label: m.name }))
-  , [models]);
+    , [models]);
 
-  const generationOptions = useMemo(() => 
+  const generationOptions = useMemo(() =>
     generations.map(g => ({ value: g.id, label: g.name }))
-  , [generations]);
+    , [generations]);
 
-  const engineOptions = useMemo(() => 
+  const engineOptions = useMemo(() =>
     engines.map(e => ({ value: e.publicid, label: `${e.name}${e.energy ? ` (${e.energy})` : ''}` }))
-  , [engines]);
+    , [engines]);
 
   // VRM handler
   const handleVRMLookup = async () => {
@@ -467,7 +467,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-black">
       <Navbar ctaText="Become A Dealer" />
       <main className=" space-y-20">
-          <div className="bg-white">
+        <div className="bg-white">
           <section className="relative overflow-hidden bg-[#030814] text-white">
             <Image
               src="/images/hero/slider1.jpg"
@@ -509,7 +509,7 @@ export default function HomePage() {
                           className="w-full bg-transparent text-xs text-white placeholder:text-white/60 focus:outline-none sm:text-sm"
                         />
                       </div>
-                      <button 
+                      <button
                         onClick={handleVRMLookup}
                         disabled={vrmLoading}
                         className="w-full rounded-xl bg-[#ffd200] px-4 py-2.5 text-xs font-semibold text-black sm:w-auto sm:rounded-[12px] sm:px-4 sm:py-3 sm:text-sm animate-button disabled:opacity-50 disabled:cursor-not-allowed"
@@ -518,7 +518,7 @@ export default function HomePage() {
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Error Message */}
                   {vrmError && (
                     <div className="mt-3 rounded-lg bg-red-500/20 border border-red-500/50 px-3 py-2">
@@ -564,7 +564,7 @@ export default function HomePage() {
                           </div>
                         </div>
                       </div>
-                      <Link 
+                      <Link
                         href={`/gains-calculator?reg=${encodeURIComponent(vrmInput)}`}
                         className="block w-full mt-4 rounded-[14px] bg-[#1d70ff] px-6 py-3 text-center text-sm font-semibold text-white shadow-[0_15px_35px_rgba(29,112,255,0.35)] hover:bg-[#1565e0] transition-colors"
                       >
@@ -644,7 +644,7 @@ export default function HomePage() {
                       />
                     </div>
                   </div>
-                  <button 
+                  <button
                     onClick={handleViewGains}
                     className="mt-6 w-full rounded-[14px] bg-[#ffd200] px-6 py-3 text-sm font-semibold text-black shadow-[0_15px_35px_rgba(255,210,0,0.35)] hover:bg-[#e6c000] transition-colors animate-button"
                   >
@@ -658,7 +658,7 @@ export default function HomePage() {
             <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl">Our Services</h2>
               <div className="flex gap-2 sm:gap-3">
-                <button 
+                <button
                   onClick={prevServices}
                   className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button"
                   aria-label="Previous services"
@@ -667,7 +667,7 @@ export default function HomePage() {
                     <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <button 
+                <button
                   onClick={nextServices}
                   className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button"
                   aria-label="Next services"
@@ -681,63 +681,77 @@ export default function HomePage() {
 
             <div className="relative overflow-hidden">
               <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-                {getVisibleServices().map((service, index) => (
-                <div
-                  key={service.title}
-                  className={`flex h-full flex-col gap-3 rounded-2xl bg-white p-4 shadow-[0_15px_40px_rgba(12,30,59,0.08)] sm:gap-4 sm:rounded-[24px] sm:p-4.5 md:rounded-[28px] md:p-5 card-hover ${
-                    index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : index === 2 ? 'animate-card-delay-2' : 'animate-card-delay-3'
-                  }`}
-                >
-                  <div className="overflow-hidden rounded-[22px]">
-                    <Image
-                      src={service.image}
-                      alt={service.title}
-                      width={320}
-                      height={220}
-                      className="h-48 w-full object-cover animate-image-hover"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-black text-[#0c1b33]">{service.title}</h3>
-                    <p className="text-sm text-[#5c6c86]">{service.description}</p>
-                  </div>
-                  <div className="mt-auto">
-                    <button
-                      className={`flex w-full items-center justify-center gap-2 rounded-[14px] px-6 py-3 text-sm font-semibold transition animate-button ${
-                        index === 0
-                          ? "bg-[#1d70ff] text-white shadow-[0_10px_25px_rgba(29,112,255,0.25)]"
-                          : "border border-[#1d70ff] text-[#1d70ff]"
-                      }`}
+                {getVisibleServices().map((service, index) => {
+                  const getServiceLink = (title: string) => {
+                    switch (title) {
+                      case "ECU Remapping": return "/services/ecu-remapping";
+                      case "Dyno Tests": return "/services/dyno-tests";
+                      case "Custom Exhausts": return "/services/custom-exhausts";
+                      case "DPF & EGR Services": return "/services/dpf-egr-services";
+                      case "Turbo Upgrades": return "/services/turbo-upgrades";
+                      case "Performance Tuning": return "/services/performance-tuning";
+                      case "ECU Diagnostics": return "/services/ecu-diagnostics";
+                      case "Stage Upgrades": return "/services/stage-upgrades";
+                      default: return "/services";
+                    }
+                  };
+
+                  return (
+                    <Link
+                      key={service.title}
+                      href={getServiceLink(service.title)}
+                      className={`flex h-full flex-col gap-3 rounded-2xl bg-white p-4 shadow-[0_15px_40px_rgba(12,30,59,0.08)] sm:gap-4 sm:rounded-[24px] sm:p-4.5 md:rounded-[28px] md:p-5 card-hover block ${index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : index === 2 ? 'animate-card-delay-2' : 'animate-card-delay-3'
+                        }`}
                     >
-                      View
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path
-                          d="M7 17l7-7-7-7"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                      <div className="overflow-hidden rounded-[22px]">
+                        <Image
+                          src={service.image}
+                          alt={service.title}
+                          width={320}
+                          height={220}
+                          className="h-48 w-full object-cover animate-image-hover"
                         />
-                        <path d="M13 3h4v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-black text-[#0c1b33]">{service.title}</h3>
+                        <p className="text-sm text-[#5c6c86]">{service.description}</p>
+                      </div>
+                      <div className="mt-auto">
+                        <div
+                          className={`flex w-full items-center justify-center gap-2 rounded-[14px] px-6 py-3 text-sm font-semibold transition animate-button ${index === 0
+                              ? "bg-[#1d70ff] text-white shadow-[0_10px_25px_rgba(29,112,255,0.25)]"
+                              : "border border-[#1d70ff] text-[#1d70ff]"
+                            }`}
+                        >
+                          View
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                            <path
+                              d="M7 17l7-7-7-7"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path d="M13 3h4v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
-            
+
             {/* Carousel Indicators */}
             <div className="flex justify-center gap-2 mt-6">
               {Array.from({ length: totalServicePages }).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentServiceIndex(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentServiceIndex
+                  className={`h-2 rounded-full transition-all ${index === currentServiceIndex
                       ? 'w-8 bg-[#1d70ff]'
                       : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
-                  }`}
+                    }`}
                   aria-label={`Go to page ${index + 1}`}
                 />
               ))}
@@ -804,12 +818,12 @@ export default function HomePage() {
 
             <div ref={statsRef} className="grid gap-6 px-4 pb-6 sm:gap-8 sm:px-6 sm:pb-8 md:grid-cols-2 md:px-8 md:pb-10 lg:grid-cols-4">
               {stats.map((stat) => {
-                const numericValue = hasAnimated 
+                const numericValue = hasAnimated
                   ? (animatedStats[stat.value] ?? getNumericValue(stat.value))
                   : 0;
                 const suffix = getSuffix(stat.value);
                 const displayValue = `${Math.floor(numericValue)}${suffix}`;
-                
+
                 return (
                   <div key={stat.value} className="space-y-2">
                     <p className="text-3xl font-black text-[#0c1b33] sm:text-4xl">{displayValue}</p>
@@ -825,7 +839,7 @@ export default function HomePage() {
             <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
               <h2 className="text-xl font-black text-[#0c1b33] sm:text-2xl md:text-3xl lg:text-4xl truncate min-w-0 flex-1">Our Products</h2>
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <button 
+                <button
                   onClick={prevProducts}
                   className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button flex-shrink-0"
                   aria-label="Previous products"
@@ -834,7 +848,7 @@ export default function HomePage() {
                     <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <button 
+                <button
                   onClick={nextProducts}
                   className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button flex-shrink-0"
                   aria-label="Next products"
@@ -870,7 +884,7 @@ export default function HomePage() {
                   <p className="text-[#5c6c86]">No products available at the moment.</p>
                 </div>
               ) : (
-                <div 
+                <div
                   ref={productsCarouselRef}
                   className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
                 >
@@ -882,7 +896,7 @@ export default function HomePage() {
                 </div>
               )}
             </div>
-            
+
             {/* Products Carousel Indicators */}
             {homeProducts.length > productsPerPage && (
               <div className="flex justify-center gap-2 mt-6">
@@ -900,11 +914,10 @@ export default function HomePage() {
                         });
                       }
                     }}
-                    className={`h-2 rounded-full transition-all ${
-                      index === currentProductIndex
+                    className={`h-2 rounded-full transition-all ${index === currentProductIndex
                         ? 'w-8 bg-[#1d70ff]'
                         : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
-                    }`}
+                      }`}
                     aria-label={`Go to page ${index + 1}`}
                   />
                 ))}
@@ -915,7 +928,7 @@ export default function HomePage() {
           <section id="testimonials" className="relative space-y-6 bg-[#f5f7fa] px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
             {/* Left border line */}
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1d70ff]" />
-            
+
             <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#1d70ff] sm:text-xs">
@@ -924,7 +937,7 @@ export default function HomePage() {
                 <h2 className="mt-1 text-lg font-black text-[#0c1b33] sm:mt-2 sm:text-xl md:text-2xl lg:text-3xl truncate">Our Testimonials</h2>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <button 
+                <button
                   onClick={prevTestimonials}
                   className="rounded-lg border border-[#d9e0ef] bg-white p-2.5 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-xl sm:p-3 animate-button flex-shrink-0"
                   aria-label="Previous testimonials"
@@ -933,7 +946,7 @@ export default function HomePage() {
                     <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <button 
+                <button
                   onClick={nextTestimonials}
                   className="rounded-lg border border-[#d9e0ef] bg-white p-2.5 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-xl sm:p-3 animate-button flex-shrink-0"
                   aria-label="Next testimonials"
@@ -946,7 +959,7 @@ export default function HomePage() {
             </div>
 
             <div className="relative overflow-hidden">
-              <div 
+              <div
                 ref={testimonialsCarouselRef}
                 className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
               >
@@ -973,15 +986,15 @@ export default function HomePage() {
                       {testimonial.source === "google" && (
                         <div className="flex-shrink-0">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                           </svg>
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Rating stars */}
                     <div className="flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, idx) => (
@@ -999,14 +1012,14 @@ export default function HomePage() {
                         </svg>
                       ))}
                     </div>
-                    
+
                     {/* Quote */}
                     <p className="text-sm leading-relaxed text-[#5c6c86]">"{testimonial.quote}"</p>
                   </div>
                 ))}
               </div>
             </div>
-            
+
             {/* Testimonials Carousel Indicators */}
             {allTestimonials.length > testimonialsPerPage && (
               <div className="flex justify-center gap-2 mt-6">
@@ -1024,11 +1037,10 @@ export default function HomePage() {
                         });
                       }
                     }}
-                    className={`h-2 rounded-full transition-all ${
-                      index === currentTestimonialIndex
+                    className={`h-2 rounded-full transition-all ${index === currentTestimonialIndex
                         ? 'w-8 bg-[#1d70ff]'
                         : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
-                    }`}
+                      }`}
                     aria-label={`Go to page ${index + 1}`}
                   />
                 ))}
@@ -1042,7 +1054,7 @@ export default function HomePage() {
                 <p className="text-xs sm:text-sm text-[#9aa6bd] font-medium">Company Insights</p>
                 <h2 className="text-xl font-black text-[#0c1b33] sm:text-2xl md:text-3xl lg:text-4xl truncate">Latest Blogs</h2>
               </div>
-              <Link 
+              <Link
                 href="/blog"
                 className="rounded-xl bg-[#1d70ff] px-3 py-2 text-[10px] font-semibold text-white hover:bg-[#1a5fdd] transition shadow-sm sm:px-4 sm:py-2.5 sm:text-xs md:px-6 md:py-3 md:text-sm whitespace-nowrap flex-shrink-0"
               >
@@ -1070,10 +1082,10 @@ export default function HomePage() {
               ) : (
                 <div className="grid gap-6 md:grid-cols-2">
                   {displayedBlogs.map((post, index) => {
-                    const blogUrl = post.slug 
-                      ? `/blog/${post.slug}` 
-                      : post.id 
-                        ? `/blog/${post.id}` 
+                    const blogUrl = post.slug
+                      ? `/blog/${post.slug}`
+                      : post.id
+                        ? `/blog/${post.id}`
                         : '#';
                     return (
                       <Link
@@ -1097,11 +1109,10 @@ export default function HomePage() {
                           </div>
                           <div className="mt-auto">
                             <div
-                              className={`flex h-10 w-10 items-center justify-center rounded-lg transition ${
-                                index === 0
+                              className={`flex h-10 w-10 items-center justify-center rounded-lg transition ${index === 0
                                   ? "bg-[#1d70ff] text-white hover:bg-[#1a5fdd]"
                                   : "border border-[#1d70ff] text-[#1d70ff] hover:bg-[#1d70ff] hover:text-white"
-                              }`}
+                                }`}
                             >
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                 <path
@@ -1255,8 +1266,8 @@ export default function HomePage() {
               </div>
             </div>
           </footer>
-          </div>
-        </main>
+        </div>
+      </main>
     </div>
   );
 }

@@ -99,28 +99,16 @@ export default function ProductsPage() {
 
   const displayTotal = totalProducts;
 
-  // Build categories list with counts from fetched products
+  // Build categories list from all categories (not filtered by current products)
   const categories = useMemo(() => {
-    const categoryMap = new Map<number, number>();
-    products.forEach((product) => {
-      if (product.category_id) {
-        categoryMap.set(
-          product.category_id,
-          (categoryMap.get(product.category_id) || 0) + 1
-        );
-      }
-    });
-
-    const categoryList = allCategories
-      .filter((cat) => categoryMap.has(cat.id))
-      .map((cat) => ({
-        id: cat.id,
-        label: cat.category_name,
-        count: categoryMap.get(cat.id) || 0,
-      }));
+    const categoryList = allCategories.map((cat) => ({
+      id: cat.id,
+      label: cat.category_name,
+      count: null, // Count is not available when showing all categories
+    }));
 
     return [{ id: null, label: "All", count: null }, ...categoryList];
-  }, [products, allCategories]);
+  }, [allCategories]);
 
   const handleSortChange = (value: string) => {
     const [field, order] = value.split("_");
@@ -218,8 +206,8 @@ export default function ProductsPage() {
     };
   }, []);
 
-  const startIndex = totalProducts > 0 
-    ? (currentPage - 1) * productsPerPage + 1 
+  const startIndex = totalProducts > 0
+    ? (currentPage - 1) * productsPerPage + 1
     : 0;
   const endIndex = totalProducts > 0
     ? Math.min(currentPage * productsPerPage, totalProducts)
@@ -305,108 +293,108 @@ export default function ProductsPage() {
                             )}
                           </div>
                         </PopoverTrigger>
-                      <PopoverContent 
-                        className="w-[var(--radix-popover-trigger-width)] p-0" 
-                        align="start"
-                        onOpenAutoFocus={(e) => e.preventDefault()}
-                        onInteractOutside={(e) => {
-                          // Prevent closing when clicking on the input
-                          if (searchInputRef.current && searchInputRef.current.contains(e.target as Node)) {
-                            e.preventDefault();
-                          }
-                        }}
-                      >
-                        {(searchCategories.length > 0 || searchProducts.length > 0) ? (
-                          <div className="max-h-[400px] overflow-y-auto">
-                            {searchCategories.length > 0 && (
-                              <>
-                                <div className="px-3 py-2 bg-gray-50 border-b">
-                                  <p className="text-xs font-semibold text-[#5c6c86] uppercase tracking-wide">Categories</p>
-                                </div>
-                                {searchCategories.map((category) => (
-                                  <button
-                                    key={`category-${category.id}`}
-                                    type="button"
-                                    onClick={(e) => handleSelectCategory(category, e)}
-                                    onMouseDown={(e) => {
-                                      // Prevent input blur when clicking category
-                                      e.preventDefault();
-                                      if (searchTimeoutRef.current) {
-                                        clearTimeout(searchTimeoutRef.current);
-                                        searchTimeoutRef.current = null;
-                                      }
-                                    }}
-                                    className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors border-b last:border-b-0 text-left"
-                                  >
-                                    <div className="relative w-10 h-10 flex-shrink-0 rounded-full bg-[#1d70ff]/10 flex items-center justify-center">
-                                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                                        <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                                      </svg>
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-[#0c1b33] truncate">
-                                        {category.category_name}
-                                      </p>
-                                      <p className="text-xs text-[#5c6c86] truncate">
-                                        View all products in this category
-                                      </p>
-                                    </div>
-                                  </button>
-                                ))}
-                              </>
-                            )}
-                            {searchProducts.length > 0 && (
-                              <>
-                                {searchCategories.length > 0 && (
+                        <PopoverContent
+                          className="w-[var(--radix-popover-trigger-width)] p-0"
+                          align="start"
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                          onInteractOutside={(e) => {
+                            // Prevent closing when clicking on the input
+                            if (searchInputRef.current && searchInputRef.current.contains(e.target as Node)) {
+                              e.preventDefault();
+                            }
+                          }}
+                        >
+                          {(searchCategories.length > 0 || searchProducts.length > 0) ? (
+                            <div className="max-h-[400px] overflow-y-auto">
+                              {searchCategories.length > 0 && (
+                                <>
                                   <div className="px-3 py-2 bg-gray-50 border-b">
-                                    <p className="text-xs font-semibold text-[#5c6c86] uppercase tracking-wide">Products</p>
+                                    <p className="text-xs font-semibold text-[#5c6c86] uppercase tracking-wide">Categories</p>
                                   </div>
-                                )}
-                                {searchProducts.map((product) => (
-                                  <Link
-                                    key={`product-${product.id}`}
-                                    href={`/products/${product.id}`}
-                                    onClick={(e) => handleSelectSuggestion(product, e)}
-                                    onMouseDown={(e) => {
-                                      // Prevent input blur when clicking suggestion
-                                      e.preventDefault();
-                                      if (searchTimeoutRef.current) {
-                                        clearTimeout(searchTimeoutRef.current);
-                                        searchTimeoutRef.current = null;
-                                      }
-                                    }}
-                                    className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors border-b last:border-b-0"
-                                  >
-                                    <div className="relative w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-gray-100">
-                                      <Image
-                                        src={product.image_url || "/images/products/product1.png"}
-                                        alt={product.product_name}
-                                        width={48}
-                                        height={48}
-                                        className="w-full h-full object-cover"
-                                      />
+                                  {searchCategories.map((category) => (
+                                    <button
+                                      key={`category-${category.id}`}
+                                      type="button"
+                                      onClick={(e) => handleSelectCategory(category, e)}
+                                      onMouseDown={(e) => {
+                                        // Prevent input blur when clicking category
+                                        e.preventDefault();
+                                        if (searchTimeoutRef.current) {
+                                          clearTimeout(searchTimeoutRef.current);
+                                          searchTimeoutRef.current = null;
+                                        }
+                                      }}
+                                      className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors border-b last:border-b-0 text-left"
+                                    >
+                                      <div className="relative w-10 h-10 flex-shrink-0 rounded-full bg-[#1d70ff]/10 flex items-center justify-center">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
+                                          <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                        </svg>
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-[#0c1b33] truncate">
+                                          {category.category_name}
+                                        </p>
+                                        <p className="text-xs text-[#5c6c86] truncate">
+                                          View all products in this category
+                                        </p>
+                                      </div>
+                                    </button>
+                                  ))}
+                                </>
+                              )}
+                              {searchProducts.length > 0 && (
+                                <>
+                                  {searchCategories.length > 0 && (
+                                    <div className="px-3 py-2 bg-gray-50 border-b">
+                                      <p className="text-xs font-semibold text-[#5c6c86] uppercase tracking-wide">Products</p>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-[#0c1b33] truncate">
-                                        {product.product_name}
-                                      </p>
-                                      <p className="text-xs text-[#5c6c86] truncate">
-                                        {product.category_name}
-                                      </p>
-                                    </div>
-                                  </Link>
-                                ))}
-                              </>
-                            )}
-                          </div>
-                        ) : searchInput.trim().length >= 2 ? (
-                          <div className="p-4 text-center text-sm text-gray-500">
-                            No products or categories found
-                          </div>
-                        ) : null}
-                      </PopoverContent>
-                    </div>
-                  </Popover>
+                                  )}
+                                  {searchProducts.map((product) => (
+                                    <Link
+                                      key={`product-${product.id}`}
+                                      href={`/products/${product.id}`}
+                                      onClick={(e) => handleSelectSuggestion(product, e)}
+                                      onMouseDown={(e) => {
+                                        // Prevent input blur when clicking suggestion
+                                        e.preventDefault();
+                                        if (searchTimeoutRef.current) {
+                                          clearTimeout(searchTimeoutRef.current);
+                                          searchTimeoutRef.current = null;
+                                        }
+                                      }}
+                                      className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors border-b last:border-b-0"
+                                    >
+                                      <div className="relative w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-gray-100">
+                                        <Image
+                                          src={product.image_url || "/images/products/product1.png"}
+                                          alt={product.product_name}
+                                          width={48}
+                                          height={48}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-[#0c1b33] truncate">
+                                          {product.product_name}
+                                        </p>
+                                        <p className="text-xs text-[#5c6c86] truncate">
+                                          {product.category_name}
+                                        </p>
+                                      </div>
+                                    </Link>
+                                  ))}
+                                </>
+                              )}
+                            </div>
+                          ) : searchInput.trim().length >= 2 ? (
+                            <div className="p-4 text-center text-sm text-gray-500">
+                              No products or categories found
+                            </div>
+                          ) : null}
+                        </PopoverContent>
+                      </div>
+                    </Popover>
                     <select
                       value={`${sortBy}_${sortOrder}`}
                       onChange={(e) => handleSortChange(e.target.value)}
@@ -431,12 +419,11 @@ export default function ProductsPage() {
                   <button
                     key={category.id === null ? "all" : category.id}
                     onClick={() => handleCategoryChange(category.id)}
-                    className={`rounded-[6px] sm:rounded-[8px] px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold transition whitespace-nowrap ${
-                      (selectedCategoryId === null && category.id === null) ||
-                      selectedCategoryId === category.id
+                    className={`rounded-[6px] sm:rounded-[8px] px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold transition whitespace-nowrap ${(selectedCategoryId === null && category.id === null) ||
+                        selectedCategoryId === category.id
                         ? "bg-[#1d70ff] text-white"
                         : "bg-gray-100 text-[#0c1b33] hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     {category.label} {category.count !== null && `(${category.count})`}
                   </button>

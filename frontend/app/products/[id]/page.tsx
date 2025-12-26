@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { navLinks } from "@/lib/constants";
 import { useGetProductQuery, useGetProductImagesQuery } from "@/lib/store/api/productsApi";
@@ -15,10 +15,17 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const productId = typeof params?.id === 'string' ? parseInt(params.id, 10) : 0;
-  
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState("Description");
   const [quantity, setQuantity] = useState(1);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check authentication status
+  useEffect(() => {
+    const token = localStorage.getItem('customer_token');
+    setIsAuthenticated(!!token);
+  }, []);
 
   const { data: product, isLoading, error } = useGetProductQuery(productId, {
     skip: !productId || isNaN(productId),
@@ -41,12 +48,12 @@ export default function ProductDetailPage() {
   }, [sortedImages, product?.image_url]);
 
   const currentImage = productImages[selectedImage] || productImages[0];
-  
+
   const price = product ? parseFloat(product.price) : 0;
   const salePrice = product?.sale_price ? parseFloat(product.sale_price) : null;
   const displayPrice = salePrice || price;
   const oldPrice = salePrice ? price : null;
-  
+
   const discount = salePrice && price > salePrice
     ? Math.round(((price - salePrice) / price) * 100)
     : null;
@@ -153,9 +160,8 @@ export default function ProductDetailPage() {
                         <button
                           key={index}
                           onClick={() => setSelectedImage(index)}
-                          className={`relative flex-1 aspect-square rounded-[8px] overflow-hidden border-2 transition ${
-                            selectedImage === index ? "border-[#1d70ff]" : "border-gray-200"
-                          }`}
+                          className={`relative flex-1 aspect-square rounded-[8px] overflow-hidden border-2 transition ${selectedImage === index ? "border-[#1d70ff]" : "border-gray-200"
+                            }`}
                         >
                           <Image
                             src={img}
@@ -299,11 +305,10 @@ export default function ProductDetailPage() {
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`pb-4 text-base font-semibold transition ${
-                          activeTab === tab
-                            ? "border-b-2 border-[#1d70ff] text-[#1d70ff]"
-                            : "text-[#5c6c86] hover:text-[#0c1b33]"
-                        }`}
+                        className={`pb-4 text-base font-semibold transition ${activeTab === tab
+                          ? "border-b-2 border-[#1d70ff] text-[#1d70ff]"
+                          : "text-[#5c6c86] hover:text-[#0c1b33]"
+                          }`}
                       >
                         {tab}
                       </button>
@@ -319,7 +324,7 @@ export default function ProductDetailPage() {
                       ) : (
                         <p>No description available for this product.</p>
                       )}
-                      
+
                       {/* Variants Section */}
                       {product.product_type === "variable" && product.variants && product.variants.length > 0 && (
                         <div className="mt-8 pt-8 border-t border-gray-200">
@@ -330,7 +335,7 @@ export default function ProductDetailPage() {
                               const variantSalePrice = variant.sale_price ? parseFloat(variant.sale_price) : null;
                               const displayVariantPrice = variantSalePrice || variantPrice;
                               const oldVariantPrice = variantSalePrice ? variantPrice : null;
-                              
+
                               return (
                                 <div
                                   key={variant.id}
@@ -421,7 +426,11 @@ export default function ProductDetailPage() {
 
                   {activeTab === "Reviews" && product && (
                     <div className="max-w-3xl mx-auto">
-                      <ProductReviews productId={product.id} productName={product.product_name} />
+                      <ProductReviews
+                        productId={product.id}
+                        productName={product.product_name}
+                        isAuthenticated={isAuthenticated}
+                      />
                     </div>
                   )}
                 </div>

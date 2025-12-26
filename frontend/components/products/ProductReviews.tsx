@@ -3,18 +3,28 @@
 import { useState } from "react";
 import { useGetProductReviewsQuery, useCreateProductReviewMutation } from "@/lib/store/api/productsApi";
 import { Star, ThumbsUp, CheckCircle } from "lucide-react";
+import Link from "next/link";
 
 interface ProductReviewsProps {
   productId: number;
   productName: string;
+  isAuthenticated?: boolean;
+  userName?: string;
+  userEmail?: string;
 }
 
-export default function ProductReviews({ productId, productName }: ProductReviewsProps) {
+export default function ProductReviews({
+  productId,
+  productName,
+  isAuthenticated = false,
+  userName = "",
+  userEmail = ""
+}: ProductReviewsProps) {
   const [page, setPage] = useState(1);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [formData, setFormData] = useState({
-    reviewer_name: "",
-    reviewer_email: "",
+    reviewer_name: userName,
+    reviewer_email: userEmail,
     title: "",
     review_text: "",
     rating: 5,
@@ -37,11 +47,11 @@ export default function ProductReviews({ productId, productName }: ProductReview
         product_id: productId,
         ...formData,
       }).unwrap();
-      
+
       // Reset form
       setFormData({
-        reviewer_name: "",
-        reviewer_email: "",
+        reviewer_name: userName,
+        reviewer_email: userEmail,
         title: "",
         review_text: "",
         rating: 5,
@@ -62,11 +72,10 @@ export default function ProductReviews({ productId, productName }: ProductReview
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`${sizeClass} ${
-              star <= rating
+            className={`${sizeClass} ${star <= rating
                 ? "fill-yellow-400 text-yellow-400"
                 : "fill-gray-200 text-gray-200"
-            }`}
+              }`}
           />
         ))}
       </div>
@@ -97,18 +106,33 @@ export default function ProductReviews({ productId, productName }: ProductReview
 
   return (
     <div className="space-y-6">
-      {/* Review Form */}
-      {!showReviewForm ? (
-        <button
-          onClick={() => setShowReviewForm(true)}
-          className="px-4 py-2 bg-[#1d70ff] text-white rounded-md hover:bg-[#1560e6] transition"
-        >
-          Write a Review
-        </button>
-      ) : (
+      {/* Header with title and button aligned */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-[#0c1b33]">Customer Reviews</h3>
+        {!showReviewForm && (
+          isAuthenticated ? (
+            <button
+              onClick={() => setShowReviewForm(true)}
+              className="px-4 py-2 bg-[#1d70ff] text-white rounded-md hover:bg-[#1560e6] transition"
+            >
+              Write a Review
+            </button>
+          ) : (
+            <Link
+              href="/login?redirect=back"
+              className="px-4 py-2 bg-gray-100 text-[#5c6c86] rounded-md hover:bg-gray-200 transition text-sm"
+            >
+              Log in to write a review
+            </Link>
+          )
+        )}
+      </div>
+
+      {/* Review Form - only shown for authenticated users */}
+      {showReviewForm && isAuthenticated && (
         <form onSubmit={handleSubmit} className="space-y-4 p-6 border border-gray-200 rounded-lg">
           <h3 className="text-lg font-semibold text-[#0c1b33]">Write a Review</h3>
-          
+
           <div>
             <label className="block text-sm font-medium text-[#0c1b33] mb-1">
               Your Name <span className="text-red-500">*</span>
@@ -147,11 +171,10 @@ export default function ProductReviews({ productId, productName }: ProductReview
                   className="focus:outline-none"
                 >
                   <Star
-                    className={`w-6 h-6 ${
-                      star <= formData.rating
+                    className={`w-6 h-6 ${star <= formData.rating
                         ? "fill-yellow-400 text-yellow-400"
                         : "fill-gray-200 text-gray-200"
-                    } hover:fill-yellow-300 hover:text-yellow-300 transition`}
+                      } hover:fill-yellow-300 hover:text-yellow-300 transition`}
                   />
                 </button>
               ))}

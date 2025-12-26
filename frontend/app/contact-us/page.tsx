@@ -2,12 +2,50 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { navLinks, brandLogos, footerLinks } from "@/lib/constants";
 import { Navbar } from "@/components/Navbar";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 export default function ContactUsPage() {
   const pathname = usePathname();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatus("idle");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/ecommerce/v1/contact-messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) throw new Error("Failed to send message");
+
+      setStatus("success");
+      setFormData({ name: "", email: "", phone: "", address: "", message: "" });
+    } catch (error) {
+      console.error(error);
+      setStatus("error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black">
@@ -36,17 +74,20 @@ export default function ContactUsPage() {
             <section className="px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-12">
               <div className="mx-auto max-w-7xl">
                 <h2 className="text-2xl font-bold text-[#0c1b33] mb-6 sm:text-3xl sm:mb-8 md:text-4xl md:mb-10 lg:text-5xl lg:mb-12">Let Your Wanderlust <br className="hidden sm:block" /> Guide You</h2>
-                
+
                 <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-12">
                   {/* Left Column - Contact Form */}
                   <div className="animate-slide-left">
-                    <div className="space-y-4 sm:space-y-5 md:space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-[#0c1b33] sm:text-sm">Your Email</label>
                           <div className="relative">
                             <input
                               type="email"
+                              required
+                              value={formData.email}
+                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                               placeholder="Your Email"
                               className="w-full rounded-lg border border-[#dfe6f2] bg-gray-50 px-3 py-3 pr-10 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none sm:rounded-[8px] sm:px-4 sm:py-4 sm:pr-12 sm:text-sm"
                             />
@@ -66,6 +107,8 @@ export default function ContactUsPage() {
                           <div className="relative">
                             <input
                               type="tel"
+                              value={formData.phone}
+                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                               placeholder="Your Phone"
                               className="w-full rounded-lg border border-[#dfe6f2] bg-gray-50 px-3 py-3 pr-10 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none sm:rounded-[8px] sm:px-4 sm:py-4 sm:pr-12 sm:text-sm"
                             />
@@ -82,10 +125,26 @@ export default function ContactUsPage() {
                       </div>
 
                       <div className="space-y-2">
+                        <label className="text-xs font-semibold text-[#0c1b33] sm:text-sm">Your Name</label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            required
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            placeholder="Your Name"
+                            className="w-full rounded-lg border border-[#dfe6f2] bg-gray-50 px-3 py-3 pr-10 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none sm:rounded-[8px] sm:px-4 sm:py-4 sm:pr-12 sm:text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
                         <label className="text-xs font-semibold text-[#0c1b33] sm:text-sm">Your Address</label>
                         <div className="relative">
                           <input
                             type="text"
+                            value={formData.address}
+                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                             placeholder="Your Address"
                             className="w-full rounded-lg border border-[#dfe6f2] bg-gray-50 px-3 py-3 pr-10 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none sm:rounded-[8px] sm:px-4 sm:py-4 sm:pr-12 sm:text-sm"
                           />
@@ -105,6 +164,9 @@ export default function ContactUsPage() {
                         <label className="text-xs font-semibold text-[#0c1b33] sm:text-sm">Message</label>
                         <div className="relative">
                           <textarea
+                            required
+                            value={formData.message}
+                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                             placeholder="Write Message.."
                             rows={5}
                             className="w-full rounded-lg border border-[#dfe6f2] bg-gray-50 px-3 py-3 pr-10 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none resize-none sm:rounded-[8px] sm:px-4 sm:py-4 sm:pr-12 sm:text-sm sm:rows-6"
@@ -120,10 +182,22 @@ export default function ContactUsPage() {
                         </div>
                       </div>
 
-                      <button className="w-full rounded-[8px] bg-[#1d70ff] px-6 py-4 text-sm font-semibold text-white hover:bg-[#1a5fdd] transition animate-button">
-                        Send Message
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full rounded-[8px] bg-[#1d70ff] px-6 py-4 text-sm font-semibold text-white hover:bg-[#1a5fdd] transition animate-button disabled:opacity-50"
+                      >
+                        {loading ? "Sending..." : "Send Message"}
                       </button>
-                    </div>
+
+                      {status === "success" && (
+                        <p className="text-green-600 text-sm mt-2">Message sent successfully!</p>
+                      )}
+                      {status === "error" && (
+                        <p className="text-red-600 text-sm mt-2">Failed to send message. Please try again.</p>
+                      )}
+
+                    </form>
                   </div>
 
                   {/* Right Column - Image and Contact Details */}
@@ -137,7 +211,7 @@ export default function ContactUsPage() {
                         className="w-full h-full object-cover"
                       />
                       {/* Location Card Overlay */}
-                      <div 
+                      <div
                         className="absolute bg-white border border-[#dfe6f2] shadow-lg opacity-100"
                         style={{
                           width: '563px',

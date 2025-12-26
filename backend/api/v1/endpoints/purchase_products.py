@@ -166,6 +166,29 @@ class PurchaseProducts(PostResource):
         # Calculate total amount (subtotal + tax + shipping + shipping_tax)
         total_amount = subtotal + total_tax + shipping_cost + shipping_tax
         
+        # Build shipping address from components
+        shipping_address_parts = []
+        if self.request_data.shipping_address:
+            shipping_address_parts.append(self.request_data.shipping_address)
+        if self.request_data.city:
+            shipping_address_parts.append(self.request_data.city)
+        if self.request_data.state_code:
+            shipping_address_parts.append(self.request_data.state_code)
+        if self.request_data.postcode:
+            shipping_address_parts.append(self.request_data.postcode)
+        if self.request_data.country_code:
+            shipping_address_parts.append(self.request_data.country_code)
+        full_shipping_address = ", ".join(shipping_address_parts) if shipping_address_parts else None
+        
+        # Determine payment and order status based on payment method
+        payment_method = self.request_data.payment_method
+        if payment_method == "cod":
+            payment_status = "pending"  # COD - payment pending until delivery
+            order_status = "pending"
+        else:
+            payment_status = "pending"  # Card - will be updated after Stripe processes
+            order_status = "pending"
+        
         # Create Sale object
         self.sale = SaleCreate(
             user_id=context.data["user"]["id"],
@@ -174,6 +197,10 @@ class PurchaseProducts(PostResource):
             shipping_cost=shipping_cost,
             shipping_tax=shipping_tax,
             total_amount=total_amount,
+            payment_method=payment_method,
+            shipping_address=full_shipping_address,
+            order_status=order_status,
+            payment_status=payment_status,
         )
         self.sale = await crud.sale.create(self.db, obj_in=self.sale)
 
@@ -223,6 +250,8 @@ class PurchaseProducts(PostResource):
         self.response_message = "Products purchased successfully"
         self.response_data = {
             **self.sale.to_dict(),
+            "order_id": self.sale.id,
+            "order_number": self.sale.order_number or f"ORD-{self.sale.id}",
             "purchased_items": [x.to_dict() for x in self.successful_purchases_created],
             "failed_items": self.failed_purchases,
         }

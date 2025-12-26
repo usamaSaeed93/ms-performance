@@ -15,6 +15,8 @@ function OrderConfirmationContent() {
   const paymentIntentId = searchParams?.get("payment_intent") ||
     searchParams?.get("payment_intent_id") ||
     searchParams?.get("pi");
+  const orderId = searchParams?.get("order_id");
+  const isCOD = searchParams?.get("cod") === "true";
   const [orderStatus, setOrderStatus] = useState<"loading" | "confirmed" | "processing" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
@@ -22,6 +24,13 @@ function OrderConfirmationContent() {
   useEffect(() => {
     if (!isCustomerAuthenticated()) {
       router.push("/login");
+      return;
+    }
+
+    // Handle COD orders - they're confirmed immediately
+    if (isCOD && orderId) {
+      setOrderStatus("confirmed");
+      setOrderNumber(`ORD-${orderId}`);
       return;
     }
 
@@ -34,13 +43,18 @@ function OrderConfirmationContent() {
         return;
       }
 
-      setOrderStatus("error");
-      setErrorMessage("No payment information found. Please check your email for order confirmation or contact support.");
-      return;
+      // If also no order ID, show error
+      if (!orderId) {
+        setOrderStatus("error");
+        setErrorMessage("No payment information found. Please check your email for order confirmation or contact support.");
+        return;
+      }
     }
 
-    verifyOrder(paymentIntentId);
-  }, [paymentIntentId, router]);
+    if (paymentIntentId) {
+      verifyOrder(paymentIntentId);
+    }
+  }, [paymentIntentId, orderId, isCOD, router]);
 
   const verifyOrder = async (paymentIntentIdToCheck: string) => {
     try {
@@ -158,9 +172,24 @@ function OrderConfirmationContent() {
                       </svg>
                     </div>
                     <h2 className="text-3xl font-bold mb-4">Thank You for Your Order!</h2>
-                    <p className="text-gray-600 mb-8">
-                      Your payment has been processed successfully. We've sent a confirmation email with your order details.
-                    </p>
+                    {isCOD ? (
+                      <div className="space-y-4 mb-8">
+                        <p className="text-gray-600">
+                          Your order has been placed successfully. You will pay in cash when your order is delivered.
+                        </p>
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-left">
+                          <p className="font-semibold text-amber-800 mb-2">Cash on Delivery</p>
+                          <p className="text-sm text-amber-700">
+                            Please have the exact amount ready when our delivery partner arrives.
+                            You will receive a confirmation email with your order details.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-600 mb-8">
+                        Your payment has been processed successfully. We've sent a confirmation email with your order details.
+                      </p>
+                    )}
                     {orderNumber && (
                       <div className="bg-gray-50 rounded-lg p-4 mb-8">
                         <p className="text-sm text-gray-600">Order Number</p>

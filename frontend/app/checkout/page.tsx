@@ -24,6 +24,10 @@ if (!stripePublishableKey) {
 
 const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+type PaymentMethod = 'card' | 'cod';
+
 interface CartItem {
   id: number;
   name: string;
@@ -39,6 +43,8 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [shippingCost, setShippingCost] = useState(15);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  const [processingCOD, setProcessingCOD] = useState(false);
   const [shippingAddress, setShippingAddress] = useState({
     country: "GB",
     state: "",
@@ -77,7 +83,7 @@ export default function CheckoutPage() {
       setLoading(true);
       const token = getCustomerToken();
       console.log("Token retrieved:", token ? "Token exists" : "No token");
-      
+
       if (!token) {
         toast.error("Please log in to continue");
         router.push("/login?redirect=/checkout");
@@ -122,7 +128,7 @@ export default function CheckoutPage() {
       console.error("Payment initialization error:", error);
       const errorMessage = error.message || "Failed to initialize payment";
       toast.error(errorMessage);
-      
+
       // If authentication failed, redirect to login
       if (errorMessage.includes("authorized") || errorMessage.includes("403")) {
         router.push("/login?redirect=/checkout");
@@ -318,37 +324,180 @@ export default function CheckoutPage() {
                       </div>
                     </div>
 
-                    {/* Stripe Payment Element */}
-                    {clientSecret && stripePromise && (
-                      <Elements
-                        stripe={stripePromise}
-                        options={{
-                          clientSecret,
-                          appearance: {
-                            theme: "stripe",
-                          },
-                        }}
-                      >
-                        <CheckoutForm
-                          onSuccess={(paymentIntentId?: string) => {
-                            if (paymentIntentId) {
-                              router.push(`/order-confirmation?payment_intent=${paymentIntentId}`);
-                            } else {
-                              router.push("/order-confirmation");
-                            }
-                          }}
-                        />
-                      </Elements>
-                    )}
-                    {clientSecret && !stripePromise && (
-                      <div className="text-center py-8">
-                        <p className="text-red-600">Stripe is not configured. Please set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY in your environment variables.</p>
+                    {/* Payment Method Selection */}
+                    <div className="mb-8">
+                      <h3 className="font-semibold mb-4">Payment Method</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <button
+                          type="button"
+                          onClick={() => setPaymentMethod('card')}
+                          className={`p-4 border-2 rounded-lg text-left transition ${paymentMethod === 'card'
+                              ? 'border-[#1d70ff] bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'card' ? 'border-[#1d70ff]' : 'border-gray-300'
+                              }`}>
+                              {paymentMethod === 'card' && (
+                                <div className="w-3 h-3 rounded-full bg-[#1d70ff]" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-[#0c1b33]">Card Payment</p>
+                              <p className="text-xs text-gray-500">Pay securely with Stripe</p>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex gap-2">
+                            <span className="text-xs bg-gray-100 px-2 py-1 rounded">Visa</span>
+                            <span className="text-xs bg-gray-100 px-2 py-1 rounded">Mastercard</span>
+                            <span className="text-xs bg-gray-100 px-2 py-1 rounded">Amex</span>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setPaymentMethod('cod')}
+                          className={`p-4 border-2 rounded-lg text-left transition ${paymentMethod === 'cod'
+                              ? 'border-[#1d70ff] bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cod' ? 'border-[#1d70ff]' : 'border-gray-300'
+                              }`}>
+                              {paymentMethod === 'cod' && (
+                                <div className="w-3 h-3 rounded-full bg-[#1d70ff]" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-[#0c1b33]">Cash on Delivery</p>
+                              <p className="text-xs text-gray-500">Pay when you receive</p>
+                            </div>
+                          </div>
+                          <div className="mt-2">
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">No advance payment</span>
+                          </div>
+                        </button>
                       </div>
+                    </div>
+
+                    {/* Card Payment (Stripe) */}
+                    {paymentMethod === 'card' && (
+                      <>
+                        {clientSecret && stripePromise && (
+                          <Elements
+                            stripe={stripePromise}
+                            options={{
+                              clientSecret,
+                              appearance: {
+                                theme: "stripe",
+                              },
+                            }}
+                          >
+                            <CheckoutForm
+                              onSuccess={(paymentIntentId?: string) => {
+                                localStorage.removeItem('cart');
+                                localStorage.removeItem('applied_discount');
+                                if (paymentIntentId) {
+                                  router.push(`/order-confirmation?payment_intent=${paymentIntentId}`);
+                                } else {
+                                  router.push("/order-confirmation");
+                                }
+                              }}
+                            />
+                          </Elements>
+                        )}
+                        {clientSecret && !stripePromise && (
+                          <div className="text-center py-8">
+                            <p className="text-red-600">Stripe is not configured. Please set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY in your environment variables.</p>
+                          </div>
+                        )}
+                        {!clientSecret && (
+                          <div className="text-center py-8">
+                            <p className="text-gray-600">Initializing payment...</p>
+                          </div>
+                        )}
+                      </>
                     )}
 
-                    {!clientSecret && (
-                      <div className="text-center py-8">
-                        <p className="text-gray-600">Initializing payment...</p>
+                    {/* Cash on Delivery */}
+                    {paymentMethod === 'cod' && (
+                      <div className="space-y-4">
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <svg className="w-5 h-5 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                              <p className="font-semibold text-amber-800">Cash on Delivery</p>
+                              <p className="text-sm text-amber-700 mt-1">
+                                You will pay <strong>£{total.toFixed(2)}</strong> in cash when your order is delivered.
+                                Please keep the exact amount ready for our delivery partner.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.postcode) {
+                              toast.error("Please fill in all shipping address fields");
+                              return;
+                            }
+
+                            setProcessingCOD(true);
+                            try {
+                              const token = getCustomerToken();
+                              if (!token) {
+                                toast.error("Please log in to continue");
+                                router.push("/login?redirect=/checkout");
+                                return;
+                              }
+
+                              // Create COD order
+                              const response = await fetch(`${API_BASE_URL}/ecommerce/v1/purchase_products`, {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({
+                                  items: cartItems.map((item) => ({
+                                    product_id: item.id,
+                                    quantity: item.quantity,
+                                  })),
+                                  payment_method: 'cod',
+                                  shipping_address: shippingAddress.address,
+                                  city: shippingAddress.city,
+                                  state: shippingAddress.state,
+                                  postcode: shippingAddress.postcode,
+                                  country_code: shippingAddress.country,
+                                }),
+                              });
+
+                              const result = await response.json();
+
+                              if (response.ok && result.success) {
+                                localStorage.removeItem('cart');
+                                localStorage.removeItem('applied_discount');
+                                toast.success("Order placed successfully!");
+                                router.push(`/order-confirmation?order_id=${result.data?.order_id || ''}&cod=true`);
+                              } else {
+                                throw new Error(result.message || "Failed to place order");
+                              }
+                            } catch (error: any) {
+                              toast.error(error.message || "Failed to place order");
+                            } finally {
+                              setProcessingCOD(false);
+                            }
+                          }}
+                          disabled={processingCOD}
+                          className="w-full rounded-[12px] bg-green-600 px-6 py-4 text-center text-base font-semibold text-white hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {processingCOD ? "Processing Order..." : "Place Order (Cash on Delivery)"}
+                        </button>
                       </div>
                     )}
                   </div>
@@ -373,7 +522,7 @@ function CheckoutForm({ onSuccess }: { onSuccess: (paymentIntentId?: string) => 
     try {
       const token = getCustomerToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      
+
       // Check order status
       const orderResponse = await fetch(
         `${API_URL}/ecommerce/v1/check_order_status?payment_intent_id=${encodeURIComponent(paymentIntentId)}`,
@@ -383,14 +532,14 @@ function CheckoutForm({ onSuccess }: { onSuccess: (paymentIntentId?: string) => 
           },
         }
       );
-      
+
       if (orderResponse.ok) {
         const orderData = await orderResponse.json();
         if (orderData.data?.order_exists) {
           return { exists: true };
         }
       }
-      
+
       // If order doesn't exist, check webhook status for errors
       const webhookResponse = await fetch(
         `${API_URL}/ecommerce/v1/check_webhook_status?payment_intent_id=${encodeURIComponent(paymentIntentId)}`,
@@ -400,17 +549,17 @@ function CheckoutForm({ onSuccess }: { onSuccess: (paymentIntentId?: string) => 
           },
         }
       );
-      
+
       if (webhookResponse.ok) {
         const webhookData = await webhookResponse.json();
         if (webhookData.data?.status === "failed") {
-          return { 
-            exists: false, 
-            error: webhookData.data.error || "Order processing failed. Please contact support." 
+          return {
+            exists: false,
+            error: webhookData.data.error || "Order processing failed. Please contact support."
           };
         }
       }
-      
+
       return { exists: false };
     } catch (error) {
       console.error('Error checking order status:', error);
@@ -457,10 +606,10 @@ function CheckoutForm({ onSuccess }: { onSuccess: (paymentIntentId?: string) => 
       setLoading(false);
       setProcessing(true);
       toast.info("Payment successful! Processing your order...", { duration: 5000 });
-      
+
       // Poll for order creation (webhook should create it)
       const result = await pollOrderStatus(paymentIntent.id);
-      
+
       if (result.success) {
         toast.success("Order placed successfully!");
         // Store payment intent ID in localStorage as backup
@@ -470,14 +619,14 @@ function CheckoutForm({ onSuccess }: { onSuccess: (paymentIntentId?: string) => 
         // Show error message
         toast.error(result.error || "Order processing failed. Please contact support with your payment ID.");
         setProcessing(false);
-        
+
         // Don't redirect to success page if there's an error
         // Show error state instead
         toast.error(
           `Payment ID: ${paymentIntent.id}. Please save this ID and contact support if the issue persists.`,
           { duration: 10000 }
         );
-        
+
         // Still redirect but with payment intent ID so they can see the error on confirmation page
         // This allows them to see the payment ID and contact support
         localStorage.setItem("last_payment_intent_id", paymentIntent.id);

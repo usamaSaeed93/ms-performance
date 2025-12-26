@@ -27,6 +27,7 @@ import {
   FileText,
   LogOut,
   Receipt,
+  MessageSquare,
 } from "lucide-react";
 
 const navItems = [
@@ -39,6 +40,7 @@ const navItems = [
   { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { label: "Messages", href: "/admin/contact-messages", icon: MessageSquare },
 ];
 
 export function AppSidebar() {
