@@ -39,13 +39,13 @@ export default function NewProductPage() {
   const [activeTab, setActiveTab] = useState<TabType>("general");
   const [images, setImages] = useState<ImageGalleryItem[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
-  
+
   // RTK Query hooks
   const { data: categoriesData, isLoading: categoriesLoading, error: categoriesError } = useGetCategoriesQuery();
   const { data: taxClassesData, isLoading: taxClassesLoading } = useGetTaxClassesQuery({});
   const [createProduct, { isLoading: isCreatingProduct }] = useCreateProductMutation();
   const [createProductImages, { isLoading: isCreatingImages }] = useCreateProductImagesMutation();
-  
+
   const categories = categoriesData?.categories || [];
   const taxClasses = taxClassesData?.tax_classes || [];
   const loading = isCreatingProduct || isCreatingImages;
@@ -122,9 +122,9 @@ export default function NewProductPage() {
       setActiveTab("images");
       return;
     }
-    
+
     const loadingToast = toast.loading("Creating product...");
-    
+
     try {
       const submitData: any = {
         ...data,
@@ -148,7 +148,7 @@ export default function NewProductPage() {
       // Create product images if any
       if (images.length > 0 && productId) {
         toast.loading("Uploading product images...", { id: loadingToast });
-        
+
         try {
           const imageData = images.map((img, index) => ({
             image_url: img.image_url,
@@ -171,7 +171,7 @@ export default function NewProductPage() {
       }
 
       toast.success("Product created successfully!", { id: loadingToast });
-      
+
       // Navigate after a short delay to show the success message
       setTimeout(() => {
         router.push("/admin/products");
@@ -220,406 +220,406 @@ export default function NewProductPage() {
               toast.error(`Please fix ${errorFields.length} validation error${errorFields.length > 1 ? 's' : ''} before submitting.`);
             }
           })} className="space-y-6">
-          <Card className="overflow-visible">
-            <CardHeader>
-              <CardTitle>Product Details</CardTitle>
-              <CardDescription>
-                Configure your product settings across different sections
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="overflow-visible">
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
-                <TabsList className="grid w-full grid-cols-7">
-                  <TabsTrigger value="general">📝 General</TabsTrigger>
-                  <TabsTrigger value="inventory">📦 Inventory</TabsTrigger>
-                  <TabsTrigger value="shipping">🚚 Shipping</TabsTrigger>
-                  <TabsTrigger value="images">🖼️ Images</TabsTrigger>
-                  <TabsTrigger value="variants">🎨 Variants</TabsTrigger>
-                  <TabsTrigger value="seo">🔍 SEO</TabsTrigger>
-                  <TabsTrigger value="advanced">⚙️ Advanced</TabsTrigger>
-                </TabsList>
+            <Card className="overflow-visible">
+              <CardHeader>
+                <CardTitle>Product Details</CardTitle>
+                <CardDescription>
+                  Configure your product settings across different sections
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="overflow-visible">
+                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
+                  <TabsList className="flex flex-wrap gap-1 h-auto p-1 sm:grid sm:grid-cols-4 lg:grid-cols-7 w-full">
+                    <TabsTrigger value="general" className="flex-1 min-w-[80px] text-xs sm:text-sm">📝 General</TabsTrigger>
+                    <TabsTrigger value="inventory" className="flex-1 min-w-[80px] text-xs sm:text-sm">📦 Inventory</TabsTrigger>
+                    <TabsTrigger value="shipping" className="flex-1 min-w-[80px] text-xs sm:text-sm">🚚 Shipping</TabsTrigger>
+                    <TabsTrigger value="images" className="flex-1 min-w-[80px] text-xs sm:text-sm">🖼️ Images</TabsTrigger>
+                    <TabsTrigger value="variants" className="flex-1 min-w-[80px] text-xs sm:text-sm">🎨 Variants</TabsTrigger>
+                    <TabsTrigger value="seo" className="flex-1 min-w-[80px] text-xs sm:text-sm">🔍 SEO</TabsTrigger>
+                    <TabsTrigger value="advanced" className="flex-1 min-w-[80px] text-xs sm:text-sm">⚙️ Advanced</TabsTrigger>
+                  </TabsList>
 
-                {/* General Tab */}
-                <TabsContent value="general" className="space-y-6 mt-6 overflow-visible">
-                  <FormInput
-                    name="product_name"
-                    label="Product Name"
-                    required
-                    placeholder="Enter product name"
-                  />
-
-                  <FormInput
-                    name="slug"
-                    label="Product Slug"
-                    placeholder="product-slug"
-                  />
-
-                  <FormTextarea
-                    name="short_description"
-                    label="Short Description"
-                    rows={3}
-                    placeholder="Brief description for product listings"
-                  />
-
-                  <FormTextarea
-                    name="description"
-                    label="Full Description"
-                    rows={6}
-                    placeholder="Full product description"
-                  />
-
-                  <FormSelect
-                    name="category_id"
-                    label="Category"
-                    required
-                    disabled={categoriesLoading}
-                    placeholder={categoriesLoading ? "Loading categories..." : "Select a category"}
-                    transformValue={(value) => parseInt(value)}
-                  >
-                    <SelectItem value="0">Select a category</SelectItem>
-                    {categories.length === 0 && !categoriesLoading ? (
-                      <SelectItem value="0" disabled>No categories available</SelectItem>
-                    ) : (
-                      categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id.toString()}>
-                          {cat.category_name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </FormSelect>
-                  {categoriesLoading && (
-                    <p className="text-xs text-muted-foreground">Loading categories...</p>
-                  )}
-                  {categoriesError && (
-                    <p className="text-xs text-destructive">
-                      Error loading categories: {(categoriesError as any)?.data?.message || (categoriesError as any)?.message || 'Unknown error'}
-                    </p>
-                  )}
-                  {!categoriesLoading && !categoriesError && categories.length === 0 && (
-                    <p className="text-xs text-muted-foreground">No categories found. Please create a category first.</p>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* General Tab */}
+                  <TabsContent value="general" className="space-y-6 mt-6 overflow-visible">
                     <FormInput
-                      name="price"
-                      label="Regular Price"
-                      type="number"
-                      step="0.01"
+                      name="product_name"
+                      label="Product Name"
                       required
-                      placeholder="0.00"
+                      placeholder="Enter product name"
                     />
 
                     <FormInput
-                      name="sale_price"
-                      label="Sale Price"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormInput
-                      name="sale_start_date"
-                      label="Sale Start Date"
-                      type="datetime-local"
+                      name="slug"
+                      label="Product Slug"
+                      placeholder="product-slug"
                     />
 
-                    <FormInput
-                      name="sale_end_date"
-                      label="Sale End Date"
-                      type="datetime-local"
+                    <FormTextarea
+                      name="short_description"
+                      label="Short Description"
+                      rows={3}
+                      placeholder="Brief description for product listings"
                     />
-                  </div>
 
-                  <FormSelect
-                    name="product_type"
-                    label="Product Type"
-                    placeholder="Select product type"
-                  >
-                    <SelectItem value="simple">Simple Product</SelectItem>
-                    <SelectItem value="variable">Variable Product</SelectItem>
-                    <SelectItem value="grouped">Grouped Product</SelectItem>
-                    <SelectItem value="external">External/Affiliate Product</SelectItem>
-                  </FormSelect>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormSelect
-                      name="tax_status"
-                      label="Tax Status"
-                      placeholder="Select tax status"
-                    >
-                      <SelectItem value="taxable">Taxable</SelectItem>
-                      <SelectItem value="shipping">Shipping Only</SelectItem>
-                      <SelectItem value="none">None</SelectItem>
-                    </FormSelect>
+                    <FormTextarea
+                      name="description"
+                      label="Full Description"
+                      rows={6}
+                      placeholder="Full product description"
+                    />
 
                     <FormSelect
-                      name="tax_class_id"
-                      label="Tax Class"
-                      placeholder="Standard Rate"
-                      transformValue={(value) => value === "0" ? null : parseInt(value)}
+                      name="category_id"
+                      label="Category"
+                      required
+                      disabled={categoriesLoading}
+                      placeholder={categoriesLoading ? "Loading categories..." : "Select a category"}
+                      transformValue={(value) => parseInt(value)}
                     >
-                      <SelectItem value="0">Standard Rate (None)</SelectItem>
-                      {taxClasses.map((taxClass: TaxClass) => (
-                        <SelectItem key={taxClass.id} value={taxClass.id.toString()}>
-                          {taxClass.name}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="0">Select a category</SelectItem>
+                      {categories.length === 0 && !categoriesLoading ? (
+                        <SelectItem value="0" disabled>No categories available</SelectItem>
+                      ) : (
+                        categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id.toString()}>
+                            {cat.category_name}
+                          </SelectItem>
+                        ))
+                      )}
                     </FormSelect>
-                  </div>
+                    {categoriesLoading && (
+                      <p className="text-xs text-muted-foreground">Loading categories...</p>
+                    )}
+                    {categoriesError && (
+                      <p className="text-xs text-destructive">
+                        Error loading categories: {(categoriesError as any)?.data?.message || (categoriesError as any)?.message || 'Unknown error'}
+                      </p>
+                    )}
+                    {!categoriesLoading && !categoriesError && categories.length === 0 && (
+                      <p className="text-xs text-muted-foreground">No categories found. Please create a category first.</p>
+                    )}
 
-                  <div className="flex flex-wrap gap-6">
-                    <FormSwitch
-                      name="is_virtual"
-                      label="Virtual Product (No shipping)"
-                    />
-                    <FormSwitch
-                      name="is_downloadable"
-                      label="Downloadable"
-                    />
-                    <FormSwitch
-                      name="is_featured"
-                      label="Featured Product"
-                    />
-                    <FormSwitch
-                      name="is_active"
-                      label="Active"
-                    />
-                  </div>
-                </TabsContent>
-
-                {/* Inventory Tab */}
-                <TabsContent value="inventory" className="space-y-6 mt-6">
-                  <FormInput
-                    name="sku"
-                    label="SKU"
-                    placeholder="SKU code"
-                  />
-
-                  <FormSwitch
-                    name="manage_stock"
-                    label="Manage Stock"
-                  />
-
-                  {watch("manage_stock") && (
-                    <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormInput
-                        name="quantity"
-                        label="Stock Quantity"
-                        type="number"
-                      />
-
-                      <FormSelect
-                        name="stock_status"
-                        label="Stock Status"
-                        placeholder="Select stock status"
-                      >
-                        <SelectItem value="in_stock">In Stock</SelectItem>
-                        <SelectItem value="out_of_stock">Out of Stock</SelectItem>
-                        <SelectItem value="on_backorder">On Backorder</SelectItem>
-                      </FormSelect>
-
-                      <Controller
-                        name="stock_threshold"
-                        control={methods.control}
-                        render={({ field, fieldState: { error } }) => (
-                          <div className="space-y-2">
-                            <Label htmlFor="stock_threshold">Low Stock Threshold</Label>
-                            <Input
-                              id="stock_threshold"
-                              type="number"
-                              value={field.value ?? ""}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                field.onChange(value === "" ? null : parseInt(value) || null);
-                              }}
-                              placeholder="Alert when stock falls below this number"
-                              className={error ? "border-destructive" : ""}
-                            />
-                            {error && (
-                              <p className="text-sm text-destructive mt-1">{error.message}</p>
-                            )}
-                          </div>
-                        )}
-                      />
-
-                      <FormSwitch
-                        name="backorders_allowed"
-                        label="Allow Backorders"
-                      />
-                    </>
-                  )}
-                </TabsContent>
-
-                {/* Shipping Tab */}
-                <TabsContent value="shipping" className="space-y-6 mt-6">
-                  <FormSwitch
-                    name="shipping_required"
-                    label="Shipping Required"
-                  />
-
-                  {watch("shipping_required") && (
-                    <>
-                      <FormInput
-                        name="weight"
-                        label="Weight (kg)"
+                        name="price"
+                        label="Regular Price"
                         type="number"
                         step="0.01"
-                      />
-
-                      <div className="grid grid-cols-3 gap-4">
-                        <FormInput
-                          name="length"
-                          label="Length (cm)"
-                          type="number"
-                          step="0.01"
-                        />
-                        <FormInput
-                          name="width"
-                          label="Width (cm)"
-                          type="number"
-                          step="0.01"
-                        />
-                        <FormInput
-                          name="height"
-                          label="Height (cm)"
-                          type="number"
-                          step="0.01"
-                        />
-                      </div>
-
-                      <FormInput
-                        name="shipping_class"
-                        label="Shipping Class"
-                        placeholder="e.g., Standard, Express"
-                      />
-
-                      <FormSwitch
-                        name="shipping_taxable"
-                        label="Shipping is Taxable"
-                      />
-                    </>
-                  )}
-                </TabsContent>
-
-                {/* Images Tab */}
-                <TabsContent value="images" className="mt-6">
-                  <ImageGallery
-                    images={images}
-                    onImagesChange={(newImages) => setImages(newImages)}
-                    folder="products"
-                    validationError={errors.images?.message as string | undefined}
-                  />
-                </TabsContent>
-
-                {/* Variants Tab */}
-                <TabsContent value="variants" className="mt-6">
-                  <ProductVariants
-                    variants={variants}
-                    onVariantsChange={setVariants}
-                  />
-                </TabsContent>
-
-                {/* SEO Tab */}
-                <TabsContent value="seo" className="space-y-6 mt-6">
-                  <FormInput
-                    name="meta_title"
-                    label="Meta Title"
-                    placeholder="SEO title"
-                  />
-
-                  <FormTextarea
-                    name="meta_description"
-                    label="Meta Description"
-                    rows={4}
-                    placeholder="SEO description"
-                  />
-
-                  <FormInput
-                    name="meta_keywords"
-                    label="Meta Keywords"
-                    placeholder="keyword1, keyword2, keyword3"
-                  />
-                </TabsContent>
-
-                {/* Advanced Tab */}
-                <TabsContent value="advanced" className="space-y-6 mt-6">
-                  <FormTextarea
-                    name="purchase_note"
-                    label="Purchase Note"
-                    rows={3}
-                    placeholder="Note shown to customer after purchase"
-                  />
-
-                  <FormInput
-                    name="upsell_ids"
-                    label="Upsell Product IDs"
-                    placeholder="1, 2, 3"
-                  />
-
-                  <FormInput
-                    name="cross_sell_ids"
-                    label="Cross-sell Product IDs"
-                    placeholder="1, 2, 3"
-                  />
-
-                  {productType === "external" && (
-                    <>
-                      <FormInput
-                        name="external_url"
-                        label="External URL"
-                        type="url"
                         required
-                        placeholder="https://example.com/product"
+                        placeholder="0.00"
                       />
 
                       <FormInput
-                        name="button_text"
-                        label="Button Text"
-                        placeholder="Buy product"
+                        name="sale_price"
+                        label="Sale Price"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
                       />
-                    </>
-                  )}
+                    </div>
 
-                  <FormSelect
-                    name="status"
-                    label="Product Status"
-                    placeholder="Select status"
-                  >
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="published">Published</SelectItem>
-                    <SelectItem value="archived">Archived</SelectItem>
-                  </FormSelect>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <FormInput
+                        name="sale_start_date"
+                        label="Sale Start Date"
+                        type="datetime-local"
+                      />
 
-                  <FormSwitch
-                    name="enable_reviews"
-                    label="Enable Reviews"
-                  />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+                      <FormInput
+                        name="sale_end_date"
+                        label="Sale End Date"
+                        type="datetime-local"
+                      />
+                    </div>
 
-          <div className="flex gap-4">
-            <Button
-              type="submit"
-              disabled={loading}
-              className="flex-1"
-              size="lg"
-            >
-              {loading ? "Creating..." : "Create Product"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              size="lg"
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
+                    <FormSelect
+                      name="product_type"
+                      label="Product Type"
+                      placeholder="Select product type"
+                    >
+                      <SelectItem value="simple">Simple Product</SelectItem>
+                      <SelectItem value="variable">Variable Product</SelectItem>
+                      <SelectItem value="grouped">Grouped Product</SelectItem>
+                      <SelectItem value="external">External/Affiliate Product</SelectItem>
+                    </FormSelect>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <FormSelect
+                        name="tax_status"
+                        label="Tax Status"
+                        placeholder="Select tax status"
+                      >
+                        <SelectItem value="taxable">Taxable</SelectItem>
+                        <SelectItem value="shipping">Shipping Only</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
+                      </FormSelect>
+
+                      <FormSelect
+                        name="tax_class_id"
+                        label="Tax Class"
+                        placeholder="Standard Rate"
+                        transformValue={(value) => value === "0" ? null : parseInt(value)}
+                      >
+                        <SelectItem value="0">Standard Rate (None)</SelectItem>
+                        {taxClasses.map((taxClass: TaxClass) => (
+                          <SelectItem key={taxClass.id} value={taxClass.id.toString()}>
+                            {taxClass.name}
+                          </SelectItem>
+                        ))}
+                      </FormSelect>
+                    </div>
+
+                    <div className="flex flex-wrap gap-6">
+                      <FormSwitch
+                        name="is_virtual"
+                        label="Virtual Product (No shipping)"
+                      />
+                      <FormSwitch
+                        name="is_downloadable"
+                        label="Downloadable"
+                      />
+                      <FormSwitch
+                        name="is_featured"
+                        label="Featured Product"
+                      />
+                      <FormSwitch
+                        name="is_active"
+                        label="Active"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {/* Inventory Tab */}
+                  <TabsContent value="inventory" className="space-y-6 mt-6">
+                    <FormInput
+                      name="sku"
+                      label="SKU"
+                      placeholder="SKU code"
+                    />
+
+                    <FormSwitch
+                      name="manage_stock"
+                      label="Manage Stock"
+                    />
+
+                    {watch("manage_stock") && (
+                      <>
+                        <FormInput
+                          name="quantity"
+                          label="Stock Quantity"
+                          type="number"
+                        />
+
+                        <FormSelect
+                          name="stock_status"
+                          label="Stock Status"
+                          placeholder="Select stock status"
+                        >
+                          <SelectItem value="in_stock">In Stock</SelectItem>
+                          <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                          <SelectItem value="on_backorder">On Backorder</SelectItem>
+                        </FormSelect>
+
+                        <Controller
+                          name="stock_threshold"
+                          control={methods.control}
+                          render={({ field, fieldState: { error } }) => (
+                            <div className="space-y-2">
+                              <Label htmlFor="stock_threshold">Low Stock Threshold</Label>
+                              <Input
+                                id="stock_threshold"
+                                type="number"
+                                value={field.value ?? ""}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(value === "" ? null : parseInt(value) || null);
+                                }}
+                                placeholder="Alert when stock falls below this number"
+                                className={error ? "border-destructive" : ""}
+                              />
+                              {error && (
+                                <p className="text-sm text-destructive mt-1">{error.message}</p>
+                              )}
+                            </div>
+                          )}
+                        />
+
+                        <FormSwitch
+                          name="backorders_allowed"
+                          label="Allow Backorders"
+                        />
+                      </>
+                    )}
+                  </TabsContent>
+
+                  {/* Shipping Tab */}
+                  <TabsContent value="shipping" className="space-y-6 mt-6">
+                    <FormSwitch
+                      name="shipping_required"
+                      label="Shipping Required"
+                    />
+
+                    {watch("shipping_required") && (
+                      <>
+                        <FormInput
+                          name="weight"
+                          label="Weight (kg)"
+                          type="number"
+                          step="0.01"
+                        />
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <FormInput
+                            name="length"
+                            label="Length (cm)"
+                            type="number"
+                            step="0.01"
+                          />
+                          <FormInput
+                            name="width"
+                            label="Width (cm)"
+                            type="number"
+                            step="0.01"
+                          />
+                          <FormInput
+                            name="height"
+                            label="Height (cm)"
+                            type="number"
+                            step="0.01"
+                          />
+                        </div>
+
+                        <FormInput
+                          name="shipping_class"
+                          label="Shipping Class"
+                          placeholder="e.g., Standard, Express"
+                        />
+
+                        <FormSwitch
+                          name="shipping_taxable"
+                          label="Shipping is Taxable"
+                        />
+                      </>
+                    )}
+                  </TabsContent>
+
+                  {/* Images Tab */}
+                  <TabsContent value="images" className="mt-6">
+                    <ImageGallery
+                      images={images}
+                      onImagesChange={(newImages) => setImages(newImages)}
+                      folder="products"
+                      validationError={errors.images?.message as string | undefined}
+                    />
+                  </TabsContent>
+
+                  {/* Variants Tab */}
+                  <TabsContent value="variants" className="mt-6">
+                    <ProductVariants
+                      variants={variants}
+                      onVariantsChange={setVariants}
+                    />
+                  </TabsContent>
+
+                  {/* SEO Tab */}
+                  <TabsContent value="seo" className="space-y-6 mt-6">
+                    <FormInput
+                      name="meta_title"
+                      label="Meta Title"
+                      placeholder="SEO title"
+                    />
+
+                    <FormTextarea
+                      name="meta_description"
+                      label="Meta Description"
+                      rows={4}
+                      placeholder="SEO description"
+                    />
+
+                    <FormInput
+                      name="meta_keywords"
+                      label="Meta Keywords"
+                      placeholder="keyword1, keyword2, keyword3"
+                    />
+                  </TabsContent>
+
+                  {/* Advanced Tab */}
+                  <TabsContent value="advanced" className="space-y-6 mt-6">
+                    <FormTextarea
+                      name="purchase_note"
+                      label="Purchase Note"
+                      rows={3}
+                      placeholder="Note shown to customer after purchase"
+                    />
+
+                    <FormInput
+                      name="upsell_ids"
+                      label="Upsell Product IDs"
+                      placeholder="1, 2, 3"
+                    />
+
+                    <FormInput
+                      name="cross_sell_ids"
+                      label="Cross-sell Product IDs"
+                      placeholder="1, 2, 3"
+                    />
+
+                    {productType === "external" && (
+                      <>
+                        <FormInput
+                          name="external_url"
+                          label="External URL"
+                          type="url"
+                          required
+                          placeholder="https://example.com/product"
+                        />
+
+                        <FormInput
+                          name="button_text"
+                          label="Button Text"
+                          placeholder="Buy product"
+                        />
+                      </>
+                    )}
+
+                    <FormSelect
+                      name="status"
+                      label="Product Status"
+                      placeholder="Select status"
+                    >
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </FormSelect>
+
+                    <FormSwitch
+                      name="enable_reviews"
+                      label="Enable Reviews"
+                    />
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+
+            <div className="flex gap-4">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="flex-1"
+                size="lg"
+              >
+                {loading ? "Creating..." : "Create Product"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+                size="lg"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
         </FormProvider>
       </div>
     </div>
