@@ -208,9 +208,9 @@ export default function CartPage() {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const vat = subtotal * 0.2; // 20% UK VAT
   const discount = appliedDiscount ? appliedDiscount.discount_amount : 0;
-  const deliveryFee = 15;
+  const deliveryFee = items.length > 0 ? 15 : 0;
   const deliveryVat = deliveryFee * 0.2; // VAT on delivery
-  const total = subtotal + vat - discount + deliveryFee + deliveryVat;
+  const total = items.length > 0 ? subtotal + vat - discount + deliveryFee + deliveryVat : 0;
 
   return (
     <div className="min-h-screen bg-black">

@@ -109,17 +109,7 @@ export default function ProductDetailPage() {
               <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-8">
                 <div className="space-y-4">
                   <div className="flex justify-end">
-                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#0c1b33]">
-                        <path
-                          d="M12 4v16m0-16L6 10m6-6l6 6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
+
                   </div>
 
                   <div className="relative bg-white rounded-[12px] overflow-hidden shadow-sm">
