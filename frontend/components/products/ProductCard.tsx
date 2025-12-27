@@ -16,7 +16,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [shouldFetchImages, setShouldFetchImages] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-  
+
   const { data: imagesData } = useGetProductImagesQuery(product.id, {
     skip: !product.id || !shouldFetchImages,
   });
@@ -25,29 +25,29 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const sortedImages = images.length > 0
     ? [...images].sort((a, b) => a.sort_order - b.sort_order)
     : [];
-  
+
   const primaryImage = product.image_url || "/images/products/product1.png";
   const displayImages = sortedImages.length > 0
     ? sortedImages.map(img => img.image_url)
     : [primaryImage];
 
   const currentImage = displayImages[currentImageIndex] || displayImages[0];
-  
+
   const price = parseFloat(product.price);
   const salePrice = product.sale_price ? parseFloat(product.sale_price) : null;
   const displayPrice = salePrice || price;
   const oldPrice = salePrice ? price : null;
-  
+
   const discount = salePrice && price > salePrice
     ? Math.round(((price - salePrice) / price) * 100)
     : null;
 
-  const animationClass = index === 0 
-    ? 'animate-card' 
-    : index === 1 
-      ? 'animate-card-delay-1' 
-      : index === 2 
-        ? 'animate-card-delay-2' 
+  const animationClass = index === 0
+    ? 'animate-card'
+    : index === 1
+      ? 'animate-card-delay-1'
+      : index === 2
+        ? 'animate-card-delay-2'
         : 'animate-card-delay-3';
 
   const nextImage = () => {
@@ -67,13 +67,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       href={`/products/${product.id}`}
       className={`relative flex flex-col gap-3 rounded-2xl bg-white p-4 sm:p-5 shadow-[0_10px_40px_rgba(16,53,106,0.05)] hover:shadow-[0_15px_50px_rgba(16,53,106,0.1)] transition-all duration-300 cursor-pointer card-hover ${animationClass} flex-shrink-0`}
     >
-      {discount && (
-        <div className="absolute right-4 top-4 z-20 rounded-full bg-[#ff3b69] px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
-          -{discount}%
-        </div>
-      )}
-      
-      <div 
+
+      <div
         className="relative w-full overflow-hidden rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 group aspect-square"
         onMouseEnter={() => setShouldFetchImages(true)}
       >
@@ -87,9 +82,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           alt={product.product_name}
           width={400}
           height={400}
-          className={`h-full w-full object-contain p-3 transition-all duration-500 group-hover:scale-110 ${
-            imageLoading ? 'opacity-0' : 'opacity-100'
-          }`}
+          className={`h-full w-full object-contain p-3 transition-all duration-500 group-hover:scale-110 ${imageLoading ? 'opacity-0' : 'opacity-100'
+            }`}
           onLoad={() => setImageLoading(false)}
           onError={() => {
             setImageLoading(false);
@@ -104,7 +98,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </svg>
           </div>
         )}
-        
+
         {displayImages.length > 1 && (
           <>
             <button
@@ -119,7 +113,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
-            
+
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -132,7 +126,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
-            
+
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               {displayImages.map((_, idx) => (
                 <button
@@ -141,11 +135,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     e.preventDefault();
                     setCurrentImageIndex(idx);
                   }}
-                  className={`h-1.5 rounded-full transition-all ${
-                    idx === currentImageIndex
-                      ? 'w-6 bg-white'
-                      : 'w-1.5 bg-white/50 hover:bg-white/75'
-                  }`}
+                  className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex
+                    ? 'w-6 bg-white'
+                    : 'w-1.5 bg-white/50 hover:bg-white/75'
+                    }`}
                   aria-label={`Go to image ${idx + 1}`}
                 />
               ))}
@@ -153,62 +146,53 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </>
         )}
       </div>
-      
-      <div className="space-y-2.5 flex-1 flex flex-col justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#5c6c86] bg-[#f5f7fa] px-2.5 py-1 rounded-full">
-            {product.category_name || "Electronics"}
-          </span>
-        </div>
-        <h3 className="text-base font-semibold leading-tight text-[#0c1b33] line-clamp-2 min-h-[2.5rem]">
+
+      <div className="space-y-2 flex-1 flex flex-col font-[var(--font-montserrat)]">
+        {/* Product Name */}
+        <h3 className="text-base font-bold leading-tight text-[#1a1a1a] line-clamp-2 min-h-[2.75rem]">
           {product.product_name}
         </h3>
-        {(product.average_rating && parseFloat(product.average_rating) > 0) || (product.review_count && product.review_count > 0) ? (
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-0.5">
-              {Array.from({ length: 5 }).map((_, idx) => {
-                const rating = product.average_rating ? parseFloat(product.average_rating) : 0;
-                const filled = idx < Math.floor(rating);
-                const halfFilled = idx === Math.floor(rating) && rating % 1 >= 0.5;
-                return (
-                  <span
-                    key={idx}
-                    className={`text-sm ${
-                      filled
-                        ? "text-yellow-400"
-                        : halfFilled
-                        ? "text-yellow-300"
-                        : "text-gray-300"
+
+        {/* Star Rating */}
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center">
+            {Array.from({ length: 5 }).map((_, idx) => {
+              const rating = product.average_rating ? parseFloat(product.average_rating) : 0;
+              const filled = idx < Math.floor(rating);
+              const halfFilled = idx === Math.floor(rating) && rating % 1 >= 0.5;
+              return (
+                <span
+                  key={idx}
+                  className={`text-base ${filled
+                    ? "text-[#ffc107]"
+                    : halfFilled
+                      ? "text-[#ffc107]"
+                      : "text-[#e0e0e0]"
                     }`}
-                  >
-                    ★
-                  </span>
-                );
-              })}
-            </div>
-            {product.average_rating && parseFloat(product.average_rating) > 0 && (
-              <span className="text-xs text-[#5c6c86]">
-                ({parseFloat(product.average_rating).toFixed(1)})
-              </span>
-            )}
-            {product.review_count !== undefined && product.review_count > 0 && (
-              <span className="text-xs text-[#5c6c86]">
-                ({product.review_count} {product.review_count === 1 ? "review" : "reviews"})
-              </span>
-            )}
+                >
+                  ★
+                </span>
+              );
+            })}
           </div>
-        ) : (
-          <div className="flex items-center gap-0.5">
-            <span className="text-xs text-[#5c6c86]">No reviews yet</span>
-          </div>
-        )}
-        <div className="flex items-baseline gap-2">
-          <span className="text-xl font-black text-[#0c1b33]">
-            £{displayPrice.toFixed(2)}
+          <span className="text-sm text-[#888888]">
+            {product.average_rating ? parseFloat(product.average_rating).toFixed(1) : "0.0"}/5
+          </span>
+        </div>
+
+        {/* Price Row */}
+        <div className="flex items-center gap-2.5 mt-auto pt-1">
+          <span className="text-xl font-bold text-[#1a1a1a]">
+            £{displayPrice.toFixed(0)}
           </span>
           {oldPrice && (
-            <span className="text-sm text-[#9aa6bd] line-through">
-              £{oldPrice.toFixed(2)}
+            <span className="text-base text-[#b0b0b0] line-through italic">
+              £{oldPrice.toFixed(0)}
+            </span>
+          )}
+          {discount && (
+            <span className="rounded-full bg-[#ffe0e6] px-2.5 py-0.5 text-xs font-semibold text-[#ff3b69]">
+              -{discount}%
             </span>
           )}
         </div>
