@@ -38,7 +38,7 @@ export default function ImageUpload({
   const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
   const [backendAvailable, setBackendAvailable] = useState<boolean | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [uploadImage, { isLoading: isUploading }] = useUploadImageMutation();
 
   // Check backend availability on mount
@@ -49,13 +49,16 @@ export default function ImageUpload({
   const checkBackendHealth = async () => {
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      console.log('[ImageUpload] Checking backend health at:', `${API_BASE_URL}/docs`);
-      const response = await fetch(`${API_BASE_URL}/docs`, { 
-        method: 'HEAD',
-        signal: AbortSignal.timeout(3000) // 3 second timeout
+      // Use a real API endpoint instead of /docs which may be disabled in production
+      const healthUrl = `${API_BASE_URL}/ecommerce/v1/get_categories?per_page=1`;
+      console.log('[ImageUpload] Checking backend health at:', healthUrl);
+      const response = await fetch(healthUrl, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000) // 5 second timeout
       });
       console.log('[ImageUpload] Backend health check response:', response.status, response.ok);
-      setBackendAvailable(response.ok);
+      // Consider 200-299 as success, 401/403 also means backend is running (just needs auth)
+      setBackendAvailable(response.ok || response.status === 401 || response.status === 403);
     } catch (error) {
       console.warn('[ImageUpload] Backend health check failed:', error);
       setBackendAvailable(false);
@@ -71,7 +74,7 @@ export default function ImageUpload({
 
     const fileArray = Array.from(files);
     console.log('[ImageUpload] Files selected:', fileArray.map(f => ({ name: f.name, size: f.size, type: f.type })));
-    
+
     // Validate all files first
     const validationErrors: string[] = [];
     for (const file of fileArray) {
@@ -115,7 +118,7 @@ export default function ImageUpload({
 
     // Upload all files
     await handleUploadMultiple(fileArray, initialProgress);
-    
+
     // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -123,12 +126,12 @@ export default function ImageUpload({
   };
 
   const uploadFile = async (
-    file: File, 
+    file: File,
     index: number,
     retryCount = 0
   ): Promise<{ success: boolean; url?: string; error?: string }> => {
     const MAX_RETRIES = 2;
-    
+
     try {
       console.log(`[ImageUpload] Starting upload for file ${index + 1}:`, {
         name: file.name,
@@ -147,14 +150,14 @@ export default function ImageUpload({
 
       // Use RTK Query mutation with timeout wrapper
       console.log(`[ImageUpload] Calling uploadImage mutation for ${file.name}...`);
-      
+
       const uploadPromise = uploadImage({ file, folder }).unwrap();
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Upload timeout after 35 seconds')), 35000)
       );
-      
+
       const result = await Promise.race([uploadPromise, timeoutPromise]) as any;
-      
+
       console.log(`[ImageUpload] Upload successful for ${file.name}:`, result);
 
       // Update progress to 100%
@@ -163,7 +166,7 @@ export default function ImageUpload({
         updated[index] = { ...updated[index], status: 'success', progress: 100 };
         return updated;
       });
-      
+
       onUploadComplete?.(result.url);
       return { success: true, url: result.url };
     } catch (error: any) {
@@ -173,12 +176,12 @@ export default function ImageUpload({
         status: error?.status,
         retryCount,
       });
-      
+
       const errorMessage = error?.data?.message || error?.message || 'Failed to upload image';
-      
+
       // Retry logic
       if (retryCount < MAX_RETRIES && (
-        errorMessage.includes('timeout') || 
+        errorMessage.includes('timeout') ||
         errorMessage.includes('network') ||
         errorMessage.includes('Failed to fetch') ||
         error?.status === 'FETCH_ERROR'
@@ -190,10 +193,10 @@ export default function ImageUpload({
 
       setUploadProgress(prev => {
         const updated = [...prev];
-        updated[index] = { 
-          ...updated[index], 
-          status: 'error', 
-          error: errorMessage 
+        updated[index] = {
+          ...updated[index],
+          status: 'error',
+          error: errorMessage
         };
         return updated;
       });
@@ -204,24 +207,24 @@ export default function ImageUpload({
   };
 
   const handleUploadMultiple = async (
-    files: File[], 
+    files: File[],
     progressArray: UploadProgress[]
   ) => {
     const uploadToast = toast.loading(`Uploading ${files.length} image${files.length > 1 ? 's' : ''}...`);
-    
+
     console.log('[ImageUpload] Starting batch upload:', {
       fileCount: files.length,
       files: files.map(f => ({ name: f.name, size: f.size })),
     });
-    
+
     // Serialize uploads to avoid concurrent request issues
     const results: Array<{ success: boolean; url?: string; error?: string }> = [];
-    
+
     for (let i = 0; i < files.length; i++) {
       console.log(`[ImageUpload] Uploading file ${i + 1} of ${files.length}`);
       const result = await uploadFile(files[i], i);
       results.push(result);
-      
+
       // Small delay between uploads to avoid overwhelming the server
       if (i < files.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -231,13 +234,13 @@ export default function ImageUpload({
     try {
       const successCount = results.filter(r => r.success).length;
       const failCount = results.filter(r => !r.success).length;
-      
+
       console.log('[ImageUpload] Batch upload complete:', {
         successCount,
         failCount,
         results,
       });
-      
+
       if (successCount > 0 && failCount === 0) {
         toast.success(`Successfully uploaded ${successCount} image${successCount > 1 ? 's' : ''}`, { id: uploadToast });
       } else if (successCount > 0 && failCount > 0) {
@@ -262,7 +265,7 @@ export default function ImageUpload({
 
   const getUploadStatusText = () => {
     if (uploadProgress.length === 0) return null;
-    
+
     const successCount = uploadProgress.filter(p => p.status === 'success').length;
     const errorCount = uploadProgress.filter(p => p.status === 'error').length;
     const uploadingCount = uploadProgress.filter(p => p.status === 'uploading').length;
@@ -318,10 +321,10 @@ export default function ImageUpload({
                 {uploadProgress.length > 0 && (
                   <div className="w-full max-w-xs mt-2">
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-primary transition-all duration-300"
-                        style={{ 
-                          width: `${(uploadProgress.filter(p => p.status === 'success' || p.status === 'uploading').length / uploadProgress.length) * 100}%` 
+                        style={{
+                          width: `${(uploadProgress.filter(p => p.status === 'success' || p.status === 'uploading').length / uploadProgress.length) * 100}%`
                         }}
                       />
                     </div>
