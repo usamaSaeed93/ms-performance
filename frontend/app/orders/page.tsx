@@ -168,9 +168,9 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <div className="pt-8">
-        <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
+        <div className="bg-white overflow-hidden">
           <Navbar ctaText="Become A Dealer" />
 
           <main className="space-y-12">

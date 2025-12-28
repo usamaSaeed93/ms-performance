@@ -51,3 +51,51 @@ export async function createPaymentIntent(
   return result;
 }
 
+export interface CreateCheckoutSessionRequest {
+  items: Array<{
+    product_id: number;
+    quantity: number;
+  }>;
+  shipping_cost: number;
+  country_code?: string;
+  state_code?: string;
+  postcode?: string;
+  city?: string;
+  shipping_address?: string;
+}
+
+export interface CreateCheckoutSessionResponse {
+  checkout_url: string;
+  session_id: string;
+}
+
+export async function createCheckoutSession(
+  data: CreateCheckoutSessionRequest,
+  token: string
+): Promise<CreateCheckoutSessionResponse> {
+  const response = await fetch(`${API_URL}/ecommerce/v1/stripe/create_checkout_session`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'Failed to create checkout session' }));
+    const errorMessage = errorData.message || errorData.detail || 'Failed to create checkout session';
+    console.error('Checkout session creation failed:', {
+      status: response.status,
+      error: errorData,
+    });
+    throw new Error(errorMessage);
+  }
+
+  const result = await response.json();
+  // Handle FastAPI response format: { success, message, data }
+  if (result.data !== undefined) {
+    return result.data;
+  }
+  return result;
+}

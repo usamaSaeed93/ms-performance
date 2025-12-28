@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/lib/contexts/theme-context";
 import { Toaster } from "@/components/ui/sonner";
 import StoreProvider from "@/lib/store/StoreProvider";
+import { Footer } from "@/components/Footer";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +38,13 @@ export default function RootLayout({
     <html lang="en" className="light">
       <head></head>
       <body
-        className={`${montserrat.variable} ${geistSans.variable} ${geistMono.variable} antialiased font-[family-name:var(--font-montserrat)]`}
+        className={`${montserrat.variable} ${geistSans.variable} ${geistMono.variable} antialiased font-[family-name:var(--font-montserrat)] bg-white`}
       >
         <StoreProvider>
           <ThemeProvider>
             {children}
+            <Footer />
+            <WhatsAppButton />
             <Toaster />
           </ThemeProvider>
         </StoreProvider>

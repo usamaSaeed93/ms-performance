@@ -184,6 +184,13 @@ async def process_webhook_event(event: dict):
             # Store event_id in metadata for tracking
             payment_intent["_event_id"] = event_id
             await handle_payment_success(payment_intent)
+        elif event_type == "checkout.session.completed":
+            # Handle Stripe Checkout session completion
+            checkout_session = event["data"]["object"]
+            session_id = checkout_session.get("id")
+            logger.info(f"Checkout session completed - Session ID: {session_id}")
+            checkout_session["_event_id"] = event_id
+            await handle_checkout_session_completed(checkout_session)
         elif event_type == "payment_intent.payment_failed":
             payment_intent = event["data"]["object"]
             payment_intent_id = payment_intent.get("id")
@@ -475,6 +482,247 @@ async def handle_payment_success(payment_intent):
         except Exception:
             pass  # Ignore rollback errors
         # Re-raise to trigger task retry
+        raise
+    finally:
+        await db.close()
+
+
+async def handle_checkout_session_completed(checkout_session):
+    """
+    Handle Stripe Checkout session completion.
+    This is called when a user completes payment via Stripe Checkout.
+    
+    The checkout session contains metadata with order details.
+    """
+    import logging
+    logger = logging.getLogger("stripe.webhook")
+    
+    session_id = checkout_session.get("id")
+    payment_intent_id = checkout_session.get("payment_intent")
+    payment_status = checkout_session.get("payment_status")
+    
+    logger.info(f"Processing checkout session: {session_id}, Payment Intent: {payment_intent_id}, Status: {payment_status}")
+    
+    # Only process if payment succeeded
+    if payment_status != "paid":
+        logger.info(f"Checkout session {session_id} payment status is {payment_status}, skipping")
+        return
+    
+    # Get metadata from checkout session
+    metadata = checkout_session.get("metadata", {})
+    user_id = int(metadata.get("user_id", 0))
+    
+    if not user_id:
+        logger.error(f"No user_id in checkout session metadata for Session: {session_id}")
+        return
+    
+    logger.info(f"Creating order for user_id: {user_id}, Session: {session_id}")
+    
+    # Get database session
+    db = AsyncSessionMaker()
+    try:
+        db.sync_session.set_bind_key(config.APP_ENVIRONMENT)
+        
+        # IDEMPOTENCY CHECK: Check if order already exists for this payment_intent_id or session_id
+        existing_sale = await crud.sale.get_by_payment_intent_id(db, payment_intent_id=payment_intent_id)
+        if existing_sale:
+            logger.info(f"Order already exists for Payment Intent {payment_intent_id}: Sale ID {existing_sale.id}")
+            await db.close()
+            return existing_sale
+        
+        # Parse items from metadata
+        import ast
+        items = ast.literal_eval(metadata.get("items", "[]"))
+        shipping_cost = Decimal(metadata.get("shipping_cost", "0"))
+        country_code = metadata.get("country_code", "GB")
+        state_code = metadata.get("state_code") or None
+        postcode = metadata.get("postcode") or None
+        city = metadata.get("city") or None
+        shipping_address = metadata.get("shipping_address") or None
+        
+        # Get customer shipping address from Stripe if provided
+        shipping_details = checkout_session.get("shipping_details")
+        if shipping_details and not shipping_address:
+            address = shipping_details.get("address", {})
+            shipping_address = ", ".join(filter(None, [
+                address.get("line1"),
+                address.get("line2"),
+                address.get("city"),
+                address.get("state"),
+                address.get("postal_code"),
+                address.get("country"),
+            ]))
+
+        # Process items and calculate totals
+        successful_purchases = []
+        products_cache = {}
+        inventory_updates = []
+
+        for item_data in items:
+            product_id = item_data["product_id"]
+            quantity = item_data["quantity"]
+
+            if product_id in products_cache:
+                product = products_cache[product_id]
+            else:
+                product = await crud.product.get(db, id=product_id)
+                if not product:
+                    continue
+                products_cache[product_id] = product
+
+            if product.quantity < quantity:
+                logger.warning(f"Insufficient stock for product {product_id}")
+                continue
+
+            price_per_unit = product.sale_price if product.sale_price else product.price
+
+            tax_calculation = await TaxCalculator.calculate_line_item_tax(
+                db=db,
+                product=product,
+                quantity=quantity,
+                price_per_unit=price_per_unit,
+                country_code=country_code,
+                state_code=state_code,
+                postcode=postcode,
+                city=city,
+            )
+
+            from crud.schemas import SaleItemCreate
+            sale_item = SaleItemCreate(
+                sale_id=0,
+                product_id=product_id,
+                quantity=quantity,
+                price_per_unit=price_per_unit,
+                tax_rate=tax_calculation["tax_rate"],
+                tax_amount=tax_calculation["tax_amount"],
+                line_total=tax_calculation["line_total"],
+            )
+
+            successful_purchases.append({
+                "sale_item": sale_item,
+                "line_subtotal": tax_calculation["line_subtotal"],
+                "tax_amount": tax_calculation["tax_amount"],
+                "product": product,
+            })
+
+            if product.manage_stock:
+                inventory_updates.append({
+                    "product": product,
+                    "quantity": quantity,
+                })
+
+        if not successful_purchases:
+            logger.warning("No successful purchases to create")
+            await db.close()
+            return
+
+        # Calculate totals
+        subtotal = sum([x["line_subtotal"] for x in successful_purchases])
+        total_tax = sum([x["tax_amount"] for x in successful_purchases])
+
+        shipping_tax_calc = await TaxCalculator.calculate_shipping_tax(
+            db=db,
+            shipping_cost=shipping_cost,
+            country_code=country_code,
+            state_code=state_code,
+            postcode=postcode,
+            city=city,
+            shipping_taxable=True,
+        )
+
+        shipping_tax = shipping_tax_calc["tax_amount"]
+        total_amount = subtotal + total_tax + shipping_cost + shipping_tax
+
+        # Create sale
+        from crud.schemas import SaleCreate
+        from models.sale import Sale
+        from models.sale_item import SaleItem
+        
+        sale_data = SaleCreate(
+            user_id=user_id,
+            subtotal=subtotal,
+            tax=total_tax,
+            shipping_cost=shipping_cost,
+            shipping_tax=shipping_tax,
+            total_amount=total_amount,
+            payment_status="paid",
+            payment_method="stripe",
+            order_status="processing",
+            payment_intent_id=payment_intent_id,
+        )
+        
+        sale = Sale(**sale_data.model_dump())
+        db.add(sale)
+        await db.flush()
+        
+        # Create sale items
+        for purchase_data in successful_purchases:
+            sale_item_data = purchase_data["sale_item"]
+            sale_item_obj = SaleItem(
+                sale_id=sale.id,
+                product_id=sale_item_data.product_id,
+                quantity=sale_item_data.quantity,
+                price_per_unit=sale_item_data.price_per_unit,
+                tax_rate=sale_item_data.tax_rate,
+                tax_amount=sale_item_data.tax_amount,
+                line_total=sale_item_data.line_total,
+            )
+            db.add(sale_item_obj)
+        
+        # Update inventory
+        for inv_update in inventory_updates:
+            product = inv_update["product"]
+            quantity = inv_update["quantity"]
+            
+            inventory = await crud.inventory.get_by_product_id(db, product_id=product.id)
+            if inventory:
+                inventory.quantity = max(0, inventory.quantity - quantity)
+                db.add(inventory)
+            
+            product.quantity = max(0, product.quantity - quantity)
+            db.add(product)
+        
+        await db.commit()
+        await db.refresh(sale)
+
+        # Send order confirmation email
+        user_obj = await crud.user.get(db, id=user_id)
+        if user_obj:
+            from core.email_queue import email_queue
+            from core.email import email_service
+
+            order_items = []
+            for purchase_data in successful_purchases:
+                product = await crud.product.get(db, id=purchase_data["sale_item"].product_id)
+                if product:
+                    order_items.append({
+                        "name": product.product_name,
+                        "quantity": purchase_data["sale_item"].quantity,
+                        "price": float(purchase_data["sale_item"].price_per_unit),
+                        "total": float(purchase_data["sale_item"].line_total),
+                    })
+
+            await email_queue.add_email_task(
+                email_service.send_order_confirmation_email,
+                to_email=user_obj.email,
+                first_name=user_obj.first_name,
+                order_number=sale.order_number or f"ORD-{sale.id}",
+                order_items=order_items,
+                subtotal=float(sale.subtotal),
+                tax=float(sale.tax),
+                shipping_cost=float(sale.shipping_cost or 0),
+                total=float(sale.total_amount),
+            )
+
+        logger.info(f"Order created from Checkout Session - Sale ID: {sale.id}, Order Number: {sale.order_number or f'ORD-{sale.id}'}")
+    except Exception as e:
+        logger.error(f"Error processing checkout session {session_id}: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {''.join(traceback.format_exc())}")
+        try:
+            await db.rollback()
+        except Exception:
+            pass
         raise
     finally:
         await db.close()

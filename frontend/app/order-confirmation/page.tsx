@@ -15,9 +15,11 @@ function OrderConfirmationContent() {
   const paymentIntentId = searchParams?.get("payment_intent") ||
     searchParams?.get("payment_intent_id") ||
     searchParams?.get("pi");
+  const sessionId = searchParams?.get("session_id"); // Stripe Checkout session ID
   const orderId = searchParams?.get("order_id");
   const isCOD = searchParams?.get("cod") === "true";
-  const [orderStatus, setOrderStatus] = useState<"loading" | "confirmed" | "processing" | "error">("loading");
+  const isCancelled = searchParams?.get("cancelled") === "true";
+  const [orderStatus, setOrderStatus] = useState<"loading" | "confirmed" | "processing" | "error" | "cancelled">("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
 
@@ -27,10 +29,27 @@ function OrderConfirmationContent() {
       return;
     }
 
+    // Handle cancelled checkout
+    if (isCancelled) {
+      setOrderStatus("cancelled");
+      return;
+    }
+
     // Handle COD orders - they're confirmed immediately
     if (isCOD && orderId) {
       setOrderStatus("confirmed");
       setOrderNumber(`ORD-${orderId}`);
+      return;
+    }
+
+    // Handle Stripe Checkout session completion
+    if (sessionId) {
+      // Clear cart since payment was successful
+      localStorage.removeItem('cart');
+      localStorage.removeItem('applied_discount');
+
+      // Check if order already exists (webhook may have created it)
+      checkOrderBySessionId(sessionId);
       return;
     }
 
@@ -54,7 +73,7 @@ function OrderConfirmationContent() {
     if (paymentIntentId) {
       verifyOrder(paymentIntentId);
     }
-  }, [paymentIntentId, orderId, isCOD, router]);
+  }, [paymentIntentId, sessionId, orderId, isCOD, isCancelled, router]);
 
   const verifyOrder = async (paymentIntentIdToCheck: string) => {
     try {
@@ -111,10 +130,42 @@ function OrderConfirmationContent() {
     }
   };
 
+  const checkOrderBySessionId = async (sessionIdToCheck: string) => {
+    try {
+      const token = getCustomerToken();
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+      // Check order status by session ID
+      const orderResponse = await fetch(
+        `${API_URL}/ecommerce/v1/check_order_status?session_id=${encodeURIComponent(sessionIdToCheck)}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (orderResponse.ok) {
+        const orderData = await orderResponse.json();
+        if (orderData.data?.order_exists) {
+          setOrderStatus("confirmed");
+          setOrderNumber(orderData.data.order_number);
+          return;
+        }
+      }
+
+      // Order not found yet, webhook may still be processing
+      setOrderStatus("processing");
+    } catch (error) {
+      console.error("Error checking order by session ID:", error);
+      setOrderStatus("processing"); // Assume processing rather than error
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <div className="pt-8">
-        <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
+        <div className="bg-white overflow-hidden">
           <Navbar ctaText="Become A Dealer" />
 
           <main className="space-y-12">
@@ -246,6 +297,30 @@ function OrderConfirmationContent() {
                   </>
                 )}
 
+                {orderStatus === "cancelled" && (
+                  <>
+                    <div className="bg-gray-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+                      <svg
+                        className="w-12 h-12 text-gray-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <h2 className="text-3xl font-bold mb-4">Checkout Cancelled</h2>
+                    <p className="text-gray-600 mb-8">
+                      Your checkout was cancelled. No payment has been made. You can return to checkout to complete your order.
+                    </p>
+                  </>
+                )}
+
                 {paymentIntentId && (
                   <div className="bg-gray-50 rounded-lg p-4 mb-8">
                     <p className="text-sm text-gray-600 mb-1">Payment ID</p>
@@ -305,6 +380,22 @@ function OrderConfirmationContent() {
                       </Link>
                     </>
                   )}
+                  {orderStatus === "cancelled" && (
+                    <>
+                      <Link
+                        href="/checkout"
+                        className="rounded-[12px] bg-[#1d70ff] px-6 py-3 text-white font-semibold hover:bg-[#1a5fdd] transition"
+                      >
+                        Return to Checkout
+                      </Link>
+                      <Link
+                        href="/cart"
+                        className="rounded-[12px] border-2 border-[#1d70ff] px-6 py-3 text-[#1d70ff] font-semibold hover:bg-[#1d70ff]/5 transition"
+                      >
+                        View Cart
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </section>
@@ -318,9 +409,9 @@ function OrderConfirmationContent() {
 export default function OrderConfirmationPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-white">
         <div className="pt-8">
-          <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
+          <div className="bg-white overflow-hidden">
             <Navbar ctaText="Become A Dealer" />
             <main className="space-y-12">
               <section className="relative overflow-hidden bg-[#030814] text-white h-[360px]">

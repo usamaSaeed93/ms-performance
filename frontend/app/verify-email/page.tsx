@@ -55,8 +55,8 @@ function VerifyEmailContent() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden max-w-md w-full">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="bg-white overflow-hidden max-w-md w-full">
         <div className={`p-8 text-center ${status === "success"
           ? "bg-gradient-to-r from-green-500 to-green-600"
           : status === "error"
@@ -143,8 +143,8 @@ function VerifyEmailContent() {
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden max-w-md w-full">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="bg-white overflow-hidden max-w-md w-full">
           <div className="p-8 text-center bg-gradient-to-r from-[#0c1b33] to-[#1d70ff]">
             <div className="mb-4">
               <svg className="w-16 h-16 mx-auto text-white animate-spin" fill="none" viewBox="0 0 24 24">

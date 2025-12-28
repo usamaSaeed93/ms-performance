@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 
@@ -32,8 +31,8 @@ export default function StageUpgradesPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
 
     return (
-        <div className="min-h-screen bg-black">
-            <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
+        <div className="min-h-screen bg-white">
+            <div className="bg-white overflow-hidden">
                 <Navbar ctaText="Upgrade Now" />
 
                 <main className="space-y-20">
@@ -196,23 +195,9 @@ export default function StageUpgradesPage() {
                             </div>
                         </div>
                     </section>
-
-                    {/* Footer */}
-                    <footer className="border-t border-[#1d70ff]/100 px-8 py-12">
-                        <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr_1fr_1fr]">
-                            <div className="space-y-4">
-                                <Link href="/">
-                                    <Image src="/images/logos/ms-logo.png" alt="MS Performance" width={160} height={48} />
-                                </Link>
-                                <p className="text-sm leading-relaxed text-[#5c6c86]">
-                                    MSPerformance: Complete Stage 1, 2, and 3 Tuning Packages.
-                                </p>
-                            </div>
-                        </div>
-                        <p className="text-sm text-[#5c6c86] mt-8">© Copyright 2025 MSPerformance</p>
-                    </footer>
                 </main>
             </div>
         </div>
     );
 }
+

@@ -46,6 +46,7 @@ from .endpoints.create_tax_rate import CreateTaxRate
 from .endpoints.update_tax_rate import UpdateTaxRate
 from .endpoints.delete_tax_rate import DeleteTaxRate
 from .endpoints.create_payment_intent import CreatePaymentIntent
+from .endpoints.create_checkout_session import CreateCheckoutSession
 from .endpoints.check_order_status import CheckOrderStatus
 from .endpoints.check_webhook_status import CheckWebhookStatus
 from .endpoints.create_contact_message import CreateContactMessage
@@ -256,4 +257,8 @@ class RoutingV1(BaseRouting):
         self.routing_collection[ValidateDiscount.api_name] = (
             ValidateDiscount(),
             ValidateDiscount.api_url,
+        )
+        self.routing_collection[CreateCheckoutSession.api_name] = (
+            CreateCheckoutSession(),
+            CreateCheckoutSession.api_url,
         )

@@ -46,7 +46,7 @@ export default function ServicesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-black">
+        <div className="min-h-screen bg-white">
             <Navbar ctaText="Contact Us" />
 
             <main className="space-y-20 pb-20">
@@ -84,10 +84,10 @@ export default function ServicesPage() {
                                 <Link
                                     key={service.title}
                                     href={getServiceLink(service.title)}
-                                    className={`group flex flex-col gap-4 rounded-2xl bg-[#0a0a0a] p-4 transition-all duration-300 hover:-translate-y-1 hover:bg-[#111] hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] border border-white/5 sm:rounded-[24px] sm:p-5 card-hover ${index % 4 === 0 ? 'animate-card' :
-                                            index % 4 === 1 ? 'animate-card-delay-1' :
-                                                index % 4 === 2 ? 'animate-card-delay-2' :
-                                                    'animate-card-delay-3'
+                                    className={`group flex flex-col gap-4 rounded-2xl bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-gray-100 sm:rounded-[24px] sm:p-5 shadow-sm card-hover ${index % 4 === 0 ? 'animate-card' :
+                                        index % 4 === 1 ? 'animate-card-delay-1' :
+                                            index % 4 === 2 ? 'animate-card-delay-2' :
+                                                'animate-card-delay-3'
                                         }`}
                                 >
                                     <div className="relative overflow-hidden rounded-[16px] aspect-[4/3]">
@@ -101,15 +101,15 @@ export default function ServicesPage() {
                                     </div>
 
                                     <div className="flex flex-1 flex-col space-y-3">
-                                        <h3 className="text-xl font-bold text-white group-hover:text-[#1d70ff] transition-colors">
+                                        <h3 className="text-xl font-bold text-[#0c1b33] group-hover:text-[#1d70ff] transition-colors">
                                             {service.title}
                                         </h3>
-                                        <p className="text-sm text-gray-400 line-clamp-3">
+                                        <p className="text-sm text-[#5c6c86] line-clamp-3">
                                             {service.description}
                                         </p>
 
                                         <div className="mt-auto pt-4">
-                                            <div className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-white/5 px-4 py-3 text-sm font-semibold text-white transition-all group-hover:bg-[#1d70ff] group-hover:text-white">
+                                            <div className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-gray-100 px-4 py-3 text-sm font-semibold text-[#0c1b33] transition-all group-hover:bg-[#1d70ff] group-hover:text-white">
                                                 Learn More
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="transition-transform group-hover:translate-x-1">
                                                     <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -122,52 +122,6 @@ export default function ServicesPage() {
                         </div>
                     </div>
                 </section>
-
-                {/* Footer */}
-                <footer className="border-t border-white/10 px-8 py-12 bg-black">
-                    <div className="mx-auto max-w-7xl grid gap-8 lg:grid-cols-[1.2fr_1fr_1fr_1fr]">
-                        <div className="space-y-4">
-                            <Link href="/">
-                                <Image src="/images/logos/ms-logo.png" alt="MS Performance" width={160} height={48} />
-                            </Link>
-                            <p className="text-sm leading-relaxed text-gray-400">
-                                At MSPerformance, we specialize in car performance boosting services, ranging from ECU
-                                remapping to custom exhausts. We provide expert care for every vehicle that enters our workshop.
-                            </p>
-                        </div>
-
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Contact</h3>
-                            <ul className="space-y-2 text-sm text-gray-400">
-                                <li>Unit 16, Bakers Ln</li>
-                                <li>Chelmsford CM2 8LD</li>
-                                <li className="text-[#1d70ff]">0775 179 8827</li>
-                                <li className="text-[#1d70ff]">info@msperformance.co.uk</li>
-                            </ul>
-                        </div>
-
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Hours</h3>
-                            <ul className="space-y-2 text-sm text-gray-400">
-                                <li>Mon - Fri: 9:30 - 18:00</li>
-                                <li>Saturday: 9:30 - 16:00</li>
-                                <li>Sunday: Closed</li>
-                            </ul>
-                        </div>
-
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Legal</h3>
-                            <ul className="space-y-2 text-sm text-gray-400">
-                                <li><a href="#" className="hover:text-[#1d70ff]">Privacy Policy</a></li>
-                                <li><a href="#" className="hover:text-[#1d70ff]">Terms & Conditions</a></li>
-                                <li><a href="#" className="hover:text-[#1d70ff]">Cookie Policy</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="mx-auto max-w-7xl mt-12 pt-8 border-t border-white/5 text-center text-sm text-gray-500">
-                        <p>© Copyright 2025 MSPerformance. All rights reserved.</p>
-                    </div>
-                </footer>
             </main>
         </div>
     );

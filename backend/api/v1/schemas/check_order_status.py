@@ -1,8 +1,10 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 
 class CheckOrderStatusRequest(BaseModel):
-    payment_intent_id: str = Field(..., description="Stripe Payment Intent ID")
+    payment_intent_id: Optional[str] = Field(None, description="Stripe Payment Intent ID")
+    session_id: Optional[str] = Field(None, description="Stripe Checkout Session ID")
 
 
 class CheckOrderStatusResponse(BaseModel):

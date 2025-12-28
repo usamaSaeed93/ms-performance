@@ -7,8 +7,8 @@ import { useSearchParams } from "next/navigation";
 import { navLinks, vehicleMakes, vehicleModels } from "@/lib/constants";
 import { VehicleComboboxLight } from "@/components/VehicleComboboxLight";
 import { Navbar } from "@/components/Navbar";
-import { 
-  resolveVRM, 
+import {
+  resolveVRM,
   getEngineDetails,
   getBrands,
   getModels,
@@ -47,19 +47,19 @@ function GainsCalculatorContent() {
   const [selectedModelId, setSelectedModelId] = useState<string>("");
   const [selectedGenerationId, setSelectedGenerationId] = useState<string>("");
   const [selectedEnginePublicId, setSelectedEnginePublicId] = useState<string>("");
-  
+
   // Dropdown data state
   const [brands, setBrands] = useState<Brand[]>([]);
   const [models, setModels] = useState<Model[]>([]);
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [engines, setEngines] = useState<Engine[]>([]);
-  
+
   // Loading states
   const [brandsLoading, setBrandsLoading] = useState(false);
   const [modelsLoading, setModelsLoading] = useState(false);
   const [generationsLoading, setGenerationsLoading] = useState(false);
   const [enginesLoading, setEnginesLoading] = useState(false);
-  
+
   // VRM state
   const [vrmInput, setVrmInput] = useState(regParam || "");
   const [vrmData, setVrmData] = useState<VRMResponse | null>(null);
@@ -83,7 +83,7 @@ function GainsCalculatorContent() {
     try {
       const data = await resolveVRM(registration, "msperformance.co.uk");
       setVrmData(data);
-      
+
       // Optionally update dropdown selections with API data if available
       if (data.engineDetails?.paths && brands.length > 0) {
         // Find and set the brand ID
@@ -95,7 +95,7 @@ function GainsCalculatorContent() {
           }
         }
       }
-      
+
       // Trigger animation after a small delay to ensure DOM is ready
       setTimeout(() => {
         setAnimateProgress(true);
@@ -121,44 +121,44 @@ function GainsCalculatorContent() {
     try {
       const data = await getEngineDetails(engineId);
       setVrmData(data);
-      
+
       // Populate dropdown selections if paths are available
       if (data.engineDetails?.paths && brands.length > 0) {
         const paths = data.engineDetails.paths;
-        
+
         // Find and set brand
         if (paths.brand?.name) {
           const matchingBrand = brands.find(b => b.name === paths.brand.name);
           if (matchingBrand) {
             setSelectedBrandId(matchingBrand.id);
-            
+
             // Load models and populate model selection
             try {
               const modelsData = await getModels(matchingBrand.id);
               setModels(modelsData);
-              
+
               // Find and set model
               if (paths.model?.name && modelsData.length > 0) {
                 const matchingModel = modelsData.find(m => m.name === paths.model.name);
                 if (matchingModel) {
                   setSelectedModelId(matchingModel.id);
-                  
+
                   // Load generations and populate generation selection
                   try {
                     const generationsData = await getGenerations(matchingModel.id);
                     setGenerations(generationsData);
-                    
+
                     // Find and set generation
                     if (paths.generation?.name && generationsData.length > 0) {
                       const matchingGeneration = generationsData.find(g => g.name === paths.generation.name);
                       if (matchingGeneration) {
                         setSelectedGenerationId(matchingGeneration.id);
-                        
+
                         // Load engines and set engine selection
                         try {
                           const enginesData = await getEngines(matchingGeneration.id);
                           setEngines(enginesData);
-                          
+
                           // Set the engine public ID after a small delay to ensure useEffects have finished
                           setTimeout(() => {
                             setSelectedEnginePublicId(engineId);
@@ -179,7 +179,7 @@ function GainsCalculatorContent() {
           }
         }
       }
-      
+
       // Trigger animation after a small delay
       setTimeout(() => {
         setAnimateProgress(true);
@@ -224,7 +224,7 @@ function GainsCalculatorContent() {
       setSelectedModelId("");
       setSelectedGenerationId("");
       setSelectedEnginePublicId("");
-      
+
       try {
         const modelsData = await getModels(selectedBrandId);
         setModels(modelsData);
@@ -252,7 +252,7 @@ function GainsCalculatorContent() {
       setEngines([]);
       setSelectedGenerationId("");
       setSelectedEnginePublicId("");
-      
+
       try {
         const generationsData = await getGenerations(selectedModelId);
         setGenerations(generationsData);
@@ -277,7 +277,7 @@ function GainsCalculatorContent() {
       setEnginesLoading(true);
       setEngines([]);
       setSelectedEnginePublicId("");
-      
+
       try {
         const enginesData = await getEngines(selectedGenerationId);
         setEngines(enginesData);
@@ -307,21 +307,21 @@ function GainsCalculatorContent() {
   }, [engineParam, brands.length, handleEngineDetailsLoad]);
 
   // Prepare options for comboboxes
-  const brandOptions = useMemo(() => 
+  const brandOptions = useMemo(() =>
     brands.map(b => ({ value: b.id, label: b.name }))
-  , [brands]);
+    , [brands]);
 
-  const modelOptions = useMemo(() => 
+  const modelOptions = useMemo(() =>
     models.map(m => ({ value: m.id, label: m.name }))
-  , [models]);
+    , [models]);
 
-  const generationOptions = useMemo(() => 
+  const generationOptions = useMemo(() =>
     generations.map(g => ({ value: g.id, label: g.name }))
-  , [generations]);
+    , [generations]);
 
-  const engineOptions = useMemo(() => 
+  const engineOptions = useMemo(() =>
     engines.map(e => ({ value: e.publicid, label: `${e.name}${e.energy ? ` (${e.energy})` : ''}` }))
-  , [engines]);
+    , [engines]);
 
   // Handler for manual vehicle selection
   const handleManualSelection = async () => {
@@ -338,7 +338,7 @@ function GainsCalculatorContent() {
     try {
       const data = await getEngineDetails(selectedEnginePublicId);
       setVrmData(data);
-      
+
       // Trigger animation after a small delay
       setTimeout(() => {
         setAnimateProgress(true);
@@ -523,7 +523,7 @@ function GainsCalculatorContent() {
   }, [dynoChartData, vrmData]);
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <div className="w-full">
         <div className="bg-white shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
           <Navbar ctaText="Book a Dyno" />
@@ -575,7 +575,7 @@ function GainsCalculatorContent() {
                           readOnly={false}
                         />
                       </div>
-                      <button 
+                      <button
                         onClick={() => handleVRMLookup()}
                         disabled={vrmLoading}
                         className="rounded-[6px] sm:rounded-[8px] bg-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white animate-button disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
@@ -654,7 +654,7 @@ function GainsCalculatorContent() {
                         emptyMessage="No engine found."
                       />
                     </div>
-                    <button 
+                    <button
                       onClick={handleManualSelection}
                       disabled={!selectedEnginePublicId || vrmLoading}
                       className="w-full rounded-[6px] sm:rounded-[8px] bg-[#ffd200] px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold text-black animate-button hover:bg-[#e6c000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -663,112 +663,112 @@ function GainsCalculatorContent() {
                     </button>
                   </div>
                 </div>
-{/* Car Image and Specifications Card */}
-<div 
-  className="w-full bg-white border border-gray-100 rounded-[8px] sm:rounded-[10px] p-3 sm:p-4 md:p-5 lg:p-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 md:gap-8 lg:gap-[35px] animate-card-delay-1 animate-slide-right"
->
-  {/* Car/Brand Image */}
-  <div className="relative flex-shrink-0 w-full sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] h-[150px] sm:h-[170px] md:h-[189px]">
-    {vrmData?.engineDetails?.brand_image ? (
-      <div className="w-full h-full rounded-[8px] overflow-hidden relative bg-gray-50 flex items-center justify-center">
-        <Image
-          src={vrmData.engineDetails.brand_image}
-          alt={vrmData.engineDetails.paths?.brand?.name || vrmData.name || "Vehicle"}
-          width={400}
-          height={189}
-          className="w-full h-full object-contain p-4"
-        />
-      </div>
-    ) : vrmData?.engineDetails?.brand_svg ? (
-      <div className="w-full h-full rounded-[8px] overflow-hidden relative bg-gray-50 flex items-center justify-center">
-        <Image
-          src={vrmData.engineDetails.brand_svg}
-          alt={vrmData.engineDetails.paths?.brand?.name || vrmData.name || "Vehicle"}
-          width={400}
-          height={189}
-          className="w-full h-full object-contain p-4"
-        />
-      </div>
-    ) : (
-      <div className="w-full h-full bg-gray-100 rounded-[8px] overflow-hidden flex items-center justify-center">
-        <div className="text-center text-gray-400">
-          <svg
-            width="64"
-            height="64"
-          viewBox="0 0 24 24"
-          fill="none"
-            className="mx-auto mb-2"
-        >
-          <path
-              d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-          <p className="text-sm font-medium">Enter VRM to load vehicle image</p>
-        </div>
-      </div>
-    )}
-  </div>
+                {/* Car Image and Specifications Card */}
+                <div
+                  className="w-full bg-white border border-gray-100 rounded-[8px] sm:rounded-[10px] p-3 sm:p-4 md:p-5 lg:p-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 md:gap-8 lg:gap-[35px] animate-card-delay-1 animate-slide-right"
+                >
+                  {/* Car/Brand Image */}
+                  <div className="relative flex-shrink-0 w-full sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] h-[150px] sm:h-[170px] md:h-[189px]">
+                    {vrmData?.engineDetails?.brand_image ? (
+                      <div className="w-full h-full rounded-[8px] overflow-hidden relative bg-gray-50 flex items-center justify-center">
+                        <Image
+                          src={vrmData.engineDetails.brand_image}
+                          alt={vrmData.engineDetails.paths?.brand?.name || vrmData.name || "Vehicle"}
+                          width={400}
+                          height={189}
+                          className="w-full h-full object-contain p-4"
+                        />
+                      </div>
+                    ) : vrmData?.engineDetails?.brand_svg ? (
+                      <div className="w-full h-full rounded-[8px] overflow-hidden relative bg-gray-50 flex items-center justify-center">
+                        <Image
+                          src={vrmData.engineDetails.brand_svg}
+                          alt={vrmData.engineDetails.paths?.brand?.name || vrmData.name || "Vehicle"}
+                          width={400}
+                          height={189}
+                          className="w-full h-full object-contain p-4"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 rounded-[8px] overflow-hidden flex items-center justify-center">
+                        <div className="text-center text-gray-400">
+                          <svg
+                            width="64"
+                            height="64"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="mx-auto mb-2"
+                          >
+                            <path
+                              d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          <p className="text-sm font-medium">Enter VRM to load vehicle image</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-  {/* Vehicle Specifications */}
-  <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-3 sm:gap-y-4 text-xs sm:text-sm">
-    {/* Left Column */}
-    <div className="space-y-4">
-      <div>
-        <div className="font-bold text-[#0c1b33]">Model:</div>
-        <div className="text-[#5c6c86] mt-1">
-          {vrmData?.engineDetails?.paths?.model?.name || "-"}
-        </div>
-      </div>
-      <div>
-        <div className="font-bold text-[#0c1b33]">Fuel:</div>
-        <div className="text-[#5c6c86] mt-1">
-          {vrmData?.engineDetails?.specz?.energy || "Petrol"}
-        </div>
-      </div>
-      <div>
-        <div className="font-bold text-[#0c1b33]">Engine Size:</div>
-        <div className="text-[#5c6c86] mt-1">
-          {vrmData?.engineDetails?.specz?.["Cylinder content"] 
-            ? `${vrmData.engineDetails.specz["Cylinder content"]} cc`
-            : vrmData?.engine_size || "1329 cc"}
-        </div>
-      </div>
-    </div>
+                  {/* Vehicle Specifications */}
+                  <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-3 sm:gap-y-4 text-xs sm:text-sm">
+                    {/* Left Column */}
+                    <div className="space-y-4">
+                      <div>
+                        <div className="font-bold text-[#0c1b33]">Model:</div>
+                        <div className="text-[#5c6c86] mt-1">
+                          {vrmData?.engineDetails?.paths?.model?.name || "-"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-[#0c1b33]">Fuel:</div>
+                        <div className="text-[#5c6c86] mt-1">
+                          {vrmData?.engineDetails?.specz?.energy || "Petrol"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-[#0c1b33]">Engine Size:</div>
+                        <div className="text-[#5c6c86] mt-1">
+                          {vrmData?.engineDetails?.specz?.["Cylinder content"]
+                            ? `${vrmData.engineDetails.specz["Cylinder content"]} cc`
+                            : vrmData?.engine_size || "1329 cc"}
+                        </div>
+                      </div>
+                    </div>
 
-    {/* Right Column */}
-    <div className="space-y-4">
-      <div>
-        <div className="font-bold text-[#0c1b33]">Variant:</div>
-        <div className="text-[#5c6c86] mt-1">
-          {vrmData?.engineDetails?.paths?.engine?.name || "-"}
-        </div>
-      </div>
-      <div>
-        <div className="font-bold text-[#0c1b33]">Years:</div>
-        <div className="text-[#5c6c86] mt-1">
-          {vrmData?.engineDetails?.paths?.generation?.name || vrmData?.year || "-"}
-        </div>
-      </div>
-      <div>
-        <div className="font-bold text-[#0c1b33]">ECU Type:</div>
-        <div className="text-[#5c6c86] mt-1">
-          {vrmData?.engineDetails?.specz?.engine_ecu || "Marelli 8GM"}
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                    {/* Right Column */}
+                    <div className="space-y-4">
+                      <div>
+                        <div className="font-bold text-[#0c1b33]">Variant:</div>
+                        <div className="text-[#5c6c86] mt-1">
+                          {vrmData?.engineDetails?.paths?.engine?.name || "-"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-[#0c1b33]">Years:</div>
+                        <div className="text-[#5c6c86] mt-1">
+                          {vrmData?.engineDetails?.paths?.generation?.name || vrmData?.year || "-"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-[#0c1b33]">ECU Type:</div>
+                        <div className="text-[#5c6c86] mt-1">
+                          {vrmData?.engineDetails?.specz?.engine_ecu || "Marelli 8GM"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Vehicle Title and Description */}
@@ -785,127 +785,127 @@ function GainsCalculatorContent() {
                     </>
                   ) : (
                     <>
-                  Our ECU Software remapping service for the Abarth 124 Spider includes Dyno Development to ensure
-                  optimal performance. We enhance Power & Torque while maintaining Fuel Economy and Reliability. Our
-                  professional tuning delivers safe, tested improvements to your vehicle's performance.
+                      Our ECU Software remapping service for the Abarth 124 Spider includes Dyno Development to ensure
+                      optimal performance. We enhance Power & Torque while maintaining Fuel Economy and Reliability. Our
+                      professional tuning delivers safe, tested improvements to your vehicle's performance.
                     </>
                   )}
                 </p>
               </div>
-            {/* Performance Graph Section */}
-             <div className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 md:py-10">
-              <div className="bg-white rounded-[12px] sm:rounded-[16px] p-4 sm:p-6 md:p-8">
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33] mb-4 sm:mb-6">
-                  <span className="hidden sm:inline">Vehicle Performance Chart - </span>
-                  {vrmData?.name || vrmData?.engineDetails?.fullname || "Abarth 124 Spider 1.4 Turbo MultiAir 167 Bhp"}
-                </h3>
-                <div className="h-[300px] sm:h-[400px] md:h-[500px] rounded-[8px] sm:rounded-[12px] border border-gray-200 p-2 sm:p-3 md:p-4">
-                  {chartData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis 
-                          dataKey="rpm" 
-                          label={{ value: 'RPM', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fill: '#0c1b33', fontWeight: 'bold', fontSize: 12 } }}
-                          tick={{ fill: '#5c6c86', fontSize: 11 }}
-                          domain={[500, 5000]}
-                          type="number"
-                          ticks={[500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]}
-                        />
-                        <YAxis 
-                          yAxisId="bhp"
-                          orientation="left"
-                          label={{ value: 'BHP', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#0c1b33', fontWeight: 'bold', fontSize: 12 } }}
-                          tick={{ fill: '#5c6c86', fontSize: 11 }}
-                          domain={[0, 400]}
-                          ticks={[0, 50, 100, 150, 200, 250, 300, 350, 400]}
-                        />
-                        <YAxis 
-                          yAxisId="nm"
-                          orientation="right"
-                          label={{ value: 'Nm', angle: 90, position: 'insideRight', style: { textAnchor: 'middle', fill: '#0c1b33', fontWeight: 'bold', fontSize: 12 } }}
-                          tick={{ fill: '#5c6c86', fontSize: 11 }}
-                          domain={[0, 400]}
-                          ticks={[0, 50, 100, 150, 200, 250, 300, 350, 400]}
-                        />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            border: '1px solid #e5e7eb',
-                            borderRadius: '8px',
-                            padding: '12px'
-                          }}
-                          formatter={(value: number, name: string) => {
-                            const labelMap: { [key: string]: string } = {
-                              'orgBHP': 'Org BHP',
-                              'tunedBHP': 'Tuned BHP',
-                              'orgNm': 'Org Nm',
-                              'tunedNm': 'Tuned Nm'
-                            };
-                            return [value, labelMap[name] || name];
-                          }}
-                          labelFormatter={(label) => `RPM: ${label}`}
-                        />
-                        <Legend 
-                          wrapperStyle={{ paddingTop: '20px' }}
-                          formatter={(value: string) => {
-                            const labelMap: { [key: string]: string } = {
-                              'orgBHP': 'Org BHP',
-                              'tunedBHP': 'Tuned BHP',
-                              'orgNm': 'Org Nm',
-                              'tunedNm': 'Tuned Nm'
-                            };
-                            return labelMap[value] || value;
-                          }}
-                        />
-                        <Line
-                          yAxisId="bhp"
-                          type="monotone"
-                          dataKey="orgBHP"
-                          stroke="#ff9999"
-                          strokeWidth={2}
-                          dot={false}
-                          name="orgBHP"
-                        />
-                        <Line
-                          yAxisId="bhp"
-                          type="monotone"
-                          dataKey="tunedBHP"
-                          stroke="#cc0000"
-                          strokeWidth={2}
-                          dot={false}
-                          name="tunedBHP"
-                        />
-                        <Line
-                          yAxisId="nm"
-                          type="monotone"
-                          dataKey="orgNm"
-                          stroke="#99ff99"
-                          strokeWidth={2}
-                          dot={false}
-                          name="orgNm"
-                        />
-                        <Line
-                          yAxisId="nm"
-                          type="monotone"
-                          dataKey="tunedNm"
-                          stroke="#00cc00"
-                          strokeWidth={2}
-                          dot={false}
-                          name="tunedNm"
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="h-full flex items-center justify-center">
-                  <div className="text-center space-y-2">
-                    <p className="text-gray-400">Performance Graph</p>
-                        <p className="text-sm text-gray-500">Enter VRM or select vehicle to view chart</p>
+              {/* Performance Graph Section */}
+              <div className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 md:py-10">
+                <div className="bg-white rounded-[12px] sm:rounded-[16px] p-4 sm:p-6 md:p-8">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33] mb-4 sm:mb-6">
+                    <span className="hidden sm:inline">Vehicle Performance Chart - </span>
+                    {vrmData?.name || vrmData?.engineDetails?.fullname || "Abarth 124 Spider 1.4 Turbo MultiAir 167 Bhp"}
+                  </h3>
+                  <div className="h-[300px] sm:h-[400px] md:h-[500px] rounded-[8px] sm:rounded-[12px] border border-gray-200 p-2 sm:p-3 md:p-4">
+                    {chartData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis
+                            dataKey="rpm"
+                            label={{ value: 'RPM', position: 'insideBottom', offset: -10, style: { textAnchor: 'middle', fill: '#0c1b33', fontWeight: 'bold', fontSize: 12 } }}
+                            tick={{ fill: '#5c6c86', fontSize: 11 }}
+                            domain={[500, 5000]}
+                            type="number"
+                            ticks={[500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]}
+                          />
+                          <YAxis
+                            yAxisId="bhp"
+                            orientation="left"
+                            label={{ value: 'BHP', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#0c1b33', fontWeight: 'bold', fontSize: 12 } }}
+                            tick={{ fill: '#5c6c86', fontSize: 11 }}
+                            domain={[0, 400]}
+                            ticks={[0, 50, 100, 150, 200, 250, 300, 350, 400]}
+                          />
+                          <YAxis
+                            yAxisId="nm"
+                            orientation="right"
+                            label={{ value: 'Nm', angle: 90, position: 'insideRight', style: { textAnchor: 'middle', fill: '#0c1b33', fontWeight: 'bold', fontSize: 12 } }}
+                            tick={{ fill: '#5c6c86', fontSize: 11 }}
+                            domain={[0, 400]}
+                            ticks={[0, 50, 100, 150, 200, 250, 300, 350, 400]}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '8px',
+                              padding: '12px'
+                            }}
+                            formatter={(value: number, name: string) => {
+                              const labelMap: { [key: string]: string } = {
+                                'orgBHP': 'Org BHP',
+                                'tunedBHP': 'Tuned BHP',
+                                'orgNm': 'Org Nm',
+                                'tunedNm': 'Tuned Nm'
+                              };
+                              return [value, labelMap[name] || name];
+                            }}
+                            labelFormatter={(label) => `RPM: ${label}`}
+                          />
+                          <Legend
+                            wrapperStyle={{ paddingTop: '20px' }}
+                            formatter={(value: string) => {
+                              const labelMap: { [key: string]: string } = {
+                                'orgBHP': 'Org BHP',
+                                'tunedBHP': 'Tuned BHP',
+                                'orgNm': 'Org Nm',
+                                'tunedNm': 'Tuned Nm'
+                              };
+                              return labelMap[value] || value;
+                            }}
+                          />
+                          <Line
+                            yAxisId="bhp"
+                            type="monotone"
+                            dataKey="orgBHP"
+                            stroke="#ff9999"
+                            strokeWidth={2}
+                            dot={false}
+                            name="orgBHP"
+                          />
+                          <Line
+                            yAxisId="bhp"
+                            type="monotone"
+                            dataKey="tunedBHP"
+                            stroke="#cc0000"
+                            strokeWidth={2}
+                            dot={false}
+                            name="tunedBHP"
+                          />
+                          <Line
+                            yAxisId="nm"
+                            type="monotone"
+                            dataKey="orgNm"
+                            stroke="#99ff99"
+                            strokeWidth={2}
+                            dot={false}
+                            name="orgNm"
+                          />
+                          <Line
+                            yAxisId="nm"
+                            type="monotone"
+                            dataKey="tunedNm"
+                            stroke="#00cc00"
+                            strokeWidth={2}
+                            dot={false}
+                            name="tunedNm"
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-full flex items-center justify-center">
+                        <div className="text-center space-y-2">
+                          <p className="text-gray-400">Performance Graph</p>
+                          <p className="text-sm text-gray-500">Enter VRM or select vehicle to view chart</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                    </div>
-                  )}
                 </div>
-              </div>
               </div>
             </section>
 
@@ -920,7 +920,7 @@ function GainsCalculatorContent() {
                       <div className="flex flex-col">
                         <span className="font-bold text-[#0c1b33] mb-1 text-xs sm:text-sm">Cylinder Capacity:</span>
                         <span className="text-[#5c6c86] text-sm sm:text-base md:text-lg">
-                          {vrmData?.engineDetails?.specz?.["Cylinder content"] 
+                          {vrmData?.engineDetails?.specz?.["Cylinder content"]
                             ? `${vrmData.engineDetails.specz["Cylinder content"]} CC`
                             : vrmData?.engine_size || "-"}
                         </span>
@@ -957,323 +957,324 @@ function GainsCalculatorContent() {
 
                   {/* Performance Results */}
                   <div>
-                  <div className="space-y-6 sm:space-y-8">
-                    {/* Power Row */}
-                    <div>
-                      <h4 className="text-base sm:text-lg font-bold text-[#0c1b33] mb-3 sm:mb-4">Power (Hp)</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                        {/* Original */}
-                        <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                          <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Standard</span>
-                          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                            {(() => {
-                              const originalHP = vrmData?.engineDetails?.horsepower_original;
-                              const tunedHP = vrmData?.engineDetails?.horsepower_white;
-                              if (!originalHP || !tunedHP) {
+                    <div className="space-y-6 sm:space-y-8">
+                      {/* Power Row */}
+                      <div>
+                        <h4 className="text-base sm:text-lg font-bold text-[#0c1b33] mb-3 sm:mb-4">Power (Hp)</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                          {/* Original */}
+                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
+                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Standard</span>
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
+                              {(() => {
+                                const originalHP = vrmData?.engineDetails?.horsepower_original;
+                                const tunedHP = vrmData?.engineDetails?.horsepower_white;
+                                if (!originalHP || !tunedHP) {
+                                  return (
+                                    <div className="flex items-center justify-center h-full">
+                                      <span className="text-sm text-gray-400">-</span>
+                                    </div>
+                                  );
+                                }
+                                const maxHP = Math.max(tunedHP * 1.2, tunedHP + 20);
+                                const percentage = (originalHP / maxHP) * 100;
+                                // Responsive radius based on container size
+                                const radius = 32; // For 80px container (mobile)
+                                const circumference = 2 * Math.PI * radius;
+                                const offset = circumference - (circumference * percentage / 100);
+                                const center = 40; // Half of 80px
                                 return (
-                                  <div className="flex items-center justify-center h-full">
-                                    <span className="text-sm text-gray-400">-</span>
-                                  </div>
+                                  <>
+                                    <svg className="w-full h-full transform -rotate-90" key={`hp-original-${originalHP}`} viewBox="0 0 80 80">
+                                      <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="none"
+                                        stroke="#e5e7eb"
+                                        strokeWidth="7"
+                                      />
+                                      <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="none"
+                                        stroke="#1d70ff"
+                                        strokeWidth="7"
+                                        strokeDasharray={circumference}
+                                        strokeDashoffset={animateProgress ? offset : circumference}
+                                        strokeLinecap="round"
+                                        className="progress-ring"
+                                        style={{
+                                          transition: 'stroke-dashoffset 1.5s ease-out'
+                                        } as React.CSSProperties}
+                                      />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{originalHP}</span>
+                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Hp</span>
+                                    </div>
+                                  </>
                                 );
-                              }
-                              const maxHP = Math.max(tunedHP * 1.2, tunedHP + 20);
-                              const percentage = (originalHP / maxHP) * 100;
-                              // Responsive radius based on container size
-                              const radius = 32; // For 80px container (mobile)
-                              const circumference = 2 * Math.PI * radius;
-                              const offset = circumference - (circumference * percentage / 100);
-                              const center = 40; // Half of 80px
-                              return (
-                                <>
-                            <svg className="w-full h-full transform -rotate-90" key={`hp-original-${originalHP}`} viewBox="0 0 80 80">
-                              <circle
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke="#e5e7eb"
-                                strokeWidth="7"
-                              />
-                              <circle
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke="#1d70ff"
-                                strokeWidth="7"
-                                strokeDasharray={circumference}
-                                strokeDashoffset={animateProgress ? offset : circumference}
-                                strokeLinecap="round"
-                                className="progress-ring"
-                                style={{
-                                  transition: 'stroke-dashoffset 1.5s ease-out'
-                                } as React.CSSProperties}
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{originalHP}</span>
-                              <span className="text-[10px] sm:text-xs text-[#5c6c86]">Hp</span>
+                              })()}
                             </div>
-                                </>
-                              );
-                            })()}
                           </div>
-                        </div>
 
-                        {/* Modified */}
-                        <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                          <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Tuned</span>
-                          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                            {(() => {
-                              const originalHP = vrmData?.engineDetails?.horsepower_original;
-                              const tunedHP = vrmData?.engineDetails?.horsepower_white;
-                              if (!originalHP || !tunedHP) {
+                          {/* Modified */}
+                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
+                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Tuned</span>
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
+                              {(() => {
+                                const originalHP = vrmData?.engineDetails?.horsepower_original;
+                                const tunedHP = vrmData?.engineDetails?.horsepower_white;
+                                if (!originalHP || !tunedHP) {
+                                  return (
+                                    <div className="flex items-center justify-center h-full">
+                                      <span className="text-sm text-gray-400">-</span>
+                                    </div>
+                                  );
+                                }
+                                const maxHP = Math.max(tunedHP * 1.2, tunedHP + 20);
+                                const percentage = (tunedHP / maxHP) * 100;
+                                const radius = 32;
+                                const circumference = 2 * Math.PI * radius;
+                                const offset = circumference - (circumference * percentage / 100);
+                                const center = 40;
                                 return (
-                                  <div className="flex items-center justify-center h-full">
-                                    <span className="text-sm text-gray-400">-</span>
-                                  </div>
+                                  <>
+                                    <svg className="w-full h-full transform -rotate-90" key={`hp-tuned-${tunedHP}`} viewBox="0 0 80 80">
+                                      <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="none"
+                                        stroke="#e5e7eb"
+                                        strokeWidth="7"
+                                      />
+                                      <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="none"
+                                        stroke="#1d70ff"
+                                        strokeWidth="7"
+                                        strokeDasharray={circumference}
+                                        strokeDashoffset={animateProgress ? offset : circumference}
+                                        strokeLinecap="round"
+                                        className="progress-ring"
+                                        style={{
+                                          transition: 'stroke-dashoffset 1.5s ease-out'
+                                        } as React.CSSProperties}
+                                      />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{tunedHP}</span>
+                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Hp</span>
+                                    </div>
+                                  </>
                                 );
-                              }
-                              const maxHP = Math.max(tunedHP * 1.2, tunedHP + 20);
-                              const percentage = (tunedHP / maxHP) * 100;
-                              const radius = 32;
-                              const circumference = 2 * Math.PI * radius;
-                              const offset = circumference - (circumference * percentage / 100);
-                              const center = 40;
-                              return (
-                                <>
-                            <svg className="w-full h-full transform -rotate-90" key={`hp-tuned-${tunedHP}`} viewBox="0 0 80 80">
-                              <circle
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke="#e5e7eb"
-                                strokeWidth="7"
-                              />
-                              <circle
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke="#1d70ff"
-                                strokeWidth="7"
-                                strokeDasharray={circumference}
-                                strokeDashoffset={animateProgress ? offset : circumference}
-                                strokeLinecap="round"
-                                className="progress-ring"
-                                style={{
-                                  transition: 'stroke-dashoffset 1.5s ease-out'
-                                } as React.CSSProperties}
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{tunedHP}</span>
-                              <span className="text-[10px] sm:text-xs text-[#5c6c86]">Hp</span>
+                              })()}
                             </div>
-                                </>
-                              );
-                            })()}
                           </div>
-                        </div>
 
-                        {/* Difference */}
-                        <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                          <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Difference</span>
-                          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                            {(() => {
-                              const originalHP = vrmData?.engineDetails?.horsepower_original;
-                              const tunedHP = vrmData?.engineDetails?.horsepower_white;
-                              if (!originalHP || !tunedHP) {
+                          {/* Difference */}
+                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
+                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Difference</span>
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
+                              {(() => {
+                                const originalHP = vrmData?.engineDetails?.horsepower_original;
+                                const tunedHP = vrmData?.engineDetails?.horsepower_white;
+                                if (!originalHP || !tunedHP) {
+                                  return (
+                                    <div className="flex items-center justify-center h-full">
+                                      <span className="text-sm text-gray-400">-</span>
+                                    </div>
+                                  );
+                                }
+                                const difference = tunedHP - originalHP;
+                                const radius = 32;
+                                const center = 40;
                                 return (
-                                  <div className="flex items-center justify-center h-full">
-                                    <span className="text-sm text-gray-400">-</span>
-                                  </div>
+                                  <>
+                                    <svg className="w-full h-full difference-ring" key={`hp-diff-${difference}`} viewBox="0 0 80 80" style={{ transform: 'rotate(-90deg)' }}>
+                                      <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="none"
+                                        stroke="#1d70ff"
+                                        strokeWidth="7"
+                                        strokeDasharray="7 7"
+                                      />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">+{difference}</span>
+                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Hp</span>
+                                    </div>
+                                  </>
                                 );
-                              }
-                              const difference = tunedHP - originalHP;
-                              const radius = 32;
-                              const center = 40;
-                              return (
-                                <>
-                            <svg className="w-full h-full difference-ring" key={`hp-diff-${difference}`} viewBox="0 0 80 80" style={{ transform: 'rotate(-90deg)' }}>
-                              <circle
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke="#1d70ff"
-                                strokeWidth="7"
-                                strokeDasharray="7 7"
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">+{difference}</span>
-                              <span className="text-[10px] sm:text-xs text-[#5c6c86]">Hp</span>
+                              })()}
                             </div>
-                                </>
-                              );
-                            })()}
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Torque Row */}
-                    <div>
-                      <h4 className="text-base sm:text-lg font-bold text-[#0c1b33] mb-3 sm:mb-4">Torque (Nm)</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                        {/* Original */}
-                        <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                          <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Standard</span>
-                          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                            {(() => {
-                              const originalTorque = vrmData?.engineDetails?.torque_original;
-                              const tunedTorque = vrmData?.engineDetails?.torque_white;
-                              if (!originalTorque || !tunedTorque) {
+                      {/* Torque Row */}
+                      <div>
+                        <h4 className="text-base sm:text-lg font-bold text-[#0c1b33] mb-3 sm:mb-4">Torque (Nm)</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                          {/* Original */}
+                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
+                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Standard</span>
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
+                              {(() => {
+                                const originalTorque = vrmData?.engineDetails?.torque_original;
+                                const tunedTorque = vrmData?.engineDetails?.torque_white;
+                                if (!originalTorque || !tunedTorque) {
+                                  return (
+                                    <div className="flex items-center justify-center h-full">
+                                      <span className="text-sm text-gray-400">-</span>
+                                    </div>
+                                  );
+                                }
+                                const maxTorque = Math.max(tunedTorque * 1.2, tunedTorque + 20);
+                                const percentage = (originalTorque / maxTorque) * 100;
+                                const radius = 32;
+                                const circumference = 2 * Math.PI * radius;
+                                const offset = circumference - (circumference * percentage / 100);
+                                const center = 40;
                                 return (
-                                  <div className="flex items-center justify-center h-full">
-                                    <span className="text-sm text-gray-400">-</span>
-                                  </div>
+                                  <>
+                                    <svg className="w-full h-full transform -rotate-90" key={`torque-original-${originalTorque}`} viewBox="0 0 80 80">
+                                      <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="none"
+                                        stroke="#e5e7eb"
+                                        strokeWidth="7"
+                                      />
+                                      <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="none"
+                                        stroke="#1d70ff"
+                                        strokeWidth="7"
+                                        strokeDasharray={circumference}
+                                        strokeDashoffset={animateProgress ? offset : circumference}
+                                        strokeLinecap="round"
+                                        className="progress-ring"
+                                        style={{
+                                          transition: 'stroke-dashoffset 1.5s ease-out'
+                                        } as React.CSSProperties}
+                                      />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{originalTorque}</span>
+                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Nm</span>
+                                    </div>
+                                  </>
                                 );
-                              }
-                              const maxTorque = Math.max(tunedTorque * 1.2, tunedTorque + 20);
-                              const percentage = (originalTorque / maxTorque) * 100;
-                              const radius = 32;
-                              const circumference = 2 * Math.PI * radius;
-                              const offset = circumference - (circumference * percentage / 100);
-                              const center = 40;
-                              return (
-                                <>
-                            <svg className="w-full h-full transform -rotate-90" key={`torque-original-${originalTorque}`} viewBox="0 0 80 80">
-                              <circle
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke="#e5e7eb"
-                                strokeWidth="7"
-                              />
-                              <circle
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke="#1d70ff"
-                                strokeWidth="7"
-                                strokeDasharray={circumference}
-                                strokeDashoffset={animateProgress ? offset : circumference}
-                                strokeLinecap="round"
-                                className="progress-ring"
-                                style={{
-                                  transition: 'stroke-dashoffset 1.5s ease-out'
-                                } as React.CSSProperties}
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{originalTorque}</span>
-                              <span className="text-[10px] sm:text-xs text-[#5c6c86]">Nm</span>
+                              })()}
                             </div>
-                                </>
-                              );
-                            })()}
                           </div>
-                        </div>
 
-                        {/* Modified */}
-                        <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                          <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Tuned</span>
-                          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                            {(() => {
-                              const originalTorque = vrmData?.engineDetails?.torque_original;
-                              const tunedTorque = vrmData?.engineDetails?.torque_white;
-                              if (!originalTorque || !tunedTorque) {
+                          {/* Modified */}
+                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
+                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Tuned</span>
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
+                              {(() => {
+                                const originalTorque = vrmData?.engineDetails?.torque_original;
+                                const tunedTorque = vrmData?.engineDetails?.torque_white;
+                                if (!originalTorque || !tunedTorque) {
+                                  return (
+                                    <div className="flex items-center justify-center h-full">
+                                      <span className="text-sm text-gray-400">-</span>
+                                    </div>
+                                  );
+                                }
+                                const maxTorque = Math.max(tunedTorque * 1.2, tunedTorque + 20);
+                                const percentage = (tunedTorque / maxTorque) * 100;
+                                const radius = 32;
+                                const circumference = 2 * Math.PI * radius;
+                                const offset = circumference - (circumference * percentage / 100);
+                                const center = 40;
                                 return (
-                                  <div className="flex items-center justify-center h-full">
-                                    <span className="text-sm text-gray-400">-</span>
-                                  </div>
+                                  <>
+                                    <svg className="w-full h-full transform -rotate-90" key={`torque-tuned-${tunedTorque}`} viewBox="0 0 80 80">
+                                      <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="none"
+                                        stroke="#e5e7eb"
+                                        strokeWidth="7"
+                                      />
+                                      <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="none"
+                                        stroke="#1d70ff"
+                                        strokeWidth="7"
+                                        strokeDasharray={circumference}
+                                        strokeDashoffset={animateProgress ? offset : circumference}
+                                        strokeLinecap="round"
+                                        className="progress-ring"
+                                        style={{
+                                          transition: 'stroke-dashoffset 1.5s ease-out'
+                                        } as React.CSSProperties}
+                                      />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{tunedTorque}</span>
+                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Nm</span>
+                                    </div>
+                                  </>
                                 );
-                              }
-                              const maxTorque = Math.max(tunedTorque * 1.2, tunedTorque + 20);
-                              const percentage = (tunedTorque / maxTorque) * 100;
-                              const radius = 32;
-                              const circumference = 2 * Math.PI * radius;
-                              const offset = circumference - (circumference * percentage / 100);
-                              const center = 40;
-                              return (
-                                <>
-                            <svg className="w-full h-full transform -rotate-90" key={`torque-tuned-${tunedTorque}`} viewBox="0 0 80 80">
-                              <circle
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke="#e5e7eb"
-                                strokeWidth="7"
-                              />
-                              <circle
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke="#1d70ff"
-                                strokeWidth="7"
-                                strokeDasharray={circumference}
-                                strokeDashoffset={animateProgress ? offset : circumference}
-                                strokeLinecap="round"
-                                className="progress-ring"
-                                style={{
-                                  transition: 'stroke-dashoffset 1.5s ease-out'
-                                } as React.CSSProperties}
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{tunedTorque}</span>
-                              <span className="text-[10px] sm:text-xs text-[#5c6c86]">Nm</span>
+                              })()}
                             </div>
-                                </>
-                              );
-                            })()}
                           </div>
-                        </div>
 
-                        {/* Difference */}
-                        <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                          <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Difference</span>
-                          <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                            {(() => {
-                              const originalTorque = vrmData?.engineDetails?.torque_original;
-                              const tunedTorque = vrmData?.engineDetails?.torque_white;
-                              if (!originalTorque || !tunedTorque) {
+                          {/* Difference */}
+                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
+                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Difference</span>
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
+                              {(() => {
+                                const originalTorque = vrmData?.engineDetails?.torque_original;
+                                const tunedTorque = vrmData?.engineDetails?.torque_white;
+                                if (!originalTorque || !tunedTorque) {
+                                  return (
+                                    <div className="flex items-center justify-center h-full">
+                                      <span className="text-sm text-gray-400">-</span>
+                                    </div>
+                                  );
+                                }
+                                const difference = tunedTorque - originalTorque;
+                                const radius = 32;
+                                const center = 40;
                                 return (
-                                  <div className="flex items-center justify-center h-full">
-                                    <span className="text-sm text-gray-400">-</span>
-                                  </div>
+                                  <>
+                                    <svg className="w-full h-full difference-ring" key={`torque-diff-${difference}`} viewBox="0 0 80 80" style={{ transform: 'rotate(-90deg)' }}>
+                                      <circle
+                                        cx={center}
+                                        cy={center}
+                                        r={radius}
+                                        fill="none"
+                                        stroke="#1d70ff"
+                                        strokeWidth="7"
+                                        strokeDasharray="7 7"
+                                      />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">+{difference}</span>
+                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Nm</span>
+                                    </div>
+                                  </>
                                 );
-                              }
-                              const difference = tunedTorque - originalTorque;
-                              const radius = 32;
-                              const center = 40;
-                              return (
-                                <>
-                            <svg className="w-full h-full difference-ring" key={`torque-diff-${difference}`} viewBox="0 0 80 80" style={{ transform: 'rotate(-90deg)' }}>
-                              <circle
-                                cx={center}
-                                cy={center}
-                                r={radius}
-                                fill="none"
-                                stroke="#1d70ff"
-                                strokeWidth="7"
-                                strokeDasharray="7 7"
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">+{difference}</span>
-                              <span className="text-[10px] sm:text-xs text-[#5c6c86]">Nm</span>
+                              })()}
                             </div>
-                                </>
-                              );
-                            })()}
                           </div>
                         </div>
                       </div>
@@ -1281,8 +1282,7 @@ function GainsCalculatorContent() {
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
             {/* Detailed Results Graph */}
             <section className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 md:py-10">
@@ -1293,7 +1293,7 @@ function GainsCalculatorContent() {
                 <p className="text-sm sm:text-base md:text-lg text-[#5c6c86] mb-4 sm:mb-6">
                   {vrmData?.engineDetails?.fullname || vrmData?.name || "Vehicle"} {vrmData?.engineDetails?.specz?.["Cylinder content"] ? `${vrmData.engineDetails.specz["Cylinder content"]} cc` : vrmData?.engine_size || ""} Power(HP) & Torque(lb-ft) VS Engine Speed(RPM)
                 </p>
-                
+
                 {/* Dyno Chart */}
                 <div className="relative h-[300px] sm:h-[400px] md:h-[500px] bg-white rounded-[8px] sm:rounded-[12px] border border-gray-200 mb-4 sm:mb-6 p-2 sm:p-3 md:p-4">
                   <div className="relative w-full h-full">
@@ -1301,14 +1301,14 @@ function GainsCalculatorContent() {
                     <div className="absolute inset-0 flex items-center justify-center opacity-10">
                       <span className="text-6xl font-bold text-gray-400">DYNOJET</span>
                     </div>
-                    
+
                     {/* Chart Area */}
                     <div className="relative w-full h-full">
                       {/* Y-axis label - Left (Power HP) */}
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 text-[10px] sm:text-xs font-semibold text-[#0c1b33] hidden sm:block">
                         Power(HP)
                       </div>
-                      
+
                       {/* Y-axis labels - Left (Power HP) */}
                       <div className="absolute left-2 sm:left-4 md:left-8 top-0 bottom-8 sm:bottom-12 flex flex-col justify-between text-[9px] sm:text-xs text-[#5c6c86]">
                         <span>250</span>
@@ -1318,12 +1318,12 @@ function GainsCalculatorContent() {
                         <span>50</span>
                         <span>0</span>
                       </div>
-                      
+
                       {/* Y-axis label - Right (Torque lb-ft) */}
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 rotate-90 text-[10px] sm:text-xs font-semibold text-[#0c1b33] hidden sm:block">
                         Torque(lb-ft)
                       </div>
-                      
+
                       {/* Y-axis labels - Right (Torque lb-ft) */}
                       <div className="absolute right-2 sm:right-4 md:right-8 top-0 bottom-8 sm:bottom-12 flex flex-col justify-between text-[9px] sm:text-xs text-[#5c6c86]">
                         <span>250</span>
@@ -1333,12 +1333,12 @@ function GainsCalculatorContent() {
                         <span>50</span>
                         <span>0</span>
                       </div>
-                      
+
                       {/* X-axis label */}
                       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-4 sm:translate-y-6 text-[10px] sm:text-xs font-semibold text-[#0c1b33]">
                         Engine Speed(RPM)
                       </div>
-                      
+
                       {/* X-axis labels */}
                       <div className="absolute bottom-4 sm:bottom-6 left-6 sm:left-8 md:left-12 right-6 sm:right-8 md:right-12 flex justify-between text-[9px] sm:text-xs text-[#5c6c86]">
                         <span>0</span>
@@ -1350,22 +1350,22 @@ function GainsCalculatorContent() {
                         <span>6</span>
                         <span>7</span>
                       </div>
-                      
+
                       {/* Chart Lines - Using Recharts */}
                       {dynoChartData.length > 0 ? (
                         <div className="absolute inset-0 top-4 sm:top-6 md:top-8 bottom-8 sm:bottom-10 md:bottom-12 left-6 sm:left-8 md:left-12 right-6 sm:right-8 md:right-12">
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={dynoChartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
-                              <XAxis 
-                                dataKey="rpm" 
+                              <XAxis
+                                dataKey="rpm"
                                 type="number"
                                 domain={[0, 7]}
                                 ticks={[0, 1, 2, 3, 4, 5, 6, 7]}
                                 tick={false}
                                 axisLine={false}
                               />
-                              <YAxis 
+                              <YAxis
                                 yAxisId="hp"
                                 orientation="left"
                                 domain={[0, 250]}
@@ -1373,7 +1373,7 @@ function GainsCalculatorContent() {
                                 tick={false}
                                 axisLine={false}
                               />
-                              <YAxis 
+                              <YAxis
                                 yAxisId="torque"
                                 orientation="right"
                                 domain={[0, 250]}
@@ -1381,8 +1381,8 @@ function GainsCalculatorContent() {
                                 tick={false}
                                 axisLine={false}
                               />
-                              <Tooltip 
-                                contentStyle={{ 
+                              <Tooltip
+                                contentStyle={{
                                   backgroundColor: 'rgba(255, 255, 255, 0.95)',
                                   border: '1px solid #e5e7eb',
                                   borderRadius: '8px',
@@ -1448,7 +1448,7 @@ function GainsCalculatorContent() {
                           </div>
                         </div>
                       )}
-                      
+
                       {/* Legend */}
                       <div className="absolute top-2 sm:top-4 right-2 sm:right-4 space-y-1 sm:space-y-2 text-[9px] sm:text-xs">
                         <div className="flex items-center gap-2">
@@ -1468,7 +1468,7 @@ function GainsCalculatorContent() {
                           <span className="text-[#0c1b33]">MOD V9 Torque</span>
                         </div>
                       </div>
-                      
+
                       {/* Annotation */}
                       <div className="absolute bottom-2 left-4 text-xs text-[#5c6c86]">
                         @ Engine SAE J1349
@@ -1476,7 +1476,7 @@ function GainsCalculatorContent() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Results Table */}
                 <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <table className="w-full text-[9px] sm:text-xs border border-gray-200 min-w-[800px]">
@@ -1565,127 +1565,7 @@ function GainsCalculatorContent() {
               </div>
             </section>
 
-            {/* Footer */}
-            <footer className="border-t border-[#1d70ff]/100 px-8 py-12">
-              <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr_1fr_1fr]">
-                <div className="space-y-4">
-                  <Link href="/">
-                    <Image src="/images/logos/ms-logo.png" alt="MS Performance" width={160} height={48} />
-                  </Link>
-                  <p className="text-sm leading-relaxed text-[#5c6c86]">
-                    At MSPerformance, we specialize in car performance boosting services, ranging from ECU
-                    remapping to custom exhausts. With our wealth of experience, we also offer comprehensive
-                    basic servicing to ensure the overall maintenance and reliability of your vehicle.
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3 pt-2">
-                    <span className="text-xs font-semibold text-[#9aa6bd]">Payment Methods:</span>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs text-[#5c6c86]">Visa</span>
-                      <span className="text-xs text-[#5c6c86]">Mastercard</span>
-                      <span className="text-xs text-[#5c6c86]">Maestro</span>
-                      <span className="text-xs text-[#5c6c86]">American Express</span>
-                      <span className="text-xs text-[#5c6c86]">PayPal</span>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-sm font-bold text-[#0c1b33]">Our headquarters address is:</h3>
-                  <p className="text-sm text-[#5c6c86]">Unit 16, Bakers Ln, Chelmsford CM2 8LD</p>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="flex items-center gap-2 text-sm font-bold text-[#0c1b33]">
-                    <span className="h-4 w-px bg-[#1d70ff]" />
-                    Mailing Subscription
-                  </h3>
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      placeholder="Your Name"
-                      className="w-full rounded-[8px] border border-[#dfe6f2] px-4 py-3 text-sm text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none"
-                    />
-                    <input
-                      type="email"
-                      placeholder="Your Email"
-                      className="w-full rounded-[8px] border border-[#dfe6f2] px-4 py-3 text-sm text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none"
-                    />
-                    <button className="w-full rounded-[8px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white">
-                      Subscribe
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-[#5c6c86]">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                        <path
-                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      <span>0775 1798827 / 01277 715069</span>
-                    </div>
-                    <p className="text-xs text-[#9aa6bd]">Mon till Sat: 9:30 till 18:00</p>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-[#5c6c86]">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                        <path
-                          d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v.51l8 5.33 8-5.33V6H4zm0 12h16V9.49l-8 5.33-8-5.33V18z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      <span>info@msperformance.co.uk</span>
-                    </div>
-                    <p className="text-xs text-[#9aa6bd]">We reply within 1 day</p>
-                  </div>
-                  <div className="pt-4">
-                    <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-[#0c1b33]">
-                      <span className="h-4 w-px bg-[#1d70ff]" />
-                      Follow us
-                    </h3>
-                    <div className="space-y-2">
-                      {["Facebook", "Instagram", "YouTube", "TikTok", "Twitter"].map((social) => (
-                        <a
-                          key={social}
-                          href="#"
-                          className="flex items-center gap-2 text-sm text-[#5c6c86] transition hover:text-[#1d70ff]"
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                            <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="2" />
-                          </svg>
-                          <span>{social}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[#dfe6f2] pt-6">
-                <p className="text-sm text-[#5c6c86]">Copyright © 2023 MSPerformance</p>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-[#5c6c86]">
-                  <a href="#" className="hover:text-[#1d70ff]">
-                    Privacy Policy
-                  </a>
-                  <span className="text-[#dfe6f2]">|</span>
-                  <a href="#" className="hover:text-[#1d70ff]">
-                    Terms & Conditions
-                  </a>
-                  <span className="text-[#dfe6f2]">|</span>
-                  <a href="#" className="hover:text-[#1d70ff]">
-                    Legal Information
-                  </a>
-                  <span className="text-[#dfe6f2]">|</span>
-                  <a href="#" className="hover:text-[#1d70ff]">
-                    Cookie Consent
-                  </a>
-                </div>
-              </div>
-            </footer>
           </main>
         </div>
       </div>
@@ -1696,7 +1576,7 @@ function GainsCalculatorContent() {
 export default function GainsCalculatorPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
     }>

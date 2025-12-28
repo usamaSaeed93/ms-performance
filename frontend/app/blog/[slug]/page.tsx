@@ -166,7 +166,7 @@ export default function BlogDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-white text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p>Loading blog post...</p>
@@ -177,7 +177,7 @@ export default function BlogDetailPage() {
 
   if (error || !blog) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-white text-center">
           <h1 className="text-4xl font-bold mb-4">Blog Post Not Found</h1>
           <Link href="/blog" className="text-[#1d70ff] hover:underline">
@@ -189,10 +189,10 @@ export default function BlogDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <Navbar ctaText="Book a Dyno" />
-      <div className="w-full px-4 pt-8 lg:px-0">
-        <div className="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+      <div className="w-full">
+        <div className="bg-white">
 
           <main className="space-y-12 relative">
             {/* Hero Section */}
@@ -247,11 +247,61 @@ export default function BlogDetailPage() {
 
             {/* Blog Content */}
             <section className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12 xl:px-16 2xl:px-24">
+              {/* Mobile Table of Contents */}
+              {blogSections.length > 0 && (
+                <div className="lg:hidden mb-6">
+                  <details className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <summary className="text-base font-bold text-[#0c1b33] cursor-pointer flex items-center justify-between">
+                      <span>Table of Contents</span>
+                      <svg className="w-5 h-5 text-[#1d70ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </summary>
+                    <ul className="mt-4 space-y-2 pl-2">
+                      {blogSections.map((section) => (
+                        <li key={section.id}>
+                          <button
+                            onClick={() => scrollToSection(section.id)}
+                            className={`text-sm text-[#5c6c86] hover:text-[#1d70ff] transition text-left w-full ${activeSection === section.id ? 'text-[#1d70ff] font-medium pl-3 border-l-2 border-[#1d70ff]' : ''
+                              }`}
+                          >
+                            {section.title}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                </div>
+              )}
+
+              {/* Mobile Share Buttons */}
+              <div className="lg:hidden mb-6 flex items-center gap-3">
+                <span className="text-sm font-medium text-[#5c6c86]">Share:</span>
+                <div className="flex gap-2">
+                  <button
+                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1877F2] text-white"
+                    onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                    </svg>
+                  </button>
+                  <button
+                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-black text-white"
+                    onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(blog.title)}`, '_blank')}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
               <div className="grid gap-6 lg:grid-cols-[250px_1fr] xl:grid-cols-[300px_1fr] lg:gap-8 xl:gap-12 items-start w-full">
-                {/* Left Sidebar */}
+                {/* Left Sidebar - Hidden on mobile, sticky on desktop */}
                 {blogSections.length > 0 && (
-                  <aside className="sticky top-8 h-fit z-10 max-h-[calc(100vh-2rem)] overflow-y-auto">
-                    <div className="bg-white rounded-xl p-4 space-y-6 sm:rounded-2xl sm:p-5 sm:space-y-7 md:rounded-[16px] md:p-6 md:space-y-8 shadow-sm">
+                  <aside className="hidden lg:block lg:sticky lg:top-8 h-fit z-10 max-h-[calc(100vh-2rem)] overflow-y-auto">
+                    <div className="bg-white rounded-xl p-4 space-y-6 sm:rounded-2xl sm:p-5 sm:space-y-7 md:rounded-[16px] md:p-6 md:space-y-8 shadow-sm border border-gray-100">
                       {/* Jump To Section */}
                       <div>
                         <h3 className="text-lg font-bold text-[#0c1b33] mb-4">Jump To Section</h3>
@@ -260,7 +310,7 @@ export default function BlogDetailPage() {
                             <li key={section.id}>
                               <button
                                 onClick={() => scrollToSection(section.id)}
-                                className={`text-sm text-[#0c1b33] hover:text-[#1d70ff] transition text-left w-full flex items-center ${activeSection === section.id ? 'pl-3 border-l-2 border-[#1d70ff]' : ''
+                                className={`text-sm text-[#0c1b33] hover:text-[#1d70ff] transition text-left w-full flex items-center ${activeSection === section.id ? 'pl-3 border-l-2 border-[#1d70ff] text-[#1d70ff] font-medium' : ''
                                   }`}
                               >
                                 {section.title}
@@ -487,127 +537,7 @@ export default function BlogDetailPage() {
             </section>
           </main>
 
-          {/* Footer */}
-          <footer className="border-t border-[#1d70ff]/100 px-8 py-12">
-            <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr_1fr_1fr]">
-              <div className="space-y-4">
-                <Link href="/">
-                  <Image src="/images/logos/ms-logo.png" alt="MS Performance" width={160} height={48} />
-                </Link>
-                <p className="text-sm leading-relaxed text-[#5c6c86]">
-                  At MSPerformance, we specialize in car performance boosting services, ranging from ECU
-                  remapping to custom exhausts. With our wealth of experience, we also offer comprehensive
-                  basic servicing to ensure the overall maintenance and reliability of your vehicle.
-                </p>
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <span className="text-xs font-semibold text-[#9aa6bd]">Payment Methods:</span>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-[#5c6c86]">Visa</span>
-                    <span className="text-xs text-[#5c6c86]">Mastercard</span>
-                    <span className="text-xs text-[#5c6c86]">Maestro</span>
-                    <span className="text-xs text-[#5c6c86]">American Express</span>
-                    <span className="text-xs text-[#5c6c86]">PayPal</span>
-                  </div>
-                </div>
-              </div>
 
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold text-[#0c1b33]">Our headquarters address is:</h3>
-                <p className="text-sm text-[#5c6c86]">810 Headquarters, Churchill Road, B17</p>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="flex items-center gap-2 text-sm font-bold text-[#0c1b33]">
-                  <span className="h-4 w-px bg-[#1d70ff]" />
-                  Mailing Subscription
-                </h3>
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Your Name"
-                    className="w-full rounded-[8px] border border-[#dfe6f2] px-4 py-3 text-sm text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none"
-                  />
-                  <input
-                    type="email"
-                    placeholder="Your Email"
-                    className="w-full rounded-[8px] border border-[#dfe6f2] px-4 py-3 text-sm text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none"
-                  />
-                  <button className="w-full rounded-[8px] bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white">
-                    Subscribe
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-[#5c6c86]">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                      <path
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <span>0770 7900021 | 0207 946089</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#5c6c86]">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                      <path
-                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v.51l8 5.33 8-5.33V6H4zm0 12h16V9.49l-8 5.33-8-5.33V18z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <span>info@msperformance.co.uk</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold text-[#0c1b33]">FOR GENERAL ENQUIRIES</p>
-                  <p className="text-xs text-[#5c6c86]">+44 (0)207 855 209</p>
-                </div>
-                <div className="pt-4">
-                  <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-[#0c1b33]">
-                    <span className="h-4 w-px bg-[#1d70ff]" />
-                    Follow us
-                  </h3>
-                  <div className="space-y-2">
-                    {["Facebook", "Twitter", "Instagram"].map((social) => (
-                      <a
-                        key={social}
-                        href="#"
-                        className="flex items-center gap-2 text-sm text-[#5c6c86] transition hover:text-[#1d70ff]"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                          <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="2" />
-                        </svg>
-                        <span>{social}</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[#dfe6f2] pt-6">
-              <p className="text-sm text-[#5c6c86]">© Copyright 2020 MSPerformance</p>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-[#5c6c86]">
-                <a href="#" className="hover:text-[#1d70ff]">
-                  Privacy Policy
-                </a>
-                <span className="text-[#dfe6f2]">|</span>
-                <a href="#" className="hover:text-[#1d70ff]">
-                  Cookie Policy
-                </a>
-                <span className="text-[#dfe6f2]">|</span>
-                <a href="#" className="hover:text-[#1d70ff]">
-                  Legal Information
-                </a>
-                <span className="text-[#dfe6f2]">|</span>
-                <a href="#" className="hover:text-[#1d70ff]">
-                  Terms & Conditions
-                </a>
-              </div>
-            </div>
-          </footer>
         </div>
       </div>
     </div>

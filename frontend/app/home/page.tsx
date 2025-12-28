@@ -464,7 +464,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <Navbar ctaText="Become A Dealer" />
       <main className=" space-y-20">
         <div className="bg-white">
@@ -489,7 +489,7 @@ export default function HomePage() {
                 </h1>
               </div>
               <div className="flex justify-center sm:justify-end animate-slide-right">
-                <div className="w-full max-w-[400px] rounded-xl backdrop-blur-[12px] p-4 text-white shadow-[0_30px_70px_rgba(2,6,14,0.7)] sm:rounded-2xl sm:p-6 md:rounded-[15px] md:p-8 animate-card" style={{ background: 'rgba(0, 0, 0, 0.4)' }}>
+                <div className="w-full max-w-[400px] rounded-xl backdrop-blur-[16px] p-4 text-white shadow-[0_30px_70px_rgba(2,6,14,0.7)] sm:rounded-2xl sm:p-6 md:rounded-[15px] md:p-8 animate-card" style={{ background: 'rgba(0, 0, 0, 0.4)' }}>
                   <p className="text-base font-semibold sm:text-lg">Select Your Vehicle</p>
                   <div className="mt-4 space-y-2 sm:mt-6">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/60 sm:text-xs">
@@ -719,8 +719,8 @@ export default function HomePage() {
                       <div className="mt-auto">
                         <div
                           className={`flex w-full items-center justify-center gap-2 rounded-[14px] px-6 py-3 text-sm font-semibold transition animate-button ${index === 0
-                              ? "bg-[#1d70ff] text-white shadow-[0_10px_25px_rgba(29,112,255,0.25)]"
-                              : "border border-[#1d70ff] text-[#1d70ff]"
+                            ? "bg-[#1d70ff] text-white shadow-[0_10px_25px_rgba(29,112,255,0.25)]"
+                            : "border border-[#1d70ff] text-[#1d70ff]"
                             }`}
                         >
                           View
@@ -749,8 +749,8 @@ export default function HomePage() {
                   key={index}
                   onClick={() => setCurrentServiceIndex(index)}
                   className={`h-2 rounded-full transition-all ${index === currentServiceIndex
-                      ? 'w-8 bg-[#1d70ff]'
-                      : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
+                    ? 'w-8 bg-[#1d70ff]'
+                    : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
                     }`}
                   aria-label={`Go to page ${index + 1}`}
                 />
@@ -915,8 +915,8 @@ export default function HomePage() {
                       }
                     }}
                     className={`h-2 rounded-full transition-all ${index === currentProductIndex
-                        ? 'w-8 bg-[#1d70ff]'
-                        : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
+                      ? 'w-8 bg-[#1d70ff]'
+                      : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
                       }`}
                     aria-label={`Go to page ${index + 1}`}
                   />
@@ -1038,8 +1038,8 @@ export default function HomePage() {
                       }
                     }}
                     className={`h-2 rounded-full transition-all ${index === currentTestimonialIndex
-                        ? 'w-8 bg-[#1d70ff]'
-                        : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
+                      ? 'w-8 bg-[#1d70ff]'
+                      : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
                       }`}
                     aria-label={`Go to page ${index + 1}`}
                   />
@@ -1110,8 +1110,8 @@ export default function HomePage() {
                           <div className="mt-auto">
                             <div
                               className={`flex h-10 w-10 items-center justify-center rounded-lg transition ${index === 0
-                                  ? "bg-[#1d70ff] text-white hover:bg-[#1a5fdd]"
-                                  : "border border-[#1d70ff] text-[#1d70ff] hover:bg-[#1d70ff] hover:text-white"
+                                ? "bg-[#1d70ff] text-white hover:bg-[#1a5fdd]"
+                                : "border border-[#1d70ff] text-[#1d70ff] hover:bg-[#1d70ff] hover:text-white"
                                 }`}
                             >
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -1133,141 +1133,9 @@ export default function HomePage() {
               )}
             </div>
           </section>
-
-          <footer className="border-t border-[#1d70ff]/100 px-4 py-8 sm:px-6 sm:py-10 md:px-8 md:py-12">
-            <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.2fr_1fr_1fr_1fr]">
-              <div className="space-y-3 sm:space-y-4">
-                <Link href="/">
-                  <Image src="/images/logos/ms-logo.png" alt="MS Performance" width={160} height={48} className="h-8 w-auto sm:h-10" />
-                </Link>
-                <p className="text-xs leading-relaxed text-[#5c6c86] sm:text-sm">
-                  At MSPerformance, we specialize in car performance boosting services, ranging from ECU
-                  remapping to custom exhausts. With our wealth of experience, we also offer comprehensive
-                  basic servicing to ensure the overall maintenance and reliability of your vehicle.
-                </p>
-                <div className="flex flex-col items-start gap-2 pt-2 sm:flex-row sm:items-center sm:gap-3">
-                  <span className="text-[10px] font-semibold text-[#9aa6bd] sm:text-xs">Payment Methods:</span>
-                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                    <span className="text-[10px] text-[#5c6c86] sm:text-xs">WorldPay</span>
-                    <span className="text-[10px] text-[#5c6c86] sm:text-xs">Mastercard</span>
-                    <span className="text-[10px] text-[#5c6c86] sm:text-xs">Maestro</span>
-                    <span className="text-[10px] text-[#5c6c86] sm:text-xs">Switch</span>
-                    <span className="text-[10px] text-[#5c6c86] sm:text-xs">Visa</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="text-xs font-bold text-[#0c1b33] sm:text-sm">Our headquarters address is:</h3>
-                <p className="text-xs text-[#5c6c86] sm:text-sm">Unit 16, Bakers Ln, Chelmsford CM2 8LD</p>
-              </div>
-
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="flex items-center gap-2 text-xs font-bold text-[#0c1b33] sm:text-sm">
-                  <span className="h-3 w-px bg-[#1d70ff] sm:h-4" />
-                  Mailing Subscription
-                </h3>
-                <div className="space-y-2 sm:space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Your Name"
-                    className="w-full rounded-lg border border-[#dfe6f2] px-3 py-2.5 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none sm:rounded-[8px] sm:px-4 sm:py-3 sm:text-sm"
-                  />
-                  <input
-                    type="email"
-                    placeholder="Your Email"
-                    className="w-full rounded-lg border border-[#dfe6f2] px-3 py-2.5 text-xs text-[#0c1b33] placeholder:text-[#9aa6bd] focus:border-[#1d70ff] focus:outline-none sm:rounded-[8px] sm:px-4 sm:py-3 sm:text-sm"
-                  />
-                  <button className="w-full rounded-lg bg-[#1d70ff] px-4 py-2.5 text-xs font-semibold text-white sm:rounded-[8px] sm:px-6 sm:py-3 sm:text-sm animate-button">
-                    Subscribe
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-[#5c6c86]">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                      <path
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <span>0775 1798827 / 01277 715069</span>
-                  </div>
-                  <p className="text-xs text-[#9aa6bd]">Mon till Sat: 9:30 till 18:00</p>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-[#5c6c86]">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                      <path
-                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v.51l8 5.33 8-5.33V6H4zm0 12h16V9.49l-8 5.33-8-5.33V18z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <span>info@msperformance.co.uk</span>
-                  </div>
-                  <p className="text-xs text-[#9aa6bd]">We reply within 1 day</p>
-                </div>
-                <div className="pt-2">
-                  <p className="mb-2 text-sm font-bold text-[#0c1b33]">For overseas customers:</p>
-                  <div className="flex items-center gap-2 text-sm text-[#5c6c86]">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                      <path
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <span>+44 (0)1637 875 209</span>
-                  </div>
-                </div>
-                <div className="pt-4">
-                  <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-[#0c1b33]">
-                    <span className="h-4 w-px bg-[#1d70ff]" />
-                    Follow us
-                  </h3>
-                  <div className="space-y-2">
-                    {["Facebook", "YouTube", "Twitter", "Instagram"].map((social) => (
-                      <a
-                        key={social}
-                        href="#"
-                        className="flex items-center gap-2 text-sm text-[#5c6c86] transition hover:text-[#1d70ff]"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                          <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="2" />
-                        </svg>
-                        <span>{social}</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[#dfe6f2] pt-6">
-              <p className="text-sm text-[#5c6c86]">© Copyright 2025 MSPerformance</p>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-[#5c6c86]">
-                <a href="#" className="hover:text-[#1d70ff]">
-                  Privacy Policy
-                </a>
-                <span className="text-[#dfe6f2]">|</span>
-                <a href="#" className="hover:text-[#1d70ff]">
-                  Delivery & Returns
-                </a>
-                <span className="text-[#dfe6f2]">|</span>
-                <a href="#" className="hover:text-[#1d70ff]">
-                  Legal information
-                </a>
-                <span className="text-[#dfe6f2]">|</span>
-                <a href="#" className="hover:text-[#1d70ff]">
-                  Terms & Conditions
-                </a>
-              </div>
-            </div>
-          </footer>
         </div>
       </main>
     </div>
   );
 }
+
