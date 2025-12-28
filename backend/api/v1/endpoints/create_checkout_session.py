@@ -8,6 +8,7 @@ import crud
 from models.product import Product
 from api.base_resource import PostResource
 from core.tax import TaxCalculator
+from instance.config import config
 from ..schemas.create_checkout_session import (
     CreateCheckoutSessionRequest,
     CreateCheckoutSessionResponse,
@@ -17,8 +18,8 @@ from ..schemas.create_checkout_session import (
 # Initialize Stripe
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 
-# Frontend URLs for redirect
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+# Frontend URLs for redirect - use config which loads from .vars
+FRONTEND_URL = config.EMAIL_CONFIG.FRONTEND_URL
 
 
 class CreateCheckoutSession(PostResource):
