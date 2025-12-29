@@ -34,8 +34,117 @@ import {
   generateDynoData,
   detectEngineType,
   estimateEngineParams,
-  type DynoDataPoint,
 } from "@/lib/utils/dynoGenerator";
+
+// Custom Gauge Component matching the design
+// Custom Gauge Component matching the design
+function Gauge({
+  label,
+  value,
+  unit,
+  color = "#00a9f4",  // Cyan-blue from image
+  type = "solid",
+  isDifference = false
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  color?: string;
+  type?: "solid" | "dashed";
+  isDifference?: boolean;
+}) {
+  const radius = 38;
+  const strokeWidth = 5;
+  const center = 50;
+  const circumference = 2 * Math.PI * radius;
+  // Open circle at bottom (approx 260 degrees visible)
+  const visibleAngle = 250;
+  const totalLength = (visibleAngle / 360) * circumference;
+  const rotation = 90 + (360 - visibleAngle) / 2;
+
+  const percent = isDifference ? 100 : 75;
+  // Difference ring is full circle/dashed, others are solid arc
+  const strokeDashoffset = isDifference
+    ? 0
+    : circumference - (totalLength * (percent / 100));
+
+  // Bar chart bars (mock visual) - make them blue/cyan
+  const bars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  return (
+    <div className="flex flex-col items-center justify-center w-[145px] h-[182px] rounded-[10px]">
+      <span className="text-sm font-bold text-black mb-3">{label}</span>
+      <div className="relative w-[110px] h-[110px] flex items-center justify-center">
+        {/* Gauge SVG */}
+        <svg width="100%" height="100%" viewBox="0 0 100 100" className="absolute inset-0 z-10">
+          {/* White Base Track (Background Ring) */}
+          <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            fill="none"
+            stroke="#c0c0c0"
+            strokeWidth={strokeWidth}
+            strokeDasharray={isDifference ? "6 6" : `${totalLength} ${circumference}`}
+            transform={`rotate(${rotation} ${center} ${center})`}
+            strokeLinecap="round"
+            className="opacity-100"
+          />
+
+          {/* Progress/Value Arc */}
+          <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={isDifference ? "6 6" : `${totalLength} ${circumference}`}
+            strokeDashoffset={isDifference ? 0 : strokeDashoffset}
+            transform={`rotate(${rotation} ${center} ${center})`}
+            strokeLinecap="round"
+            className={isDifference ? "" : ""}
+          />
+        </svg>
+
+        {/* Center Content: Value, Unit, Bars */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pt-1 z-20">
+          {/* Value */}
+          <span className={`text-2xl font-black text-black leading-none tracking-tight`}>
+            {isDifference ? "+" : ""}{Math.round(value)}
+          </span>
+          {/* Unit */}
+          <span className="text-[10px] text-gray-500 font-medium mb-1">{unit}</span>
+
+          {/* Bar Chart Visualization (Inside Gauge) */}
+          <div className="flex items-end gap-[3px] h-[14px]">
+            {!isDifference && bars.map((h, i) => (
+              <div
+                key={i}
+                className="w-[3px] rounded-sm"
+                style={{
+                  height: `${h * 1.5}px`,
+                  backgroundColor: color,
+                  opacity: i < 8 ? 1 : 0.4
+                }}
+              />
+            ))}
+            {/* Dashed placeholder for difference or just simpler look? User image has bars for diff too but greyish? 
+                    Actually in image, difference has bars too. Let's add them. 
+                  */}
+            {isDifference && bars.map((h, i) => (
+              <div
+                key={i}
+                className="w-[3px] rounded-sm bg-gray-400"
+                style={{ height: `${h * 1.5}px` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function GainsCalculatorContent() {
   const searchParams = useSearchParams();
@@ -909,380 +1018,129 @@ function GainsCalculatorContent() {
               </div>
             </section>
 
-            {/* Engine Specifications and Results */}
+
+
+            {/* Engine Specifications and Results Section */}
             <section className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 md:py-10">
-              <div className="bg-gray-100 rounded-[12px] sm:rounded-[16px] p-4 sm:p-6 md:p-8">
-                <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr] xl:grid-cols-[1fr_1.5fr]">
-                  {/* Engine Specifications */}
-                  <div className="space-y-4 sm:space-y-6">
-                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0c1b33] mb-4 sm:mb-6 md:mb-8">Engine Specifications</h3>
-                    <div className="space-y-3 sm:space-y-4 text-sm sm:text-base">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[#0c1b33] mb-1 text-xs sm:text-sm">Cylinder Capacity:</span>
-                        <span className="text-[#5c6c86] text-sm sm:text-base md:text-lg">
-                          {vrmData?.engineDetails?.specz?.["Cylinder content"]
-                            ? `${vrmData.engineDetails.specz["Cylinder content"]} CC`
-                            : vrmData?.engine_size || "-"}
-                        </span>
+              <div className="bg-[#E5E5E5] rounded-[10px] w-full max-w-[1291px] mx-auto h-auto lg:h-[507px] p-6 lg:px-12 lg:py-8 flex flex-col justify-center">
+                <div className="grid gap-12 lg:grid-cols-[1fr_1.8fr] items-start">
+
+                  {/* Engine Specifications - Left Side */}
+                  <div className="space-y-8">
+                    <h3 className="text-3xl font-black text-black tracking-tight">Engine Specifications</h3>
+
+                    <div className="grid grid-cols-[140px_1fr] gap-y-6 text-sm">
+                      <div className="text-gray-600 font-medium">Cylinder Capacity</div>
+                      <div className="font-bold text-black">
+                        {vrmData?.engineDetails?.specz?.["Cylinder content"]
+                          ? `${vrmData.engineDetails.specz["Cylinder content"]}CC`
+                          : vrmData?.engine_size ? `${vrmData.engine_size}CC` : "-"}
                       </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[#0c1b33] mb-1 text-xs sm:text-sm">Compression:</span>
-                        <span className="text-[#5c6c86] text-sm sm:text-base md:text-lg">
-                          {vrmData?.engineDetails?.specz?.compression_ratio || "-"}
-                        </span>
+
+                      <div className="text-gray-600 font-medium">Compression</div>
+                      <div className="font-bold text-black">
+                        {vrmData?.engineDetails?.specz?.compression_ratio || "9.1 : 1"}
                       </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[#0c1b33] mb-1 text-xs sm:text-sm">Type Ecu:</span>
-                        <span className="text-[#5c6c86] text-sm sm:text-base md:text-lg">
-                          {vrmData?.engineDetails?.specz?.engine_ecu || "-"}
-                        </span>
+
+                      <div className="text-gray-600 font-medium">Type Ecu</div>
+                      <div className="font-bold text-black leading-snug max-w-[200px]">
+                        {vrmData?.engineDetails?.specz?.engine_ecu || "Bosch ME17.1.6 & Bosch ME7.1.1 & Bosch MG1CS163"}
                       </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[#0c1b33] mb-1 text-xs sm:text-sm">Bore X Stroke:</span>
-                        <span className="text-[#5c6c86] text-sm sm:text-base md:text-lg">
-                          {vrmData?.engineDetails?.specz?.bore_stroke_ratio || "-"}
-                        </span>
+
+                      <div className="text-gray-600 font-medium">Bore X Stroke</div>
+                      <div className="font-bold text-black">
+                        {vrmData?.engineDetails?.specz?.bore_stroke_ratio || "84.0 X 90.2 Mm"}
                       </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[#0c1b33] mb-1 text-xs sm:text-sm">Engine Number:</span>
-                        <span className="text-[#5c6c86] text-sm sm:text-base md:text-lg">
-                          {vrmData?.engineDetails?.specz?.engine_number || "-"}
-                        </span>
+
+                      <div className="text-gray-600 font-medium">Engine Code</div>
+                      <div className="font-bold text-black">
+                        {vrmData?.engineDetails?.specz?.engine_code || "DBD"}
                       </div>
                     </div>
-                    <button className="mt-4 sm:mt-6 md:mt-8 w-full rounded-[8px] sm:rounded-[12px] bg-[#12a7ff] px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base font-semibold text-white shadow-[0_4px_12px_rgba(18,167,255,0.3)] hover:bg-[#0f95e6] transition-colors animate-button">
+
+                    <button className="w-[180px] rounded-[6px] bg-[#00a9f4] hover:bg-[#009de3] py-3 text-sm font-bold text-white transition-colors shadow-sm">
                       Request Quote
                     </button>
                   </div>
 
-                  {/* Performance Results */}
-                  <div>
-                    <div className="space-y-6 sm:space-y-8">
-                      {/* Power Row */}
-                      <div>
-                        <h4 className="text-base sm:text-lg font-bold text-[#0c1b33] mb-3 sm:mb-4">Power (Hp)</h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                          {/* Original */}
-                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Standard</span>
-                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                              {(() => {
-                                const originalHP = vrmData?.engineDetails?.horsepower_original;
-                                const tunedHP = vrmData?.engineDetails?.horsepower_white;
-                                if (!originalHP || !tunedHP) {
-                                  return (
-                                    <div className="flex items-center justify-center h-full">
-                                      <span className="text-sm text-gray-400">-</span>
-                                    </div>
-                                  );
-                                }
-                                const maxHP = Math.max(tunedHP * 1.2, tunedHP + 20);
-                                const percentage = (originalHP / maxHP) * 100;
-                                // Responsive radius based on container size
-                                const radius = 32; // For 80px container (mobile)
-                                const circumference = 2 * Math.PI * radius;
-                                const offset = circumference - (circumference * percentage / 100);
-                                const center = 40; // Half of 80px
-                                return (
-                                  <>
-                                    <svg className="w-full h-full transform -rotate-90" key={`hp-original-${originalHP}`} viewBox="0 0 80 80">
-                                      <circle
-                                        cx={center}
-                                        cy={center}
-                                        r={radius}
-                                        fill="none"
-                                        stroke="#e5e7eb"
-                                        strokeWidth="7"
-                                      />
-                                      <circle
-                                        cx={center}
-                                        cy={center}
-                                        r={radius}
-                                        fill="none"
-                                        stroke="#1d70ff"
-                                        strokeWidth="7"
-                                        strokeDasharray={circumference}
-                                        strokeDashoffset={animateProgress ? offset : circumference}
-                                        strokeLinecap="round"
-                                        className="progress-ring"
-                                        style={{
-                                          transition: 'stroke-dashoffset 1.5s ease-out'
-                                        } as React.CSSProperties}
-                                      />
-                                    </svg>
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{originalHP}</span>
-                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Hp</span>
-                                    </div>
-                                  </>
-                                );
-                              })()}
-                            </div>
-                          </div>
+                  {/* Performance Results - Right Side */}
+                  <div className="space-y-4">
 
-                          {/* Modified */}
-                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Tuned</span>
-                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                              {(() => {
-                                const originalHP = vrmData?.engineDetails?.horsepower_original;
-                                const tunedHP = vrmData?.engineDetails?.horsepower_white;
-                                if (!originalHP || !tunedHP) {
-                                  return (
-                                    <div className="flex items-center justify-center h-full">
-                                      <span className="text-sm text-gray-400">-</span>
-                                    </div>
-                                  );
-                                }
-                                const maxHP = Math.max(tunedHP * 1.2, tunedHP + 20);
-                                const percentage = (tunedHP / maxHP) * 100;
-                                const radius = 32;
-                                const circumference = 2 * Math.PI * radius;
-                                const offset = circumference - (circumference * percentage / 100);
-                                const center = 40;
-                                return (
-                                  <>
-                                    <svg className="w-full h-full transform -rotate-90" key={`hp-tuned-${tunedHP}`} viewBox="0 0 80 80">
-                                      <circle
-                                        cx={center}
-                                        cy={center}
-                                        r={radius}
-                                        fill="none"
-                                        stroke="#e5e7eb"
-                                        strokeWidth="7"
-                                      />
-                                      <circle
-                                        cx={center}
-                                        cy={center}
-                                        r={radius}
-                                        fill="none"
-                                        stroke="#1d70ff"
-                                        strokeWidth="7"
-                                        strokeDasharray={circumference}
-                                        strokeDashoffset={animateProgress ? offset : circumference}
-                                        strokeLinecap="round"
-                                        className="progress-ring"
-                                        style={{
-                                          transition: 'stroke-dashoffset 1.5s ease-out'
-                                        } as React.CSSProperties}
-                                      />
-                                    </svg>
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{tunedHP}</span>
-                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Hp</span>
-                                    </div>
-                                  </>
-                                );
-                              })()}
-                            </div>
-                          </div>
-
-                          {/* Difference */}
-                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Difference</span>
-                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                              {(() => {
-                                const originalHP = vrmData?.engineDetails?.horsepower_original;
-                                const tunedHP = vrmData?.engineDetails?.horsepower_white;
-                                if (!originalHP || !tunedHP) {
-                                  return (
-                                    <div className="flex items-center justify-center h-full">
-                                      <span className="text-sm text-gray-400">-</span>
-                                    </div>
-                                  );
-                                }
-                                const difference = tunedHP - originalHP;
-                                const radius = 32;
-                                const center = 40;
-                                return (
-                                  <>
-                                    <svg className="w-full h-full difference-ring" key={`hp-diff-${difference}`} viewBox="0 0 80 80" style={{ transform: 'rotate(-90deg)' }}>
-                                      <circle
-                                        cx={center}
-                                        cy={center}
-                                        r={radius}
-                                        fill="none"
-                                        stroke="#1d70ff"
-                                        strokeWidth="7"
-                                        strokeDasharray="7 7"
-                                      />
-                                    </svg>
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">+{difference}</span>
-                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Hp</span>
-                                    </div>
-                                  </>
-                                );
-                              })()}
-                            </div>
-                          </div>
-                        </div>
+                    {/* Power Row - Unified Card */}
+                    <div className="flex w-full max-w-[721px] h-auto md:h-[221px] bg-[#6767671A] rounded-[10px] overflow-hidden">
+                      {/* Label Section (Left) */}
+                      <div className="w-[163px] h-full bg-[#3A3A3A17] flex flex-col items-center justify-center flex-shrink-0">
+                        <span className="text-2xl font-black text-black">Power</span>
+                        <span className="text-gray-600 font-normal text-sm">(Hp)</span>
                       </div>
 
-                      {/* Torque Row */}
-                      <div>
-                        <h4 className="text-base sm:text-lg font-bold text-[#0c1b33] mb-3 sm:mb-4">Torque (Nm)</h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                          {/* Original */}
-                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Standard</span>
-                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                              {(() => {
-                                const originalTorque = vrmData?.engineDetails?.torque_original;
-                                const tunedTorque = vrmData?.engineDetails?.torque_white;
-                                if (!originalTorque || !tunedTorque) {
-                                  return (
-                                    <div className="flex items-center justify-center h-full">
-                                      <span className="text-sm text-gray-400">-</span>
-                                    </div>
-                                  );
-                                }
-                                const maxTorque = Math.max(tunedTorque * 1.2, tunedTorque + 20);
-                                const percentage = (originalTorque / maxTorque) * 100;
-                                const radius = 32;
-                                const circumference = 2 * Math.PI * radius;
-                                const offset = circumference - (circumference * percentage / 100);
-                                const center = 40;
-                                return (
-                                  <>
-                                    <svg className="w-full h-full transform -rotate-90" key={`torque-original-${originalTorque}`} viewBox="0 0 80 80">
-                                      <circle
-                                        cx={center}
-                                        cy={center}
-                                        r={radius}
-                                        fill="none"
-                                        stroke="#e5e7eb"
-                                        strokeWidth="7"
-                                      />
-                                      <circle
-                                        cx={center}
-                                        cy={center}
-                                        r={radius}
-                                        fill="none"
-                                        stroke="#1d70ff"
-                                        strokeWidth="7"
-                                        strokeDasharray={circumference}
-                                        strokeDashoffset={animateProgress ? offset : circumference}
-                                        strokeLinecap="round"
-                                        className="progress-ring"
-                                        style={{
-                                          transition: 'stroke-dashoffset 1.5s ease-out'
-                                        } as React.CSSProperties}
-                                      />
-                                    </svg>
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{originalTorque}</span>
-                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Nm</span>
-                                    </div>
-                                  </>
-                                );
-                              })()}
-                            </div>
-                          </div>
-
-                          {/* Modified */}
-                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Tuned</span>
-                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                              {(() => {
-                                const originalTorque = vrmData?.engineDetails?.torque_original;
-                                const tunedTorque = vrmData?.engineDetails?.torque_white;
-                                if (!originalTorque || !tunedTorque) {
-                                  return (
-                                    <div className="flex items-center justify-center h-full">
-                                      <span className="text-sm text-gray-400">-</span>
-                                    </div>
-                                  );
-                                }
-                                const maxTorque = Math.max(tunedTorque * 1.2, tunedTorque + 20);
-                                const percentage = (tunedTorque / maxTorque) * 100;
-                                const radius = 32;
-                                const circumference = 2 * Math.PI * radius;
-                                const offset = circumference - (circumference * percentage / 100);
-                                const center = 40;
-                                return (
-                                  <>
-                                    <svg className="w-full h-full transform -rotate-90" key={`torque-tuned-${tunedTorque}`} viewBox="0 0 80 80">
-                                      <circle
-                                        cx={center}
-                                        cy={center}
-                                        r={radius}
-                                        fill="none"
-                                        stroke="#e5e7eb"
-                                        strokeWidth="7"
-                                      />
-                                      <circle
-                                        cx={center}
-                                        cy={center}
-                                        r={radius}
-                                        fill="none"
-                                        stroke="#1d70ff"
-                                        strokeWidth="7"
-                                        strokeDasharray={circumference}
-                                        strokeDashoffset={animateProgress ? offset : circumference}
-                                        strokeLinecap="round"
-                                        className="progress-ring"
-                                        style={{
-                                          transition: 'stroke-dashoffset 1.5s ease-out'
-                                        } as React.CSSProperties}
-                                      />
-                                    </svg>
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">{tunedTorque}</span>
-                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Nm</span>
-                                    </div>
-                                  </>
-                                );
-                              })()}
-                            </div>
-                          </div>
-
-                          {/* Difference */}
-                          <div className="bg-white rounded-[8px] sm:rounded-[12px] p-3 sm:p-4 flex flex-col items-center">
-                            <span className="text-xs sm:text-sm text-[#5c6c86] mb-2 sm:mb-3">Difference</span>
-                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-2">
-                              {(() => {
-                                const originalTorque = vrmData?.engineDetails?.torque_original;
-                                const tunedTorque = vrmData?.engineDetails?.torque_white;
-                                if (!originalTorque || !tunedTorque) {
-                                  return (
-                                    <div className="flex items-center justify-center h-full">
-                                      <span className="text-sm text-gray-400">-</span>
-                                    </div>
-                                  );
-                                }
-                                const difference = tunedTorque - originalTorque;
-                                const radius = 32;
-                                const center = 40;
-                                return (
-                                  <>
-                                    <svg className="w-full h-full difference-ring" key={`torque-diff-${difference}`} viewBox="0 0 80 80" style={{ transform: 'rotate(-90deg)' }}>
-                                      <circle
-                                        cx={center}
-                                        cy={center}
-                                        r={radius}
-                                        fill="none"
-                                        stroke="#1d70ff"
-                                        strokeWidth="7"
-                                        strokeDasharray="7 7"
-                                      />
-                                    </svg>
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33]">+{difference}</span>
-                                      <span className="text-[10px] sm:text-xs text-[#5c6c86]">Nm</span>
-                                    </div>
-                                  </>
-                                );
-                              })()}
-                            </div>
-                          </div>
-                        </div>
+                      {/* Gauges Section (Right) */}
+                      <div className="flex-1 flex flex-row items-center justify-around px-2 sm:px-8">
+                        <Gauge
+                          label="Original"
+                          value={vrmData?.engineDetails?.horsepower_original || 184}
+                          unit="hp"
+                          color="#00a9f4"
+                          type="solid"
+                        />
+                        <Gauge
+                          label="Modified"
+                          value={vrmData?.engineDetails?.horsepower_white || 231}
+                          unit="hp"
+                          color="#00a9f4"
+                          type="solid"
+                        />
+                        <Gauge
+                          label="Difference"
+                          value={(vrmData?.engineDetails?.horsepower_white || 231) - (vrmData?.engineDetails?.horsepower_original || 184)}
+                          unit="hp"
+                          color="#00a9f4"
+                          type="dashed"
+                          isDifference
+                        />
                       </div>
                     </div>
+
+                    {/* Torque Row - Unified Card */}
+                    <div className="flex w-full max-w-[721px] h-auto md:h-[221px] bg-[#6767671A] rounded-[10px] overflow-hidden">
+                      {/* Label Section (Left) */}
+                      <div className="w-[163px] h-full bg-[#3A3A3A17] flex flex-col items-center justify-center flex-shrink-0">
+                        <span className="text-2xl font-black text-black">Torque</span>
+                        <span className="text-gray-600 font-normal text-sm">(Nm)</span>
+                      </div>
+
+                      {/* Gauges Section (Right) */}
+                      <div className="flex-1 flex flex-row items-center justify-around px-2 sm:px-8">
+                        <Gauge
+                          label="Original"
+                          value={vrmData?.engineDetails?.torque_original || 184}
+                          unit="nm"
+                          color="#00a9f4"
+                          type="solid"
+                        />
+                        <Gauge
+                          label="Modified"
+                          value={vrmData?.engineDetails?.torque_white || 231}
+                          unit="nm"
+                          color="#00a9f4"
+                          type="solid"
+                        />
+                        <Gauge
+                          label="Difference"
+                          value={(vrmData?.engineDetails?.torque_white || 231) - (vrmData?.engineDetails?.torque_original || 184)}
+                          unit="nm"
+                          color="#00a9f4"
+                          type="dashed"
+                          isDifference
+                        />
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>
             </section>
+
 
             {/* Detailed Results Graph */}
             <section className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 md:py-10">

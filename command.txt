@@ -1,1 +1,1 @@
-cd "/Users/usamasaeed/Desktop/untitled folder/backend" && export PATH="$HOME/.local/bin:$PATH" && poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000 --log-level debug --access-log
+export PATH="$HOME/.local/bin:$PATH" && poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000 --log-level debug --access-log

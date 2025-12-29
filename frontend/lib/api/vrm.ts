@@ -28,6 +28,7 @@ export interface VRMEngineDetails {
     "Cylinder content"?: number;
     bore_stroke_ratio?: string;
     compression_ratio?: string;
+    engine_code?: string;
   };
   options?: string[];
   fullname: string;
@@ -116,7 +117,7 @@ export async function resolveVRM(
 ): Promise<VRMResponse> {
   try {
     const url = `${VRM_API_BASE_URL}/resolve?reg=${encodeURIComponent(reg)}&owner=${encodeURIComponent(owner)}`;
-    
+
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -130,7 +131,7 @@ export async function resolveVRM(
     }
 
     const data: any = await response.json();
-    
+
     if (!data.success) {
       // Handle specific error types
       if (data.error_type === "other_car") {
@@ -271,7 +272,7 @@ export async function getEngines(generationId: string): Promise<Engine[]> {
 export async function getEngineDetails(engineId: string): Promise<VRMResponse> {
   try {
     const url = `${VRM_API_BASE_URL}/getEngineDetails/?engine_id=${encodeURIComponent(engineId)}`;
-    
+
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -285,7 +286,7 @@ export async function getEngineDetails(engineId: string): Promise<VRMResponse> {
     }
 
     const data: any = await response.json();
-    
+
     // Check if response indicates failure
     if (!data.success) {
       // Handle specific error types
