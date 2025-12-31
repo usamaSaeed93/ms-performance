@@ -98,7 +98,7 @@ export default function DiscountsPage() {
         usage_limit: formData.usage_limit ? parseInt(formData.usage_limit) : undefined,
         per_user_limit: formData.per_user_limit ? parseInt(formData.per_user_limit) : undefined,
         product_id: formData.product_id ? parseInt(formData.product_id) : undefined,
-        category_id: formData.category_id ? parseInt(formData.category_id) : undefined,
+        category_id: formData.category_id && formData.category_id !== "none" ? parseInt(formData.category_id) : undefined,
         valid_until: formData.valid_until || undefined,
       });
       setIsModalOpen(false);
@@ -270,7 +270,7 @@ export default function DiscountsPage() {
                     <SelectValue placeholder="Select category (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {categories.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id.toString()}>
                         {cat.category_name}
@@ -375,11 +375,10 @@ export default function DiscountsPage() {
                       </TableCell>
                       <TableCell>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            discount.is_active
-                              ? "bg-green-500/20 text-green-400"
-                              : "bg-red-500/20 text-red-400"
-                          }`}
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${discount.is_active
+                            ? "bg-green-500/20 text-green-400"
+                            : "bg-red-500/20 text-red-400"
+                            }`}
                         >
                           {discount.is_active ? "Active" : "Inactive"}
                         </span>
