@@ -256,7 +256,7 @@ export default function NewBlogPage() {
         <div className="flex gap-4 mt-6">
           <Button
             type="button"
-            variant="outline"
+            variant="destructive"
             onClick={() => router.back()}
             disabled={isLoading}
           >

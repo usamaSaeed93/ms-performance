@@ -314,7 +314,7 @@ export default function DiscountsPage() {
               <DialogFooter>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="destructive"
                   onClick={() => setIsModalOpen(false)}
                 >
                   Cancel

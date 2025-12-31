@@ -148,12 +148,12 @@ export default function DashboardPage() {
     stats.totalSales > 0 ? stats.totalRevenue / stats.totalSales : 0;
   const fulfillmentRate = stats.recentOrders.length
     ? Math.round(
-        (stats.recentOrders.filter(
-          (order) => order.order_status === "delivered"
-        ).length /
-          stats.recentOrders.length) *
-          100
-      )
+      (stats.recentOrders.filter(
+        (order) => order.order_status === "delivered"
+      ).length /
+        stats.recentOrders.length) *
+      100
+    )
     : 0;
   const lowStockPercentage =
     stats.totalProducts > 0
@@ -432,7 +432,32 @@ export default function DashboardPage() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="overflow-hidden rounded-lg border">
+                {/* Mobile View - Card Layout */}
+                <div className="space-y-3 md:hidden">
+                  {stats.recentOrders.length === 0 ? (
+                    <p className="py-6 text-center text-muted-foreground">No recent orders</p>
+                  ) : (
+                    stats.recentOrders.map((order) => (
+                      <div key={order.id} className="rounded-lg border bg-muted/40 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{order.order_number || `Order #${order.id}`}</span>
+                          <span className="font-semibold">{formatCurrency(Number(order.total_amount || 0))}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${statusClasses[order.order_status || ""] || "bg-slate-500/15 text-slate-700"}`}>
+                            {order.order_status || "pending"}
+                          </span>
+                          <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${paymentClasses[order.payment_status || ""] || "bg-slate-500/15 text-slate-700"}`}>
+                            {order.payment_status || "pending"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleDateString()}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+                {/* Desktop View - Table Layout */}
+                <div className="hidden md:block overflow-x-auto rounded-lg border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -491,7 +516,7 @@ export default function DashboardPage() {
                   <CardTitle>Low stock alerts</CardTitle>
                   <CardDescription>Products nearing threshold</CardDescription>
                 </div>
-                <Button asChild size="sm" variant="outline">
+                <Button asChild size="sm" variant="outline" className="w-full sm:w-auto">
                   <Link href="/admin/products">
                     Manage inventory
                     <ArrowUpRight className="ml-1.5 h-4 w-4" />
@@ -505,7 +530,7 @@ export default function DashboardPage() {
                   stats.lowStockList.slice(0, 5).map((product) => (
                     <div
                       key={product.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 p-3"
+                      className="flex flex-col gap-2 rounded-lg border bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold">{product.product_name}</p>
@@ -515,11 +540,10 @@ export default function DashboardPage() {
                       </div>
                       <div className="text-right">
                         <span
-                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                            product.quantity <= (product.stock_threshold || 5)
-                              ? "bg-red-500/15 text-red-700"
-                              : "bg-amber-500/15 text-amber-700"
-                          }`}
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${product.quantity <= (product.stock_threshold || 5)
+                            ? "bg-red-500/15 text-red-700"
+                            : "bg-amber-500/15 text-amber-700"
+                            }`}
                         >
                           {product.quantity} left
                         </span>

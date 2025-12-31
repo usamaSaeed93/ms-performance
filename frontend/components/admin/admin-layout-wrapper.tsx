@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/admin/app-sidebar";
 import { AdminShell } from "@/components/admin/admin-shell";
+import "@/styles/admin.css";
 
 export function AdminLayoutWrapper({
   children,
@@ -18,18 +19,19 @@ export function AdminLayoutWrapper({
 
   // For login page, don't show sidebar
   if (isLoginPage) {
-    return <>{children}</>;
+    return <div className="admin-theme">{children}</div>;
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
+    <div className="admin-theme">
+      <SidebarProvider>
+        <AppSidebar />
 
-      {/* This is the main area that sits next to the sidebar */}
-      <SidebarInset>
-        <AdminShell>{children}</AdminShell>
-      </SidebarInset>
-    </SidebarProvider>
+        {/* This is the main area that sits next to the sidebar */}
+        <SidebarInset>
+          <AdminShell>{children}</AdminShell>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   );
 }
-

@@ -57,7 +57,7 @@ export default function AdminOrdersPage() {
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState<Partial<Order>>({});
-  
+
   // Filters
   const [filters, setFilters] = useState({
     order_status: undefined as string | undefined,
@@ -82,7 +82,7 @@ export default function AdminOrdersPage() {
         order_by: "created_at",
         order: "desc",
       };
-      
+
       if (filters.order_status) params.order_status = filters.order_status;
       if (filters.payment_status) params.payment_status = filters.payment_status;
       if (filters.payment_method) params.payment_method = filters.payment_method;
@@ -90,7 +90,7 @@ export default function AdminOrdersPage() {
       if (filters.start_date) params.start_date = filters.start_date;
       if (filters.end_date) params.end_date = filters.end_date;
       if (filters.user_id) params.user_id = parseInt(filters.user_id);
-      
+
       const response = await adminApi.getOrders(params);
       setOrders(response.orders || []);
       setTotal(response.total || 0);
@@ -336,7 +336,7 @@ export default function AdminOrdersPage() {
                 )}
               </TableBody>
             </Table>
-            
+
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-4 pt-4 border-t">
@@ -435,7 +435,7 @@ export default function AdminOrdersPage() {
             <DialogFooter>
               <Button
                 type="button"
-                variant="outline"
+                variant="destructive"
                 onClick={() => {
                   setShowEditModal(false);
                   setEditingOrder(null);

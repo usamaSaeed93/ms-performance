@@ -128,7 +128,7 @@ export default function AdminCategoriesPage() {
               <DialogFooter>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="destructive"
                   onClick={() => {
                     setShowModal(false);
                     setEditingCategory(null);

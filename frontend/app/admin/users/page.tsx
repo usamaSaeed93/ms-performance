@@ -139,11 +139,10 @@ export default function AdminUsersPage() {
                       </TableCell>
                       <TableCell>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            user.is_active
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${user.is_active
                               ? "bg-green-500/20 text-green-400"
                               : "bg-red-500/20 text-red-400"
-                          }`}
+                            }`}
                         >
                           {user.is_active ? "Active" : "Inactive"}
                         </span>
@@ -231,7 +230,7 @@ export default function AdminUsersPage() {
             <DialogFooter>
               <Button
                 type="button"
-                variant="outline"
+                variant="destructive"
                 onClick={() => {
                   setShowEditModal(false);
                   setEditingUser(null);

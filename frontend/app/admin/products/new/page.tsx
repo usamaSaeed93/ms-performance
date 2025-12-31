@@ -612,7 +612,7 @@ export default function NewProductPage() {
               </Button>
               <Button
                 type="button"
-                variant="outline"
+                variant="destructive"
                 onClick={() => router.back()}
                 size="lg"
               >

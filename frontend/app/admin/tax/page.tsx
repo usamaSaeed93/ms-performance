@@ -40,7 +40,7 @@ import { toast } from "sonner";
 
 export default function AdminTaxPage() {
   const [activeTab, setActiveTab] = useState("classes");
-  
+
   // Tax Classes
   const { data: taxClassesData, isLoading: taxClassesLoading, refetch: refetchTaxClasses } = useGetTaxClassesQuery({});
   const [createTaxClass] = useCreateTaxClassMutation();
@@ -153,7 +153,7 @@ export default function AdminTaxPage() {
         postcode: taxRateFormData.postcode || undefined,
         city: taxRateFormData.city || undefined,
       };
-      
+
       if (editingTaxRate) {
         await updateTaxRate({ id: editingTaxRate.id, ...formData }).unwrap();
         toast.success("Tax rate updated successfully");
@@ -287,7 +287,7 @@ export default function AdminTaxPage() {
                   <DialogFooter>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="destructive"
                       onClick={() => {
                         setShowTaxClassModal(false);
                         setEditingTaxClass(null);
@@ -344,9 +344,8 @@ export default function AdminTaxPage() {
                           <TableCell>{taxClass.name}</TableCell>
                           <TableCell className="text-muted-foreground">{taxClass.slug}</TableCell>
                           <TableCell>
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              taxClass.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                            }`}>
+                            <span className={`px-2 py-1 rounded text-xs ${taxClass.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                              }`}>
                               {taxClass.is_active ? "Active" : "Inactive"}
                             </span>
                           </TableCell>
@@ -556,7 +555,7 @@ export default function AdminTaxPage() {
                   <DialogFooter>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="destructive"
                       onClick={() => {
                         setShowTaxRateModal(false);
                         setEditingTaxRate(null);
@@ -637,9 +636,8 @@ export default function AdminTaxPage() {
                               <TableCell className="font-semibold">{formatRate(taxRate.rate)}</TableCell>
                               <TableCell>{taxRate.priority}</TableCell>
                               <TableCell>
-                                <span className={`px-2 py-1 rounded text-xs ${
-                                  taxRate.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                                }`}>
+                                <span className={`px-2 py-1 rounded text-xs ${taxRate.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                                  }`}>
                                   {taxRate.is_active ? "Active" : "Inactive"}
                                 </span>
                               </TableCell>

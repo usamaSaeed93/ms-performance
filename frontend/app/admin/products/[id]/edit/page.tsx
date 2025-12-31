@@ -721,7 +721,7 @@ export default function EditProductPage() {
               </Button>
               <Button
                 type="button"
-                variant="outline"
+                variant="destructive"
                 onClick={() => router.back()}
                 size="lg"
               >
