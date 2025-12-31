@@ -1039,22 +1039,22 @@ function GainsCalculatorContent() {
 
                       <div className="text-gray-600 font-medium">Compression</div>
                       <div className="font-bold text-black">
-                        {vrmData?.engineDetails?.specz?.compression_ratio || "9.1 : 1"}
+                        {vrmData?.engineDetails?.specz?.compression_ratio || "-"}
                       </div>
 
                       <div className="text-gray-600 font-medium">Type Ecu</div>
                       <div className="font-bold text-black leading-snug max-w-[200px]">
-                        {vrmData?.engineDetails?.specz?.engine_ecu || "Bosch ME17.1.6 & Bosch ME7.1.1 & Bosch MG1CS163"}
+                        {vrmData?.engineDetails?.specz?.engine_ecu || "-"}
                       </div>
 
                       <div className="text-gray-600 font-medium">Bore X Stroke</div>
                       <div className="font-bold text-black">
-                        {vrmData?.engineDetails?.specz?.bore_stroke_ratio || "84.0 X 90.2 Mm"}
+                        {vrmData?.engineDetails?.specz?.bore_stroke_ratio || "-"}
                       </div>
 
                       <div className="text-gray-600 font-medium">Engine Code</div>
                       <div className="font-bold text-black">
-                        {vrmData?.engineDetails?.specz?.engine_code || "DBD"}
+                        {vrmData?.engineDetails?.specz?.engine_code || "-"}
                       </div>
                     </div>
 
@@ -1078,21 +1078,21 @@ function GainsCalculatorContent() {
                       <div className="flex-1 flex flex-row items-center justify-around px-2 sm:px-8">
                         <Gauge
                           label="Original"
-                          value={vrmData?.engineDetails?.horsepower_original || 184}
+                          value={vrmData?.engineDetails?.horsepower_original || 0}
                           unit="hp"
                           color="#00a9f4"
                           type="solid"
                         />
                         <Gauge
                           label="Modified"
-                          value={vrmData?.engineDetails?.horsepower_white || 231}
+                          value={vrmData?.engineDetails?.horsepower_white || 0}
                           unit="hp"
                           color="#00a9f4"
                           type="solid"
                         />
                         <Gauge
                           label="Difference"
-                          value={(vrmData?.engineDetails?.horsepower_white || 231) - (vrmData?.engineDetails?.horsepower_original || 184)}
+                          value={(vrmData?.engineDetails?.horsepower_white || 0) - (vrmData?.engineDetails?.horsepower_original || 0)}
                           unit="hp"
                           color="#00a9f4"
                           type="dashed"
@@ -1113,21 +1113,21 @@ function GainsCalculatorContent() {
                       <div className="flex-1 flex flex-row items-center justify-around px-2 sm:px-8">
                         <Gauge
                           label="Original"
-                          value={vrmData?.engineDetails?.torque_original || 184}
+                          value={vrmData?.engineDetails?.torque_original || 0}
                           unit="nm"
                           color="#00a9f4"
                           type="solid"
                         />
                         <Gauge
                           label="Modified"
-                          value={vrmData?.engineDetails?.torque_white || 231}
+                          value={vrmData?.engineDetails?.torque_white || 0}
                           unit="nm"
                           color="#00a9f4"
                           type="solid"
                         />
                         <Gauge
                           label="Difference"
-                          value={(vrmData?.engineDetails?.torque_white || 231) - (vrmData?.engineDetails?.torque_original || 184)}
+                          value={(vrmData?.engineDetails?.torque_white || 0) - (vrmData?.engineDetails?.torque_original || 0)}
                           unit="nm"
                           color="#00a9f4"
                           type="dashed"
