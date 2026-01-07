@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 
 export default function LegalInformationPage() {
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-gray-100">
             <Navbar ctaText="Contact Us" />
 
             <main>

@@ -60,7 +60,7 @@ export default function ProductDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-white text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p>Loading product...</p>
@@ -71,7 +71,7 @@ export default function ProductDetailPage() {
 
   if (error || !product || isNaN(productId)) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-white text-center">
           <h1 className="text-4xl font-bold mb-4">Product Not Found</h1>
           <p className="text-sm mb-4">Looking for ID: {params?.id}</p>
@@ -84,9 +84,9 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <div className="w-full">
-        <div className="bg-white overflow-hidden">
+        <div className="overflow-hidden">
           <Navbar ctaText="Become A Dealer" />
 
           <main className="space-y-12">
@@ -212,8 +212,14 @@ export default function ProductDetailPage() {
                   <div className="space-y-3">
                     <h3 className="text-lg font-bold text-[#0c1b33]">Secure Payment</h3>
                     <div className="flex items-center gap-3">
-                      <div className="flex h-16 items-center justify-center rounded-[8px] border border-gray-200 bg-white px-6 text-sm font-semibold text-[#5c6c86]">
-                        Stripe
+                      <div className="flex h-16 items-center justify-center rounded-[8px] border border-gray-200 bg-white px-6">
+                        <Image
+                          src="/images/payment/stripe.png"
+                          alt="Stripe"
+                          width={80}
+                          height={35}
+                          className="object-contain"
+                        />
                       </div>
                     </div>
                   </div>

@@ -3,6 +3,7 @@ import { adminApi } from './api/adminApi';
 import { productsApi } from './api/productsApi';
 import { blogsApi } from './api/blogsApi';
 import { authApi } from './api/authApi';
+import { appointmentsApi } from './api/appointmentsApi';
 
 export const makeStore = () => {
   return configureStore({
@@ -11,6 +12,7 @@ export const makeStore = () => {
       [productsApi.reducerPath]: productsApi.reducer,
       [blogsApi.reducerPath]: blogsApi.reducer,
       [authApi.reducerPath]: authApi.reducer,
+      [appointmentsApi.reducerPath]: appointmentsApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
@@ -20,9 +22,10 @@ export const makeStore = () => {
             productsApi.util.getRunningQueriesThunk.type,
             blogsApi.util.getRunningQueriesThunk.type,
             authApi.util.getRunningQueriesThunk.type,
+            appointmentsApi.util.getRunningQueriesThunk.type,
           ],
         },
-      }).concat(adminApi.middleware, productsApi.middleware, blogsApi.middleware, authApi.middleware),
+      }).concat(adminApi.middleware, productsApi.middleware, blogsApi.middleware, authApi.middleware, appointmentsApi.middleware),
   });
 };
 
@@ -31,4 +34,3 @@ export type AppStore = ReturnType<typeof makeStore>;
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<AppStore['getState']>;
 export type AppDispatch = AppStore['dispatch'];
-

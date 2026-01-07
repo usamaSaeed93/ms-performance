@@ -30,9 +30,9 @@ export default function ProductDetailPage() {
   const hasHalfStar = dummyProduct.rating % 1 >= 0.5;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <div className="mx-auto max-w-[1503px] px-4 pt-8 lg:px-0">
-        <div className="bg-white overflow-hidden">
+        <div className="overflow-hidden">
           {/* Header */}
           <header className="text-white">
             <div className="space-y-3 bg-black px-6 py-4 shadow-[0_20px_60px_rgba(1,4,13,0.65)]">

@@ -34,6 +34,36 @@ import { useRouter } from "next/navigation";
 import { VehicleCombobox } from "@/components/VehicleCombobox";
 import { Navbar } from "@/components/Navbar";
 
+// FAQ Item Component
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="rounded-xl bg-white shadow-sm border border-gray-100">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between p-4 text-left"
+      >
+        <span className="text-sm font-semibold text-[#0c1b33] pr-4">{question}</span>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          className={`flex-shrink-0 transition-transform ${isOpen ? "rotate-45" : ""} text-[#1d70ff]`}
+        >
+          <path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {isOpen && (
+        <div className="border-t border-gray-100 px-4 pb-4">
+          <p className="text-sm leading-relaxed text-[#5c6c86] pt-3">{answer}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
 
@@ -94,22 +124,22 @@ export default function HomePage() {
     {
       title: "Turbo Upgrades",
       description: "Enhanced turbo systems for maximum power and reliability.",
-      image: "/images/services/ecu-remapping.png",
+      image: "/images/services/IMG_4403.png",
     },
     {
       title: "Performance Tuning",
       description: "Professional engine tuning for optimal performance gains.",
-      image: "/images/services/dyno-tests.png",
+      image: "/images/services/IMG_4396.png",
     },
     {
       title: "ECU Diagnostics",
       description: "Comprehensive ECU diagnostics and fault code reading.",
-      image: "/images/services/dpf-egr.png",
+      image: "/images/services/IMG_4398.png",
     },
     {
       title: "Stage Upgrades",
       description: "Complete stage upgrade packages for your vehicle.",
-      image: "/images/services/custom-exhausts.png",
+      image: "/images/services/IMG_4400.png",
     },
   ];
 
@@ -464,20 +494,20 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <Navbar ctaText="Become A Dealer" />
       <main className=" space-y-20">
-        <div className="bg-white">
+        <div>
           <section className="relative overflow-hidden bg-[#030814] text-white">
             <Image
-              src="/images/hero/slider1.jpg"
+              src="/images/services/hero-dyno-v2-ue.png"
               alt="MS Performance hero"
               width={1600}
-              height={700}
-              className="absolute inset-0 h-full w-full object-cover"
+              height={500}
+              className="absolute inset-0 h-full w-full object-cover object-center"
               priority
             />
-            <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+            <div className="absolute inset-0 bg-black/40 pointer-events-none" />
             <div className="relative grid gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:gap-10 md:px-8 md:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:py-14">
               <div className="space-y-4 animate-slide-left sm:space-y-5 md:space-y-6">
                 <p className="flex items-center gap-2 text-xs font-semibold text-white sm:gap-3 sm:text-sm animate-subtitle">
@@ -792,17 +822,17 @@ export default function HomePage() {
           <section className="space-y-8 px-4 py-6 sm:space-y-10 sm:px-6 sm:py-8 md:space-y-12 md:px-8 md:py-10">
             <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
               <div className="space-y-4 sm:space-y-5 md:space-y-6">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#1d70ff] sm:text-xs">
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#1d70ff] sm:text-sm">
                   Customized Performance Solutions
                 </p>
-                <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl">
-                  We&apos;re Chelmsford&apos;s Finest Car Tuning & Exhaust Destination
+                <h2 className="text-3xl font-black text-[#0c1b33] sm:text-4xl md:text-5xl">
+                  Chelmsford&apos;s Premier Car Tuning &amp; Exhaust Specialists
                 </h2>
-                <p className="text-sm text-[#5c6c86] sm:text-base">
-                  With over a decade of experience in car tuning and custom exhaust installation, our
-                  team brings advanced programming capabilities to unlock unique features for your
-                  vehicle. From exhilarating pops and bangs to mesmerizing flames, we elevate your
-                  car&apos;s performance and sound to new heights.
+                <p className="text-base text-[#5c6c86] sm:text-lg md:text-xl leading-relaxed">
+                  Over a decade of expertise in ECU remapping, custom exhausts, and performance upgrades. We unlock your vehicle&apos;s true potential with dyno-proven results.
+                </p>
+                <p className="text-base text-[#5c6c86] sm:text-lg md:text-xl leading-relaxed">
+                  Stage 1, 2 &amp; 3 upgrades. DPF &amp; EGR solutions. Pops, bangs &amp; flames. All backed by real data from our in-house rolling road.
                 </p>
               </div>
               <div className="relative h-[250px] w-full overflow-hidden sm:h-[300px] md:h-[400px] lg:h-full">
@@ -1131,6 +1161,62 @@ export default function HomePage() {
                   })}
                 </div>
               )}
+            </div>
+          </section>
+
+          {/* FAQ Section */}
+          <section className="px-4 py-12 sm:px-6 sm:py-16 md:px-8 lg:px-12">
+            <div className="mx-auto max-w-5xl">
+              <div className="text-center mb-10">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#1d70ff] mb-3">
+                  Got Questions?
+                </p>
+                <h2 className="text-3xl font-black text-[#0c1b33] sm:text-4xl md:text-5xl">
+                  Frequently Asked Questions
+                </h2>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  <FAQItem
+                    question="How often should I change my car's oil?"
+                    answer="For most modern vehicles, we recommend changing your oil every 5,000-7,500 miles or every 6 months, whichever comes first. However, if you drive in severe conditions (frequent short trips, dusty environments, or towing), you may need to change it more frequently."
+                  />
+                  <FAQItem
+                    question="Is professional installation necessary for a custom exhaust system?"
+                    answer="Yes, professional installation is highly recommended. A properly fitted exhaust system requires precise welding, correct alignment, and secure mounting to prevent rattles, leaks, and potential damage."
+                  />
+                  <FAQItem
+                    question="Are catalytic controlled exhaust systems worth considering?"
+                    answer="Absolutely. These custom exhaust systems allow you to control exhaust flow via a valve at the back. They offer versatility, enabling you to switch between an aggressive performance sound and a more subtle, everyday mode."
+                  />
+                  <FAQItem
+                    question="What are the benefits of installing a custom exhaust system?"
+                    answer="Custom exhaust systems offer improved exhaust flow, resulting in better engine performance and fuel efficiency. They also provide a more aggressive or refined sound depending on your preference, reduced weight compared to stock systems, and enhanced aesthetics."
+                  />
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4">
+                  <FAQItem
+                    question="Do you keep a copy of the original files?"
+                    answer="Yes, we always keep a backup of your vehicle's original ECU files before any remapping work. This ensures we can restore your vehicle to its factory settings at any time if needed."
+                  />
+                  <FAQItem
+                    question="What about insurance?"
+                    answer="We recommend informing your insurance company about any modifications to your vehicle, including ECU remapping and exhaust upgrades. Many insurers are understanding of performance modifications, and some specialist insurers cater specifically to modified vehicles."
+                  />
+                  <FAQItem
+                    question="Is remapping safe for the vehicles?"
+                    answer="When performed by experienced professionals like us, remapping is completely safe. We ensure all parameters remain within safe limits for your engine and transmission. Our tuning process takes into account the engine's design, cooling capacity, and overall mechanical condition."
+                  />
+                  <FAQItem
+                    question="What is remapping?"
+                    answer="Remapping (also known as ECU tuning) is the process of modifying the software in your vehicle's Engine Control Unit to optimize performance. This can unlock additional power and torque, improve throttle response, and even enhance fuel efficiency."
+                  />
+                </div>
+              </div>
             </div>
           </section>
         </div>

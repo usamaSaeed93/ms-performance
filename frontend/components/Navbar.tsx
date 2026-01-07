@@ -112,10 +112,10 @@ export function Navbar({ ctaText = "Call us Now", ctaAction, showTopBar = true }
             <Image
               src="/images/logos/ms-logo.png"
               alt="MS Performance"
-              width={160}
-              height={48}
+              width={200}
+              height={60}
               priority
-              className="h-7 w-auto sm:h-9 md:h-10"
+              className="h-10 w-auto sm:h-12 md:h-14"
             />
           </Link>
 
@@ -127,9 +127,8 @@ export function Navbar({ ctaText = "Call us Now", ctaAction, showTopBar = true }
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`relative pb-1 transition hover:text-[#1d70ff] ${
-                    isActive ? "text-[#1d70ff]" : "text-white/80"
-                  }`}
+                  className={`relative pb-1 transition hover:text-[#1d70ff] ${isActive ? "text-[#1d70ff]" : "text-white/80"
+                    }`}
                 >
                   {link.label}
                   {isActive && (
@@ -142,12 +141,12 @@ export function Navbar({ ctaText = "Call us Now", ctaAction, showTopBar = true }
 
           {/* Desktop CTA Button */}
           <div className="hidden items-center gap-4 lg:flex">
-            <button
-              onClick={ctaAction}
+            <Link
+              href="/book-appointment"
               className="flex-shrink-0 rounded-[12px] bg-[#1d70ff] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)] transition hover:bg-[#1a5fe6] active:scale-95"
             >
-              {ctaText}
-            </button>
+              Book Appointment
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -195,85 +194,78 @@ export function Navbar({ ctaText = "Call us Now", ctaAction, showTopBar = true }
       <>
         {/* Backdrop */}
         <div
-          className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
-            isMobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
-          }`}
+          className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isMobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+            }`}
           onClick={toggleMobileMenu}
           aria-hidden="true"
         />
 
         {/* Mobile Menu */}
-        <div className={`fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-black p-6 shadow-xl transition-transform duration-300 ease-in-out lg:hidden ${
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
-        }`}>
-            <div className="flex h-full flex-col">
-              {/* Mobile Menu Header */}
-              <div className="mb-8 flex items-center justify-between">
-                <Image
-                  src="/images/logos/ms-logo.png"
-                  alt="MS Performance"
-                  width={120}
-                  height={36}
-                  className="h-8 w-auto"
-                />
-                <button
-                  onClick={toggleMobileMenu}
-                  className="p-2 text-white transition hover:text-[#1d70ff]"
-                  aria-label="Close menu"
+        <div className={`fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-black p-6 shadow-xl transition-transform duration-300 ease-in-out lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
+          }`}>
+          <div className="flex h-full flex-col">
+            {/* Mobile Menu Header */}
+            <div className="mb-8 flex items-center justify-between">
+              <Image
+                src="/images/logos/ms-logo.png"
+                alt="MS Performance"
+                width={160}
+                height={48}
+                className="h-10 w-auto"
+              />
+              <button
+                onClick={toggleMobileMenu}
+                className="p-2 text-white transition hover:text-[#1d70ff]"
+                aria-label="Close menu"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              </div>
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
 
-              {/* Mobile Navigation Links */}
-              <nav className="flex flex-1 flex-col gap-2 overflow-y-auto">
-                {navLinks.map((link) => {
-                  const isActive = link.href === getActiveLink();
-                  return (
-                    <Link
-                      key={link.label}
-                      href={link.href}
-                      onClick={toggleMobileMenu}
-                      className={`rounded-lg px-4 py-3.5 text-base font-semibold transition-all duration-200 ${
-                        isActive
-                          ? "bg-[#1d70ff]/20 text-[#1d70ff]"
-                          : "text-white active:bg-white/10 hover:bg-white/5 hover:text-[#1d70ff]"
+            {/* Mobile Navigation Links */}
+            <nav className="flex flex-1 flex-col gap-2 overflow-y-auto">
+              {navLinks.map((link) => {
+                const isActive = link.href === getActiveLink();
+                return (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    onClick={toggleMobileMenu}
+                    className={`rounded-lg px-4 py-3.5 text-base font-semibold transition-all duration-200 ${isActive
+                      ? "bg-[#1d70ff]/20 text-[#1d70ff]"
+                      : "text-white active:bg-white/10 hover:bg-white/5 hover:text-[#1d70ff]"
                       }`}
-                    >
-                      {link.label}
-                    </Link>
-                  );
-                })}
-              </nav>
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
 
-              {/* Mobile CTA Button */}
-              <div className="mt-auto border-t border-gray-700 pt-6">
-                <button
-                  onClick={() => {
-                    if (ctaAction) {
-                      ctaAction();
-                    }
-                    toggleMobileMenu();
-                  }}
-                  className="w-full rounded-[12px] bg-[#1d70ff] px-6 py-3.5 text-base font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)] transition-all duration-200 hover:bg-[#1a5fe6] active:scale-[0.98]"
-                >
-                  {ctaText}
-                </button>
-              </div>
+            {/* Mobile CTA Button */}
+            <div className="mt-auto border-t border-gray-700 pt-6">
+              <Link
+                href="/book-appointment"
+                onClick={toggleMobileMenu}
+                className="block w-full rounded-[12px] bg-[#1d70ff] px-6 py-3.5 text-center text-base font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)] transition-all duration-200 hover:bg-[#1a5fe6] active:scale-[0.98]"
+              >
+                Book Appointment
+              </Link>
             </div>
           </div>
+        </div>
       </>
     </header>
   );

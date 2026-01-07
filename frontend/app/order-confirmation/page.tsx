@@ -163,9 +163,9 @@ function OrderConfirmationContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <div className="pt-8">
-        <div className="bg-white overflow-hidden">
+        <div className="overflow-hidden">
           <Navbar ctaText="Become A Dealer" />
 
           <main className="space-y-12">
@@ -409,9 +409,9 @@ function OrderConfirmationContent() {
 export default function OrderConfirmationPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gray-100">
         <div className="pt-8">
-          <div className="bg-white overflow-hidden">
+          <div className="overflow-hidden">
             <Navbar ctaText="Become A Dealer" />
             <main className="space-y-12">
               <section className="relative overflow-hidden bg-[#030814] text-white h-[360px]">

@@ -37,7 +37,7 @@ export default function RootLayout({
     <html lang="en" className="light">
       <head></head>
       <body
-        className={`${montserrat.variable} ${geistSans.variable} ${geistMono.variable} antialiased font-[family-name:var(--font-montserrat)] bg-white`}
+        className={`${montserrat.variable} ${geistSans.variable} ${geistMono.variable} antialiased font-[family-name:var(--font-montserrat)] bg-gray-100`}
       >
         <StoreProvider>
           <ThemeProvider>

@@ -263,6 +263,52 @@ MS Performance Team
             html_content=html_content,
             text_content=text_content
         )
+    
+    async def send_appointment_confirmation_email(
+        self,
+        to_email: str,
+        customer_name: str,
+        appointment_date: str,
+        appointment_time: str,
+        service_type: str,
+        vehicle_info: str = None
+    ) -> bool:
+        """Send appointment confirmation email."""
+        html_content = self.render_template("appointment_confirmation.html", {
+            "customer_name": customer_name,
+            "appointment_date": appointment_date,
+            "appointment_time": appointment_time,
+            "service_type": service_type,
+            "vehicle_info": vehicle_info,
+            "frontend_url": self.frontend_url
+        })
+        
+        text_content = f"""
+Hello {customer_name},
+
+Your appointment has been confirmed!
+
+Appointment Details:
+- Date: {appointment_date}
+- Time: {appointment_time}
+- Service: {service_type}
+{f'- Vehicle: {vehicle_info}' if vehicle_info else ''}
+
+Please arrive 5-10 minutes before your appointment.
+
+If you need to cancel or reschedule, please contact us.
+
+Best regards,
+MS Performance Team
+"""
+        
+        return await self.send_email(
+            to_email=to_email,
+            subject="Appointment Confirmed - MS Performance",
+            html_content=html_content,
+            text_content=text_content
+        )
 
 
 email_service = EmailService()
+

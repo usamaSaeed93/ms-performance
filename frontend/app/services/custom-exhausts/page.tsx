@@ -6,24 +6,44 @@ import { Navbar } from "@/components/Navbar";
 
 const faqs = [
     {
-        question: "What are the benefits of a custom exhaust?",
+        question: "How often should I change my car's oil?",
         answer:
-            "A custom exhaust can improve your vehicle's performance by reducing backpressure, allowing the engine to breathe better. It also enhances the sound, giving your car a more aggressive or refined tone, and can be styled to improve the aesthetic appeal of your vehicle.",
+            "For most modern vehicles, we recommend changing your oil every 5,000-7,500 miles or every 6 months, whichever comes first. However, if you drive in severe conditions (frequent short trips, dusty environments, or towing), you may need to change it more frequently. Always check your owner's manual for manufacturer recommendations.",
     },
     {
-        question: "Will a custom exhaust pass the MOT?",
+        question: "Is professional installation necessary for a custom exhaust system?",
         answer:
-            "Yes, we design our exhaust systems to comply with relevant regulations. However, some track-focused systems (like decats) may not be road legal. We will always advise you on the legal implications of your chosen setup specifically for road use versus track use.",
+            "Yes, professional installation is highly recommended. A properly fitted exhaust system requires precise welding, correct alignment, and secure mounting to prevent rattles, leaks, and potential damage. Our technicians ensure perfect fitment and optimal performance from your new exhaust system.",
     },
     {
-        question: "Do you make stainless steel exhausts?",
+        question: "Are catalytic controlled exhaust systems worth considering?",
         answer:
-            "Absolutely. We use high-grade 304 stainless steel for our custom exhausts, ensuring durability and resistance to corrosion. This guarantees a long-lasting product that looks great and performs even better.",
+            "Absolutely. These are custom exhaust systems allow you to control exhaust flow via a valve at the back. They offer versatility, enabling you to switch between an aggressive performance sound and a more subtle, everyday mode. This makes them perfect for vehicles that are both daily drivers and weekend track cars.",
     },
     {
-        question: "Can I choose how loud it is?",
+        question: "What are the benefits of installing a custom exhaust system?",
         answer:
-            "Yes, because it is custom-built, we can tailor the sound to your preference. Whether you want a subtle sporty rumble or a full race-spec roar, we can configure the silencers and resonators to achieve your desired sound profile.",
+            "Custom exhaust systems offer improved exhaust flow, resulting in better engine performance and fuel efficiency. They also provide a more aggressive or refined sound depending on your preference, reduced weight compared to stock systems, and enhanced aesthetics with polished tips and quality craftsmanship.",
+    },
+    {
+        question: "Do you keep a copy of the original files?",
+        answer:
+            "Yes, we always keep a backup of your vehicle's original ECU files before any remapping work. This ensures we can restore your vehicle to its factory settings at any time if needed, providing complete peace of mind for our customers.",
+    },
+    {
+        question: "What about insurance?",
+        answer:
+            "We recommend informing your insurance company about any modifications to your vehicle, including ECU remapping and exhaust upgrades. Many insurers are understanding of performance modifications, and some specialist insurers cater specifically to modified vehicles. We can provide documentation of any work performed.",
+    },
+    {
+        question: "Is remapping safe for the vehicles?",
+        answer:
+            "When performed by experienced professionals like us, remapping is completely safe. We ensure all parameters remain within safe limits for your engine and transmission. Our tuning process takes into account the engine's design, cooling capacity, and overall mechanical condition to deliver reliable performance gains.",
+    },
+    {
+        question: "What is remapping?",
+        answer:
+            "Remapping (also known as ECU tuning) is the process of modifying the software in your vehicle's Engine Control Unit to optimize performance. This can unlock additional power and torque, improve throttle response, and even enhance fuel efficiency. The remapping process takes the factory settings and adjusts them based on your vehicle and preferences.",
     },
 ];
 
@@ -31,15 +51,15 @@ export default function CustomExhaustsPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
 
     return (
-        <div className="min-h-screen bg-white">
-            <div className="bg-white overflow-hidden">
+        <div className="min-h-screen bg-gray-100">
+            <div className="overflow-hidden">
                 <Navbar ctaText="Get a Quote" />
 
                 <main className="space-y-20">
                     {/* Hero Section */}
                     <section className="relative overflow-hidden bg-[#030814] text-white">
                         <Image
-                            src="/images/services/custom-exhausts.png"
+                            src="/images/services/IMG_4401.png"
                             alt="Custom Exhausts"
                             width={1600}
                             height={700}
@@ -74,7 +94,7 @@ export default function CustomExhaustsPage() {
                                 </div>
                                 <div className="relative overflow-hidden rounded-[20px] flex-shrink-0 animate-slide-right">
                                     <Image
-                                        src="/images/services/custom-exhausts.png"
+                                        src="/images/services/IMG_4402.png"
                                         alt="Welding Exhaust"
                                         width={600}
                                         height={400}
@@ -84,7 +104,7 @@ export default function CustomExhaustsPage() {
                             </div>
                             <div className="relative overflow-hidden h-[650px] rounded-[20px] border-2 border-[#1d70ff] flex animate-slide-right">
                                 <Image
-                                    src="/images/services/Services.png"
+                                    src="/images/services/IMG_4403.png"
                                     alt="Car Underside"
                                     width={600}
                                     height={400}

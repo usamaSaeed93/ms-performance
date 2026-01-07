@@ -2,16 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Facebook, Instagram, Twitter, Youtube, Phone, Mail } from "lucide-react";
+import { Instagram, Phone, Mail } from "lucide-react";
 
 export function Footer() {
     return (
-        <footer className="border-t border-[#00b8ff] px-8 py-12 bg-white font-sans">
+        <footer className="border-t border-[#00b8ff] px-8 py-12 bg-gray-100 font-sans">
             <div className="grid gap-8 lg:grid-cols-[2fr_1fr_1.5fr_1.5fr_1fr]">
                 {/* Column 1: Logo, Text, Payment */}
                 <div className="space-y-6">
                     <Link href="/">
-                        <Image src="/images/logos/ms-logo.png" alt="MS Performance" width={180} height={54} />
+                        <Image src="/images/logos/ms-logo.png" alt="MS Performance" width={220} height={66} />
                     </Link>
                     <p className="text-sm leading-relaxed text-[#5c6c86] max-w-sm">
                         At MSPerformance, we specialize in car performance boosting services, ranging from ECU
@@ -112,25 +112,7 @@ export function Footer() {
                         Follow us
                     </h3>
                     <div className="space-y-3">
-                        <a href="#" className="flex items-center gap-3 text-sm text-[#5c6c86] transition hover:text-[#00b8ff] group">
-                            <div className="rounded-full bg-[#00b8ff] p-1 text-white group-hover:bg-[#00b8ff]/80">
-                                <Facebook className="h-3.5 w-3.5 fill-current" />
-                            </div>
-                            <span>Facebook</span>
-                        </a>
-                        <a href="#" className="flex items-center gap-3 text-sm text-[#5c6c86] transition hover:text-[#00b8ff] group">
-                            <div className="rounded-full bg-[#00b8ff] p-1 text-white group-hover:bg-[#00b8ff]/80">
-                                <Youtube className="h-3.5 w-3.5 fill-current" />
-                            </div>
-                            <span>YouTube</span>
-                        </a>
-                        <a href="#" className="flex items-center gap-3 text-sm text-[#5c6c86] transition hover:text-[#00b8ff] group">
-                            <div className="rounded-full bg-[#00b8ff] p-1 text-white group-hover:bg-[#00b8ff]/80">
-                                <Twitter className="h-3.5 w-3.5 fill-current" />
-                            </div>
-                            <span>Twitter</span>
-                        </a>
-                        <a href="#" className="flex items-center gap-3 text-sm text-[#5c6c86] transition hover:text-[#00b8ff] group">
+                        <a href="https://www.instagram.com/msperformanceltd?igsh=MW41MnUxZG1uNjczcQ==" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-[#5c6c86] transition hover:text-[#00b8ff] group">
                             <div className="rounded-full bg-[#00b8ff] p-1 text-white group-hover:bg-[#00b8ff]/80">
                                 <Instagram className="h-3.5 w-3.5" />
                             </div>

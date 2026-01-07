@@ -166,7 +166,7 @@ export default function BlogDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-white text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p>Loading blog post...</p>
@@ -177,7 +177,7 @@ export default function BlogDetailPage() {
 
   if (error || !blog) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-white text-center">
           <h1 className="text-4xl font-bold mb-4">Blog Post Not Found</h1>
           <Link href="/blog" className="text-[#1d70ff] hover:underline">
@@ -189,7 +189,7 @@ export default function BlogDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <Navbar ctaText="Book a Dyno" />
       <div className="w-full">
         <div className="bg-white">

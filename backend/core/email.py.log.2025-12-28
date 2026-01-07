@@ -1,0 +1,2 @@
+2025-12-28 04:58:27,696 - core.email - WARNING - SMTP send_message returned errors: ({}, '2.0.0 OK  1766879907 98e67ed59e1d1-34e772ac1basm11662503a91.10 - gsmtp')
+2025-12-28 05:06:51,275 - core.email - WARNING - SMTP send_message returned errors: ({}, '2.0.0 OK  1766880411 d2e1a72fcca58-7ff7e197f9asm25077239b3a.43 - gsmtp')

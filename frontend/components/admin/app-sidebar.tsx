@@ -28,10 +28,12 @@ import {
   LogOut,
   Receipt,
   MessageSquare,
+  CalendarCheck,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Appointments", href: "/admin/appointments", icon: CalendarCheck },
   { label: "Products", href: "/admin/products", icon: Package },
   { label: "Blog", href: "/admin/blogs", icon: FileText },
   { label: "Categories", href: "/admin/categories", icon: Tag },

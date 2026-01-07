@@ -52,6 +52,12 @@ from .endpoints.check_webhook_status import CheckWebhookStatus
 from .endpoints.create_contact_message import CreateContactMessage
 from .endpoints.get_contact_messages import GetContactMessages
 from .endpoints.validate_discount import ValidateDiscount
+from .endpoints.get_shop_hours import GetShopHours
+from .endpoints.update_shop_hours import UpdateShopHours
+from .endpoints.get_available_slots import GetAvailableSlots
+from .endpoints.create_appointment import CreateAppointment
+from .endpoints.get_appointments import GetAppointments
+from .endpoints.delete_appointment import DeleteAppointment, UpdateAppointmentStatus
 
 
 class RoutingV1(BaseRouting):
@@ -262,3 +268,33 @@ class RoutingV1(BaseRouting):
             CreateCheckoutSession(),
             CreateCheckoutSession.api_url,
         )
+        # Appointment endpoints
+        self.routing_collection[GetShopHours.api_name] = (
+            GetShopHours(),
+            GetShopHours.api_url,
+        )
+        self.routing_collection[UpdateShopHours.api_name] = (
+            UpdateShopHours(),
+            UpdateShopHours.api_url,
+        )
+        self.routing_collection[GetAvailableSlots.api_name] = (
+            GetAvailableSlots(),
+            GetAvailableSlots.api_url,
+        )
+        self.routing_collection[CreateAppointment.api_name] = (
+            CreateAppointment(),
+            CreateAppointment.api_url,
+        )
+        self.routing_collection[GetAppointments.api_name] = (
+            GetAppointments(),
+            GetAppointments.api_url,
+        )
+        self.routing_collection[DeleteAppointment.api_name] = (
+            DeleteAppointment(),
+            DeleteAppointment.api_url,
+        )
+        self.routing_collection[UpdateAppointmentStatus.api_name] = (
+            UpdateAppointmentStatus(),
+            UpdateAppointmentStatus.api_url,
+        )
+

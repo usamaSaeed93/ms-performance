@@ -12,22 +12,22 @@ export default function ServicesPage() {
         {
             title: "Turbo Upgrades",
             description: "Enhanced turbo systems for maximum power and reliability.",
-            image: "/images/services/Services.png",
+            image: "/images/services/IMG_4403.png",
         },
         {
             title: "Performance Tuning",
             description: "Professional engine tuning for optimal performance gains.",
-            image: "/images/services/Services1.png",
+            image: "/images/services/IMG_4396.png",
         },
         {
             title: "ECU Diagnostics",
             description: "Comprehensive ECU diagnostics and fault code reading.",
-            image: "/images/services/our-service.png",
+            image: "/images/services/IMG_4398.png",
         },
         {
             title: "Stage Upgrades",
             description: "Complete stage upgrade packages for your vehicle.",
-            image: "/images/services/our-services.png",
+            image: "/images/services/IMG_4400.png",
         },
     ];
 
@@ -46,14 +46,14 @@ export default function ServicesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-gray-100">
             <Navbar ctaText="Contact Us" />
 
             <main className="space-y-20 pb-20">
                 {/* Hero Section */}
                 <section className="relative overflow-hidden bg-[#030814] text-white">
                     <Image
-                        src="/images/services/Services.png"
+                        src="/images/services/IMG_4394.png"
                         alt="Our Services"
                         width={1600}
                         height={700}

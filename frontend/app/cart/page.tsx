@@ -180,7 +180,7 @@ export default function CartPage() {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
@@ -213,9 +213,9 @@ export default function CartPage() {
   const total = items.length > 0 ? subtotal + vat - discount + deliveryFee + deliveryVat : 0;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <div className="pt-8">
-        <div className="bg-white overflow-hidden">
+        <div className="overflow-hidden">
           <Navbar ctaText="Become A Dealer" />
 
           <main className="space-y-12">

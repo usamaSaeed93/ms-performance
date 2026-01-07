@@ -632,7 +632,7 @@ function GainsCalculatorContent() {
   }, [dynoChartData, vrmData]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <div className="w-full">
         <div className="bg-white shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
           <Navbar ctaText="Book a Dyno" />
@@ -1434,7 +1434,7 @@ function GainsCalculatorContent() {
 export default function GainsCalculatorPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
     }>

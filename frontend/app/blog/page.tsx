@@ -83,9 +83,9 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <Navbar ctaText="Book a Dyno" />
-      <div className="bg-white overflow-hidden">
+      <div className="overflow-hidden">
         <main className="space-y-12">
           {/* Hero Section / Featured Article */}
           {isLoading ? (

@@ -109,7 +109,7 @@ export default function CheckoutPage() {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
@@ -123,9 +123,9 @@ export default function CheckoutPage() {
   const total = subtotal + vat + shippingCost;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <div className="pt-8">
-        <div className="bg-white overflow-hidden">
+        <div className="overflow-hidden">
           <Navbar ctaText="Become A Dealer" />
 
           <main className="space-y-12">
@@ -418,14 +418,11 @@ export default function CheckoutPage() {
                             </>
                           ) : (
                             <>
-                              <Image
-                                src="/images/payment/stripe.png"
-                                alt="Stripe"
-                                width={60}
-                                height={25}
-                                className="object-contain brightness-0 invert"
-                              />
-                              Pay with Stripe
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
+                                <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
+                                <path d="M2 10h20" stroke="currentColor" strokeWidth="2" />
+                              </svg>
+                              Pay with Card
                             </>
                           )}
                         </button>

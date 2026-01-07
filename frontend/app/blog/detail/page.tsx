@@ -23,7 +23,7 @@ export default function BlogDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <Navbar ctaText="Book a Dyno" />
       <div className="w-full">
         <div className="bg-white">

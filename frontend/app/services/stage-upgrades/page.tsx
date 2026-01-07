@@ -31,15 +31,15 @@ export default function StageUpgradesPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
 
     return (
-        <div className="min-h-screen bg-white">
-            <div className="bg-white overflow-hidden">
+        <div className="min-h-screen bg-gray-100">
+            <div className="overflow-hidden">
                 <Navbar ctaText="Upgrade Now" />
 
                 <main className="space-y-20">
                     {/* Hero Section */}
                     <section className="relative overflow-hidden bg-[#030814] text-white">
                         <Image
-                            src="/images/services/our-services.png"
+                            src="/images/services/IMG_4400.png"
                             alt="Stage Upgrades"
                             width={1600}
                             height={700}
@@ -74,7 +74,7 @@ export default function StageUpgradesPage() {
                                 </div>
                                 <div className="relative overflow-hidden rounded-[20px] flex-shrink-0 animate-slide-right">
                                     <Image
-                                        src="/images/services/our-services.png"
+                                        src="/images/services/IMG_4401.png"
                                         alt="Upgrade Packages"
                                         width={600}
                                         height={400}
@@ -84,7 +84,7 @@ export default function StageUpgradesPage() {
                             </div>
                             <div className="relative overflow-hidden h-[650px] rounded-[20px] border-2 border-[#1d70ff] flex animate-slide-right">
                                 <Image
-                                    src="/images/services/Services1.png"
+                                    src="/images/services/IMG_4402.png"
                                     alt="Car Parts"
                                     width={600}
                                     height={400}
