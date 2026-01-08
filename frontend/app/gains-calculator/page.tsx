@@ -72,9 +72,9 @@ function Gauge({
   const bars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
-    <div className="flex flex-col items-center justify-center w-[145px] h-[182px] rounded-[10px]">
-      <span className="text-sm font-bold text-black mb-3">{label}</span>
-      <div className="relative w-[110px] h-[110px] flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center w-[80px] sm:w-[110px] md:w-[145px] rounded-[10px]">
+      <span className="text-[10px] sm:text-xs md:text-sm font-bold text-black mb-1 sm:mb-2 md:mb-3">{label}</span>
+      <div className="relative w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[110px] md:h-[110px] flex items-center justify-center">
         {/* Gauge SVG */}
         <svg width="100%" height="100%" viewBox="0 0 100 100" className="absolute inset-0 z-10">
           {/* White Base Track (Background Ring) */}
@@ -110,20 +110,20 @@ function Gauge({
         {/* Center Content: Value, Unit, Bars */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-1 z-20">
           {/* Value */}
-          <span className={`text-2xl font-black text-black leading-none tracking-tight`}>
+          <span className={`text-sm sm:text-lg md:text-2xl font-black text-black leading-none tracking-tight`}>
             {isDifference ? "+" : ""}{Math.round(value)}
           </span>
           {/* Unit */}
-          <span className="text-[10px] text-gray-500 font-medium mb-1">{unit}</span>
+          <span className="text-[8px] sm:text-[9px] md:text-[10px] text-gray-500 font-medium mb-0.5 sm:mb-1">{unit}</span>
 
           {/* Bar Chart Visualization (Inside Gauge) */}
-          <div className="flex items-end gap-[3px] h-[14px]">
+          <div className="flex items-end gap-[2px] sm:gap-[3px] h-[8px] sm:h-[10px] md:h-[14px]">
             {!isDifference && bars.map((h, i) => (
               <div
                 key={i}
-                className="w-[3px] rounded-sm"
+                className="w-[2px] sm:w-[2.5px] md:w-[3px] rounded-sm"
                 style={{
-                  height: `${h * 1.5}px`,
+                  height: `${h * 0.8}px`,
                   backgroundColor: color,
                   opacity: i < 8 ? 1 : 0.4
                 }}
@@ -135,8 +135,8 @@ function Gauge({
             {isDifference && bars.map((h, i) => (
               <div
                 key={i}
-                className="w-[3px] rounded-sm bg-gray-400"
-                style={{ height: `${h * 1.5}px` }}
+                className="w-[2px] sm:w-[2.5px] md:w-[3px] rounded-sm bg-gray-400"
+                style={{ height: `${h * 0.8}px` }}
               />
             ))}
           </div>
@@ -632,9 +632,9 @@ function GainsCalculatorContent() {
   }, [dynoChartData, vrmData]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="w-full">
-        <div className="bg-white shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
+    <div className="min-h-screen bg-gray-100 overflow-x-hidden">
+      <div className="w-full max-w-full overflow-x-hidden">
+        <div className="overflow-hidden">
           <Navbar ctaText="Book a Dyno" />
 
           <main className="space-y-8 sm:space-y-10 md:space-y-12">
@@ -1022,14 +1022,14 @@ function GainsCalculatorContent() {
 
             {/* Engine Specifications and Results Section */}
             <section className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 md:py-10">
-              <div className="bg-[#E5E5E5] rounded-[10px] w-full max-w-[1291px] mx-auto h-auto lg:h-[507px] p-6 lg:px-12 lg:py-8 flex flex-col justify-center">
-                <div className="grid gap-12 lg:grid-cols-[1fr_1.8fr] items-start">
+              <div className="bg-[#E5E5E5] rounded-[10px] w-full max-w-[1291px] mx-auto p-4 sm:p-6 lg:px-12 lg:py-8">
+                <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1fr_1.8fr] items-start">
 
                   {/* Engine Specifications - Left Side */}
-                  <div className="space-y-8">
-                    <h3 className="text-3xl font-black text-black tracking-tight">Engine Specifications</h3>
+                  <div className="space-y-6 sm:space-y-8">
+                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-black tracking-tight">Engine Specifications</h3>
 
-                    <div className="grid grid-cols-[140px_1fr] gap-y-6 text-sm">
+                    <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-y-4 sm:gap-y-6 text-xs sm:text-sm">
                       <div className="text-gray-600 font-medium">Cylinder Capacity</div>
                       <div className="font-bold text-black">
                         {vrmData?.engineDetails?.specz?.["Cylinder content"]
@@ -1043,7 +1043,7 @@ function GainsCalculatorContent() {
                       </div>
 
                       <div className="text-gray-600 font-medium">Type Ecu</div>
-                      <div className="font-bold text-black leading-snug max-w-[200px]">
+                      <div className="font-bold text-black leading-snug">
                         {vrmData?.engineDetails?.specz?.engine_ecu || "-"}
                       </div>
 
@@ -1058,7 +1058,7 @@ function GainsCalculatorContent() {
                       </div>
                     </div>
 
-                    <button className="w-[180px] rounded-[6px] bg-[#00a9f4] hover:bg-[#009de3] py-3 text-sm font-bold text-white transition-colors shadow-sm">
+                    <button className="w-full sm:w-[180px] rounded-[6px] bg-[#00a9f4] hover:bg-[#009de3] py-3 text-sm font-bold text-white transition-colors shadow-sm">
                       Request Quote
                     </button>
                   </div>
@@ -1067,15 +1067,15 @@ function GainsCalculatorContent() {
                   <div className="space-y-4">
 
                     {/* Power Row - Unified Card */}
-                    <div className="flex w-full max-w-[721px] h-auto md:h-[221px] bg-[#6767671A] rounded-[10px] overflow-hidden">
+                    <div className="flex flex-col sm:flex-row w-full max-w-[721px] bg-[#6767671A] rounded-[10px] overflow-hidden">
                       {/* Label Section (Left) */}
-                      <div className="w-[163px] h-full bg-[#3A3A3A17] flex flex-col items-center justify-center flex-shrink-0">
-                        <span className="text-2xl font-black text-black">Power</span>
-                        <span className="text-gray-600 font-normal text-sm">(Hp)</span>
+                      <div className="w-full sm:w-[120px] md:w-[163px] py-4 sm:py-0 sm:h-auto bg-[#3A3A3A17] flex flex-col items-center justify-center flex-shrink-0">
+                        <span className="text-xl sm:text-2xl font-black text-black">Power</span>
+                        <span className="text-gray-600 font-normal text-xs sm:text-sm">(Hp)</span>
                       </div>
 
                       {/* Gauges Section (Right) */}
-                      <div className="flex-1 flex flex-row items-center justify-around px-2 sm:px-8">
+                      <div className="flex-1 flex flex-row items-center justify-around px-2 sm:px-4 md:px-8 py-4 sm:py-6">
                         <Gauge
                           label="Original"
                           value={vrmData?.engineDetails?.horsepower_original || 0}
@@ -1102,15 +1102,15 @@ function GainsCalculatorContent() {
                     </div>
 
                     {/* Torque Row - Unified Card */}
-                    <div className="flex w-full max-w-[721px] h-auto md:h-[221px] bg-[#6767671A] rounded-[10px] overflow-hidden">
+                    <div className="flex flex-col sm:flex-row w-full max-w-[721px] bg-[#6767671A] rounded-[10px] overflow-hidden">
                       {/* Label Section (Left) */}
-                      <div className="w-[163px] h-full bg-[#3A3A3A17] flex flex-col items-center justify-center flex-shrink-0">
-                        <span className="text-2xl font-black text-black">Torque</span>
-                        <span className="text-gray-600 font-normal text-sm">(Nm)</span>
+                      <div className="w-full sm:w-[120px] md:w-[163px] py-4 sm:py-0 sm:h-auto bg-[#3A3A3A17] flex flex-col items-center justify-center flex-shrink-0">
+                        <span className="text-xl sm:text-2xl font-black text-black">Torque</span>
+                        <span className="text-gray-600 font-normal text-xs sm:text-sm">(Nm)</span>
                       </div>
 
                       {/* Gauges Section (Right) */}
-                      <div className="flex-1 flex flex-row items-center justify-around px-2 sm:px-8">
+                      <div className="flex-1 flex flex-row items-center justify-around px-2 sm:px-4 md:px-8 py-4 sm:py-6">
                         <Gauge
                           label="Original"
                           value={vrmData?.engineDetails?.torque_original || 0}
