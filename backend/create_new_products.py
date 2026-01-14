@@ -7,6 +7,7 @@ import random
 from db.session import AsyncSessionMaker
 from models.product import Product
 from models.category import Category
+from models.tax import TaxClass
 from instance.config import config
 from sqlalchemy import select
 
