@@ -14,35 +14,34 @@ async def create_admin_user():
     try:
         db.sync_session.set_bind_key(config.APP_ENVIRONMENT)
         
-        admin_email = "admin@admin.com"
+        admin_email = "secure.admin@msperformance.co.uk"
         
         # Check if admin already exists
         existing_user = await user.get_by_email(db, email=admin_email)
         if existing_user:
-            if existing_user.role == "admin":
-                print("Admin user already exists with admin role!")
-                print(f"   Email: {existing_user.email}")
-                print(f"   Role: {existing_user.role}")
-                return
-            else:
-                print(f"User exists but has role '{existing_user.role}'. Updating to admin...")
-                async with db as session:
-                    existing_user.role = "admin"
-                    session.add(existing_user)
-                    await session.commit()
-                    await session.refresh(existing_user)
-                print(f"✅ Admin user updated successfully!")
-                print(f"   Email: {admin_email}")
-                print(f"   Password: Mohammad@941")
-                print(f"   Role: admin")
-                return
+            print(f"User exists. Updating to admin and resetting password...")
+            from core.security import get_password_hash
+            hashed_password = get_password_hash("X7m#9Pk$2Lv@5Nq!")
+            
+            async with db as session:
+                existing_user.role = "admin"
+                existing_user.hashed_password = hashed_password
+                session.add(existing_user)
+                await session.commit()
+                await session.refresh(existing_user)
+                
+            print(f"✅ Admin user updated successfully!")
+            print(f"   Email: {admin_email}")
+            print(f"   Password: X7m#9Pk$2Lv@5Nq!")
+            print(f"   Role: admin")
+            return
         
         # Create admin user
         admin_user = UserCreate(
             first_name="Admin",
             last_name="User",
             email=admin_email,
-            password="Mohammad@941",
+            password="X7m#9Pk$2Lv@5Nq!",
             timezone="UTC",
         )
         
@@ -57,7 +56,7 @@ async def create_admin_user():
         
         print(f"✅ Admin user created successfully!")
         print(f"   Email: {admin_email}")
-        print(f"   Password: Mohammad@941")
+        print(f"   Password: X7m#9Pk$2Lv@5Nq!")
         print(f"   Role: admin")
         
     except Exception as e:
