@@ -276,9 +276,9 @@ export default function NewProductPage() {
                       placeholder={categoriesLoading ? "Loading categories..." : "Select a category"}
                       transformValue={(value) => parseInt(value)}
                     >
-                      <SelectItem value="0">Select a category</SelectItem>
+                      <SelectItem value="0" disabled>Select a category</SelectItem>
                       {categories.length === 0 && !categoriesLoading ? (
-                        <SelectItem value="0" disabled>No categories available</SelectItem>
+                        <SelectItem value="no-categories" disabled>No categories available</SelectItem>
                       ) : (
                         categories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.id.toString()}>
