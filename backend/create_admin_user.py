@@ -26,6 +26,7 @@ async def create_admin_user():
             async with db as session:
                 existing_user.role = "admin"
                 existing_user.hashed_password = hashed_password
+                existing_user.email_confirmed = True
                 session.add(existing_user)
                 await session.commit()
                 await session.refresh(existing_user)
@@ -50,6 +51,7 @@ async def create_admin_user():
         # Update role to admin using direct database update
         async with db as session:
             created_user.role = "admin"
+            created_user.email_confirmed = True
             session.add(created_user)
             await session.commit()
             await session.refresh(created_user)
