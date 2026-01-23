@@ -33,6 +33,7 @@ import { useGetPublishedBlogsQuery } from "@/lib/store/api/blogsApi";
 import { useRouter } from "next/navigation";
 import { VehicleCombobox } from "@/components/VehicleCombobox";
 import { Navbar } from "@/components/Navbar";
+import { useEcommerceEnabled } from "@/hooks/useEcommerceEnabled";
 
 // FAQ Item Component
 function FAQItem({ question, answer }: { question: string; answer: string }) {
@@ -66,6 +67,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 
 export default function HomePage() {
   const router = useRouter();
+  const { isEnabled: ecommerceEnabled } = useEcommerceEnabled();
 
   // Services carousel state
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
@@ -865,95 +867,97 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section id="products" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:space-y-10 md:px-8 md:py-10">
-            <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
-              <h2 className="text-xl font-black text-[#0c1b33] sm:text-2xl md:text-3xl lg:text-4xl truncate min-w-0 flex-1">Our Products</h2>
-              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <button
-                  onClick={prevProducts}
-                  className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button flex-shrink-0"
-                  aria-label="Previous products"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <button
-                  onClick={nextProducts}
-                  className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button flex-shrink-0"
-                  aria-label="Next products"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <Link href="/products" className="rounded-xl bg-[#1d70ff] px-3 py-2 text-[10px] font-semibold text-white sm:rounded-[12px] sm:px-4 sm:py-2.5 sm:text-xs md:px-6 md:py-3 md:text-sm animate-button text-center whitespace-nowrap flex-shrink-0">
-                  View All
-                </Link>
+          {ecommerceEnabled && (
+            <section id="products" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:space-y-10 md:px-8 md:py-10">
+              <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
+                <h2 className="text-xl font-black text-[#0c1b33] sm:text-2xl md:text-3xl lg:text-4xl truncate min-w-0 flex-1">Our Products</h2>
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                  <button
+                    onClick={prevProducts}
+                    className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button flex-shrink-0"
+                    aria-label="Previous products"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={nextProducts}
+                    className="rounded-xl border border-[#dfe6f2] p-2 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-2xl sm:p-3 animate-button flex-shrink-0"
+                    aria-label="Next products"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <Link href="/products" className="rounded-xl bg-[#1d70ff] px-3 py-2 text-[10px] font-semibold text-white sm:rounded-[12px] sm:px-4 sm:py-2.5 sm:text-xs md:px-6 md:py-3 md:text-sm animate-button text-center whitespace-nowrap flex-shrink-0">
+                    View All
+                  </Link>
+                </div>
               </div>
-            </div>
 
-            <div className="relative overflow-hidden">
-              {productsLoading ? (
-                <div className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
-                  {Array.from({ length: 4 }).map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="relative flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-[0_10px_40px_rgba(16,53,106,0.05)] sm:gap-4 sm:rounded-[24px] sm:p-5 md:rounded-[28px] md:p-6 animate-pulse flex-shrink-0 w-[280px] sm:w-[300px]"
-                    >
-                      <div className="h-48 bg-gray-200 rounded-xl aspect-square" />
-                      <div className="space-y-2">
-                        <div className="h-4 bg-gray-200 rounded w-3/4" />
-                        <div className="h-6 bg-gray-200 rounded w-1/2" />
+              <div className="relative overflow-hidden">
+                {productsLoading ? (
+                  <div className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <div
+                        key={idx}
+                        className="relative flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-[0_10px_40px_rgba(16,53,106,0.05)] sm:gap-4 sm:rounded-[24px] sm:p-5 md:rounded-[28px] md:p-6 animate-pulse flex-shrink-0 w-[280px] sm:w-[300px]"
+                      >
+                        <div className="h-48 bg-gray-200 rounded-xl aspect-square" />
+                        <div className="space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4" />
+                          <div className="h-6 bg-gray-200 rounded w-1/2" />
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : homeProducts.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-[#5c6c86]">No products available at the moment.</p>
-                </div>
-              ) : (
-                <div
-                  ref={productsCarouselRef}
-                  className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
-                >
-                  {getVisibleProducts().map((product, index) => (
-                    <div key={product.id} className="flex-shrink-0 w-[280px] sm:w-[300px]">
-                      <ProductCard product={product} index={index} />
-                    </div>
+                    ))}
+                  </div>
+                ) : homeProducts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-[#5c6c86]">No products available at the moment.</p>
+                  </div>
+                ) : (
+                  <div
+                    ref={productsCarouselRef}
+                    className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+                  >
+                    {getVisibleProducts().map((product, index) => (
+                      <div key={product.id} className="flex-shrink-0 w-[280px] sm:w-[300px]">
+                        <ProductCard product={product} index={index} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Products Carousel Indicators */}
+              {homeProducts.length > productsPerPage && (
+                <div className="flex justify-center gap-2 mt-6">
+                  {Array.from({ length: totalProductPages }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setCurrentProductIndex(index);
+                        if (productsCarouselRef.current) {
+                          const cardWidth = 300; // Approximate card width + gap
+                          const scrollAmount = cardWidth * productsPerPage * index;
+                          productsCarouselRef.current.scrollTo({
+                            left: scrollAmount,
+                            behavior: 'smooth'
+                          });
+                        }
+                      }}
+                      className={`h-2 rounded-full transition-all ${index === currentProductIndex
+                        ? 'w-8 bg-[#1d70ff]'
+                        : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
+                        }`}
+                      aria-label={`Go to page ${index + 1}`}
+                    />
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Products Carousel Indicators */}
-            {homeProducts.length > productsPerPage && (
-              <div className="flex justify-center gap-2 mt-6">
-                {Array.from({ length: totalProductPages }).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setCurrentProductIndex(index);
-                      if (productsCarouselRef.current) {
-                        const cardWidth = 300; // Approximate card width + gap
-                        const scrollAmount = cardWidth * productsPerPage * index;
-                        productsCarouselRef.current.scrollTo({
-                          left: scrollAmount,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
-                    className={`h-2 rounded-full transition-all ${index === currentProductIndex
-                      ? 'w-8 bg-[#1d70ff]'
-                      : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
-                      }`}
-                    aria-label={`Go to page ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
+            </section>
+          )}
 
           <section id="testimonials" className="relative space-y-6 bg-[#f5f7fa] px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
             {/* Left border line */}

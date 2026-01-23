@@ -29,6 +29,8 @@ import {
   Receipt,
   MessageSquare,
   CalendarCheck,
+  CheckCircle,
+  Settings,
 } from "lucide-react";
 
 const navItems = [
@@ -43,6 +45,8 @@ const navItems = [
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Messages", href: "/admin/contact-messages", icon: MessageSquare },
+  { label: "Services", href: "/admin/services", icon: CheckCircle },
+  { label: "Settings", href: "/admin/configurations", icon: Settings },
 ];
 
 export function AppSidebar() {

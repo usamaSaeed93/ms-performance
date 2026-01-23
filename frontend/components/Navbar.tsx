@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navLinks } from "@/lib/constants/navigation";
+import { useGetSettingsQuery } from "@/lib/store/api/settingsApi";
 
 interface NavbarProps {
   ctaText?: string;
@@ -37,9 +38,17 @@ export function Navbar({ ctaText = "Call us Now", ctaAction, showTopBar = true }
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const getActiveLink = () => {
-    return navLinks.find((link) => link.href === pathname)?.href || "";
-  };
+  const { data: settings } = useGetSettingsQuery();
+  const ecommerceEnabled = settings?.find(s => s.key === "ecommerce_enabled")?.value === "true";
+
+  // Filter nav links
+  const visibleNavLinks = navLinks.filter(link => {
+    if (link.label === "Products" && !ecommerceEnabled) return false;
+    return true;
+  });
+
+  const activeLink = visibleNavLinks.find(link => link.href === pathname)?.href || "";
+  const getActiveLink = () => activeLink;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-black text-white shadow-[0_20px_60px_rgba(1,4,13,0.65)] border-b border-[#1d70ff]">
@@ -85,20 +94,22 @@ export function Navbar({ ctaText = "Call us Now", ctaAction, showTopBar = true }
                   </span>
                 </div>
               </div>
-              <Link
-                href="/cart"
-                className="flex items-center gap-2 text-white transition hover:text-[#1d70ff]"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
-                  <path
-                    d="M7 6h-2l-1 2v1h2l3.6 7.59c.18.34.52.56.9.56H19v-2h-7.42l-.1-.2L12.55 13H17c.38 0 .72-.21.89-.55L21 6H7Z"
-                    fill="currentColor"
-                  />
-                  <circle cx="9" cy="21" r="1" fill="currentColor" />
-                  <circle cx="17" cy="21" r="1" fill="currentColor" />
-                </svg>
-                <span className="text-[10px] sm:text-xs font-medium">Shop</span>
-              </Link>
+              {ecommerceEnabled && (
+                <Link
+                  href="/cart"
+                  className="flex items-center gap-2 text-white transition hover:text-[#1d70ff]"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
+                    <path
+                      d="M7 6h-2l-1 2v1h2l3.6 7.59c.18.34.52.56.9.56H19v-2h-7.42l-.1-.2L12.55 13H17c.38 0 .72-.21.89-.55L21 6H7Z"
+                      fill="currentColor"
+                    />
+                    <circle cx="9" cy="21" r="1" fill="currentColor" />
+                    <circle cx="17" cy="21" r="1" fill="currentColor" />
+                  </svg>
+                  <span className="text-[10px] sm:text-xs font-medium">Shop</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -121,7 +132,7 @@ export function Navbar({ ctaText = "Call us Now", ctaAction, showTopBar = true }
 
           {/* Desktop Navigation */}
           <nav className="hidden flex-1 items-center justify-center gap-4 text-sm font-semibold lg:flex lg:gap-6">
-            {navLinks.map((link) => {
+            {visibleNavLinks.map((link) => {
               const isActive = link.href === getActiveLink();
               return (
                 <Link
@@ -236,7 +247,7 @@ export function Navbar({ ctaText = "Call us Now", ctaAction, showTopBar = true }
 
             {/* Mobile Navigation Links */}
             <nav className="flex flex-1 flex-col gap-2 overflow-y-auto">
-              {navLinks.map((link) => {
+              {visibleNavLinks.map((link) => {
                 const isActive = link.href === getActiveLink();
                 return (
                   <Link

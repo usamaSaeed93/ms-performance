@@ -8,6 +8,7 @@ import { isCustomerAuthenticated } from "@/lib/utils/auth";
 import { Navbar } from "@/components/Navbar";
 import { toast } from "sonner";
 import { getCartItems, saveCartItems, removeFromCart, updateCartItemQuantity } from "@/lib/utils/cart";
+import { useEcommerceGuard } from "@/hooks/useEcommerceEnabled";
 
 // Dummy cart items
 const cartItems = [
@@ -46,6 +47,7 @@ interface AppliedDiscount {
 
 export default function CartPage() {
   const router = useRouter();
+  const { isEnabled: ecommerceEnabled, isLoading: ecommerceLoading } = useEcommerceGuard();
   const [items, setItems] = useState<typeof cartItems>([]);
   const [promoCode, setPromoCode] = useState("");
   const [isChecking, setIsChecking] = useState(true);

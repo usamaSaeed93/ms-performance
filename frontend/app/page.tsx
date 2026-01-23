@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useGetPublishedBlogsQuery } from "@/lib/store/api/blogsApi";
+import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
 import { Navbar } from "@/components/Navbar";
 
 const calculatorFields = [
@@ -230,8 +231,14 @@ export default function Home() {
     }));
   }, [blogsData]);
 
+  // Fetch services
+  const { data: servicesData } = useGetServicesQuery();
+
   // Combine real and dummy data
-  const allServiceCards = [...serviceCards, ...dummyServiceCards];
+  // Use explicit fallback ensuring an array is always returned
+  const servicesRaw = servicesData && servicesData.length > 0 ? servicesData : serviceCards;
+  const allServiceCards: any[] = servicesRaw ? [...servicesRaw] : [];
+  // const allServiceCards = [...serviceCards, ...dummyServiceCards];
   const allAdvantages = [...advantages, ...dummyAdvantages];
   const allTestimonials = [...testimonials, ...dummyTestimonials];
 
@@ -358,8 +365,9 @@ export default function Home() {
           <div className="relative overflow-hidden">
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
               {getVisibleServices().map((card, index) => {
-                const getServiceLink = (title: string) => {
-                  switch (title) {
+                const getServiceLink = (card: any) => {
+                  if (card.link) return card.link;
+                  switch (card.title) {
                     case "ECU Remapping": return "/services/ecu-remapping";
                     case "Dyno Tests": return "/services/dyno-tests";
                     case "Custom Exhausts": return "/services/custom-exhausts";
@@ -375,25 +383,25 @@ export default function Home() {
                 return (
                   <Link
                     key={card.title}
-                    href={getServiceLink(card.title)}
+                    href={getServiceLink(card)}
                     className={`group overflow-hidden rounded-2xl p-4 shadow-[0_20px_45px_rgba(0,0,0,0.45)] sm:rounded-[24px] sm:p-5 md:rounded-[28px] md:p-6 card-hover block ${index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : index === 2 ? 'animate-card-delay-2' : 'animate-card-delay-3'
-                      } ${card.title === "ECU Remapping"
+                      } ${(card as any).image_url || card.title === "ECU Remapping"
                         ? "relative bg-[#050505]"
                         : "bg-gradient-to-br from-[#0b0b0b] via-[#050505] to-[#010101]"
                       }`}
                   >
-                    {card.title === "ECU Remapping" && (
+                    {card.title === "ECU Remapping" || (card as any).image_url ? (
                       <>
                         <Image
-                          src="/images/services/ecu-remap-card.png"
-                          alt="ECU Remapping background"
+                          src={(card as any).image_url || "/images/services/ecu-remap-card.png"}
+                          alt={`${card.title} background`}
                           width={600}
                           height={360}
                           className="absolute inset-0 h-full w-full object-cover opacity-60 transition duration-500 group-hover:scale-110"
                         />
                         <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-black/70 to-transparent" />
                       </>
-                    )}
+                    ) : null}
                     <div className="relative z-10">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0a0a0a] text-lg text-[#12a7ff] sm:h-12 sm:w-12 sm:text-xl">
                         {card.icon}
@@ -424,8 +432,8 @@ export default function Home() {
                   key={index}
                   onClick={() => setCurrentServiceIndex(index)}
                   className={`h-2 rounded-full transition-all ${index === currentServiceIndex
-                      ? 'w-8 bg-[#12a7ff]'
-                      : 'w-2 bg-white/20 hover:bg-[#12a7ff]/50'
+                    ? 'w-8 bg-[#12a7ff]'
+                    : 'w-2 bg-white/20 hover:bg-[#12a7ff]/50'
                     }`}
                   aria-label={`Go to page ${index + 1}`}
                 />
@@ -548,8 +556,8 @@ export default function Home() {
                     key={index}
                     onClick={() => setCurrentAdvantageIndex(index)}
                     className={`h-2 rounded-full transition-all ${index === currentAdvantageIndex
-                        ? 'w-8 bg-[#12a7ff]'
-                        : 'w-2 bg-white/20 hover:bg-[#12a7ff]/50'
+                      ? 'w-8 bg-[#12a7ff]'
+                      : 'w-2 bg-white/20 hover:bg-[#12a7ff]/50'
                       }`}
                     aria-label={`Go to page ${index + 1}`}
                   />
@@ -641,8 +649,8 @@ export default function Home() {
               key={index}
               onClick={() => setCurrentTestimonialIndex(index)}
               className={`h-2 rounded-full transition-all ${index === currentTestimonialIndex
-                  ? 'w-8 bg-[#12a7ff]'
-                  : 'w-2 bg-white/20 hover:bg-[#12a7ff]/50'
+                ? 'w-8 bg-[#12a7ff]'
+                : 'w-2 bg-white/20 hover:bg-[#12a7ff]/50'
                 }`}
               aria-label={`Go to page ${index + 1}`}
             />
@@ -738,8 +746,8 @@ export default function Home() {
               key={index}
               onClick={() => setCurrentNewsIndex(index)}
               className={`h-2 rounded-full transition-all ${index === currentNewsIndex
-                  ? 'w-8 bg-[#12a7ff]'
-                  : 'w-2 bg-white/20 hover:bg-[#12a7ff]/50'
+                ? 'w-8 bg-[#12a7ff]'
+                : 'w-2 bg-white/20 hover:bg-[#12a7ff]/50'
                 }`}
               aria-label={`Go to page ${index + 1}`}
             />

@@ -19,4 +19,6 @@ from models.webhook_event import WebhookEvent
 from models.webhook_task import WebhookTask
 from models.contact_message import ContactMessage
 from models.appointment import ShopHours, Appointment
+from models.setting import Setting
+from models.service import Service
 

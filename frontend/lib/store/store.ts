@@ -4,6 +4,8 @@ import { productsApi } from './api/productsApi';
 import { blogsApi } from './api/blogsApi';
 import { authApi } from './api/authApi';
 import { appointmentsApi } from './api/appointmentsApi';
+import { servicesApi } from './api/servicesApi';
+import { settingsApi } from './api/settingsApi';
 
 export const makeStore = () => {
   return configureStore({
@@ -13,6 +15,8 @@ export const makeStore = () => {
       [blogsApi.reducerPath]: blogsApi.reducer,
       [authApi.reducerPath]: authApi.reducer,
       [appointmentsApi.reducerPath]: appointmentsApi.reducer,
+      [servicesApi.reducerPath]: servicesApi.reducer,
+      [settingsApi.reducerPath]: settingsApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
@@ -23,9 +27,19 @@ export const makeStore = () => {
             blogsApi.util.getRunningQueriesThunk.type,
             authApi.util.getRunningQueriesThunk.type,
             appointmentsApi.util.getRunningQueriesThunk.type,
+            servicesApi.util.getRunningQueriesThunk.type,
+            settingsApi.util.getRunningQueriesThunk.type,
           ],
         },
-      }).concat(adminApi.middleware, productsApi.middleware, blogsApi.middleware, authApi.middleware, appointmentsApi.middleware),
+      }).concat(
+        adminApi.middleware,
+        productsApi.middleware,
+        blogsApi.middleware,
+        authApi.middleware,
+        appointmentsApi.middleware,
+        servicesApi.middleware,
+        settingsApi.middleware
+      ),
   });
 };
 

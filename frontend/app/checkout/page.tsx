@@ -8,6 +8,7 @@ import { createCheckoutSession } from "@/lib/api/stripe";
 import { toast } from "sonner";
 import Image from "next/image";
 import { getCartItems } from "@/lib/utils/cart";
+import { useEcommerceGuard } from "@/hooks/useEcommerceEnabled";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -23,6 +24,7 @@ interface CartItem {
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { isEnabled: ecommerceEnabled, isLoading: ecommerceLoading } = useEcommerceGuard();
   const [isChecking, setIsChecking] = useState(true);
   const [loading, setLoading] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);

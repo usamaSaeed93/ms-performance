@@ -13,6 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useEcommerceGuard } from "@/hooks/useEcommerceEnabled";
 
 const productBrandLogos = [
   "/images/logos/Plogo1.png",
@@ -24,6 +25,7 @@ const productBrandLogos = [
 ];
 
 export default function ProductsPage() {
+  const { isEnabled: ecommerceEnabled, isLoading: ecommerceLoading } = useEcommerceGuard();
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("id");
