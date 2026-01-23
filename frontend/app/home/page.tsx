@@ -34,6 +34,7 @@ import { useRouter } from "next/navigation";
 import { VehicleCombobox } from "@/components/VehicleCombobox";
 import { Navbar } from "@/components/Navbar";
 import { useEcommerceEnabled } from "@/hooks/useEcommerceEnabled";
+import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
 
 // FAQ Item Component
 function FAQItem({ question, answer }: { question: string; answer: string }) {
@@ -171,7 +172,22 @@ export default function HomePage() {
     return [...dynamicBlogs, ...staticBlogs];
   }, [blogsData]);
 
-  const allServices = [...services, ...dummyServices];
+  // Fetch services from API with fallback to static
+  const { data: servicesData } = useGetServicesQuery();
+
+  // Transform API services to include image field for compatibility
+  const allServices = useMemo(() => {
+    if (servicesData && servicesData.length > 0) {
+      // Use API data - map image_url to image for compatibility
+      return servicesData.map(s => ({
+        ...s,
+        image: s.image_url || `/images/services/IMG_4403.png` // fallback image
+      }));
+    }
+    // Fallback to static data if API fails or returns empty
+    return [...services, ...dummyServices];
+  }, [servicesData]);
+
   const allTestimonials = [...testimonials];
 
   // Stats animation state

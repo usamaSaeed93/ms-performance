@@ -140,35 +140,91 @@ export default function ServicesPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="image">Service Image</Label>
-                            <div className="flex gap-2">
-                                <Input
-                                    id="image"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                />
+                        <div className="grid gap-3">
+                            <Label>Service Image</Label>
+
+                            {/* Image Preview */}
+                            {(formData.image_url || selectedFile) && (
+                                <div className="relative aspect-video w-full overflow-hidden rounded-lg border bg-muted">
+                                    {selectedFile ? (
+                                        <img
+                                            src={URL.createObjectURL(selectedFile)}
+                                            alt="Preview"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : formData.image_url ? (
+                                        <img
+                                            src={formData.image_url}
+                                            alt="Current"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : null}
+                                    {selectedFile && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                            <span className="text-xs font-medium text-white px-2 py-1 rounded bg-black/60">
+                                                Ready to upload
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Upload Area */}
+                            <div className="relative">
+                                <label
+                                    htmlFor="image"
+                                    className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                                >
+                                    <div className="flex flex-col items-center justify-center pt-2 pb-2">
+                                        <Upload className="h-6 w-6 text-muted-foreground mb-1" />
+                                        <p className="text-sm text-muted-foreground">
+                                            {selectedFile ? (
+                                                <span className="font-medium text-foreground">{selectedFile.name}</span>
+                                            ) : (
+                                                <>Click to select an image</>
+                                            )}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">PNG, JPG up to 5MB</p>
+                                    </div>
+                                    <Input
+                                        id="image"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                </label>
+                            </div>
+
+                            {/* Upload Button */}
+                            {selectedFile && (
                                 <Button
                                     type="button"
-                                    size="icon"
-                                    disabled={!selectedFile || isUploading}
+                                    variant="outline"
+                                    disabled={isUploading}
                                     onClick={handleUpload}
+                                    className="w-full"
                                 >
                                     {isUploading ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Uploading...
+                                        </>
                                     ) : (
-                                        <Upload className="h-4 w-4" />
+                                        <>
+                                            <Upload className="mr-2 h-4 w-4" />
+                                            Upload Image
+                                        </>
                                     )}
                                 </Button>
-                            </div>
-                            <Input
-                                value={formData.image_url}
-                                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                                placeholder="Image URL"
-                                readOnly
-                                className="bg-muted"
-                            />
+                            )}
+
+                            {/* Current URL (read-only) */}
+                            {formData.image_url && !selectedFile && (
+                                <p className="text-xs text-muted-foreground truncate">
+                                    Current: {formData.image_url}
+                                </p>
+                            )}
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="link">Link URL</Label>
