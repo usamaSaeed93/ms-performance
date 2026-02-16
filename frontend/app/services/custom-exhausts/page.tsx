@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
+import { useServicePageImages } from "@/hooks/useServicePageImage";
 
 const faqs = [
     {
@@ -49,6 +50,7 @@ const faqs = [
 
 export default function CustomExhaustsPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
+    const { heroImage, content1Image, content2Image } = useServicePageImages("custom-exhausts");
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -59,7 +61,7 @@ export default function CustomExhaustsPage() {
                     {/* Hero Section */}
                     <section className="relative overflow-hidden bg-[#030814] text-white">
                         <Image
-                            src="/images/services/IMG_4401.png"
+                            src={heroImage}
                             alt="Custom Exhausts"
                             width={1600}
                             height={700}
@@ -94,7 +96,7 @@ export default function CustomExhaustsPage() {
                                 </div>
                                 <div className="relative overflow-hidden rounded-[20px] flex-shrink-0 animate-slide-right">
                                     <Image
-                                        src="/images/services/IMG_4402.png"
+                                        src={content1Image}
                                         alt="Welding Exhaust"
                                         width={600}
                                         height={400}
@@ -104,7 +106,7 @@ export default function CustomExhaustsPage() {
                             </div>
                             <div className="relative overflow-hidden h-[650px] rounded-[20px] border-2 border-[#1d70ff] flex animate-slide-right">
                                 <Image
-                                    src="/images/services/IMG_4403.png"
+                                    src={content2Image}
                                     alt="Car Underside"
                                     width={600}
                                     height={400}

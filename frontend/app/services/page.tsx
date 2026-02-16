@@ -1,35 +1,48 @@
 "use client";
 
+import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { services as baseServices } from "@/lib/constants/services";
+import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
 
 export default function ServicesPage() {
-    // Combine base services with the additional ones
-    const allServices = [
-        ...baseServices,
-        {
-            title: "Turbo Upgrades",
-            description: "Enhanced turbo systems for maximum power and reliability.",
-            image: "/images/services/IMG_4403.png",
-        },
-        {
-            title: "Performance Tuning",
-            description: "Professional engine tuning for optimal performance gains.",
-            image: "/images/services/IMG_4396.png",
-        },
-        {
-            title: "ECU Diagnostics",
-            description: "Comprehensive ECU diagnostics and fault code reading.",
-            image: "/images/services/IMG_4398.png",
-        },
-        {
-            title: "Stage Upgrades",
-            description: "Complete stage upgrade packages for your vehicle.",
-            image: "/images/services/IMG_4400.png",
-        },
-    ];
+    const { data: servicesData } = useGetServicesQuery();
+
+    // Use API data with dynamic images, fallback to static
+    const allServices = useMemo(() => {
+        if (servicesData && servicesData.length > 0) {
+            return servicesData.map(s => ({
+                ...s,
+                image: s.image_url || `/images/services/IMG_4403.png`,
+            }));
+        }
+        // Fallback to static data
+        return [
+            ...baseServices,
+            {
+                title: "Turbo Upgrades",
+                description: "Enhanced turbo systems for maximum power and reliability.",
+                image: "/images/services/IMG_4403.png",
+            },
+            {
+                title: "Performance Tuning",
+                description: "Professional engine tuning for optimal performance gains.",
+                image: "/images/services/IMG_4396.png",
+            },
+            {
+                title: "ECU Diagnostics",
+                description: "Comprehensive ECU diagnostics and fault code reading.",
+                image: "/images/services/IMG_4398.png",
+            },
+            {
+                title: "Stage Upgrades",
+                description: "Complete stage upgrade packages for your vehicle.",
+                image: "/images/services/IMG_4400.png",
+            },
+        ];
+    }, [servicesData]);
 
     const getServiceLink = (title: string) => {
         switch (title) {
@@ -57,7 +70,7 @@ export default function ServicesPage() {
                         alt="Our Services"
                         width={1600}
                         height={700}
-                        className="absolute inset-0 h-full w-full object-cover opacity-60"
+                        className="absolute inset-0 h-full w-full object-cover object-center scale-110 origin-center opacity-60"
                         priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/50 to-black" />

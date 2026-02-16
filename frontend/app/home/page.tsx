@@ -35,6 +35,7 @@ import { VehicleCombobox } from "@/components/VehicleCombobox";
 import { Navbar } from "@/components/Navbar";
 import { useEcommerceEnabled } from "@/hooks/useEcommerceEnabled";
 import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
+import { useGetSettingsQuery } from "@/lib/store/api/settingsApi";
 
 // FAQ Item Component
 function FAQItem({ question, answer }: { question: string; answer: string }) {
@@ -187,6 +188,13 @@ export default function HomePage() {
     // Fallback to static data if API fails or returns empty
     return [...services, ...dummyServices];
   }, [servicesData]);
+
+  // Fetch hero image from settings
+  const { data: settingsData } = useGetSettingsQuery();
+  const heroImageUrl = useMemo(() => {
+    const heroSetting = settingsData?.find(s => s.key === "hero_image_url");
+    return heroSetting?.value || "/images/services/hero-dyno-v2-ue.png";
+  }, [settingsData]);
 
   const allTestimonials = [...testimonials];
 
@@ -516,9 +524,9 @@ export default function HomePage() {
       <Navbar ctaText="Become A Dealer" />
       <main className=" space-y-20">
         <div>
-          <section className="relative overflow-hidden bg-[#030814] text-white">
+          <section className="relative overflow-hidden bg-[#030814] text-white min-h-[300px] sm:min-h-[400px] md:min-h-[500px]">
             <Image
-              src="/images/services/hero-dyno-v2-ue.png"
+              src={heroImageUrl}
               alt="MS Performance hero"
               width={1600}
               height={500}
@@ -536,7 +544,7 @@ export default function HomePage() {
                   Maximize Power And Fuel Efficiency With Our ECU Remapping Services
                 </h1>
               </div>
-              <div className="flex justify-center sm:justify-end animate-slide-right">
+              {/* <div className="flex justify-center sm:justify-end animate-slide-right">
                 <div className="w-full max-w-[400px] rounded-xl backdrop-blur-[16px] p-4 text-white shadow-[0_30px_70px_rgba(2,6,14,0.7)] sm:rounded-2xl sm:p-6 md:rounded-[15px] md:p-8 animate-card" style={{ background: 'rgba(0, 0, 0, 0.4)' }}>
                   <p className="text-base font-semibold sm:text-lg">Select Your Vehicle</p>
                   <div className="mt-4 space-y-2 sm:mt-6">
@@ -567,14 +575,12 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Error Message */}
                   {vrmError && (
                     <div className="mt-3 rounded-lg bg-red-500/20 border border-red-500/50 px-3 py-2">
                       <p className="text-xs text-red-300">{vrmError}</p>
                     </div>
                   )}
 
-                  {/* VRM Results */}
                   {vrmData && vrmData.engineDetails && (
                     <div className="mt-4 space-y-3 rounded-lg bg-white/10 p-4 backdrop-blur-sm">
                       {vrmData.engineDetails.brand_image && (
@@ -699,7 +705,7 @@ export default function HomePage() {
                     View Gains
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
           </section>
           <section id="services" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
@@ -1139,7 +1145,7 @@ export default function HomePage() {
                         : '#';
                     return (
                       <Link
-                        key={post.id || index}
+                        key={post.id ? `blog-${post.id}` : `static-${index}`}
                         href={blogUrl}
                         className="flex w-full gap-4 rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
                       >

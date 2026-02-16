@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { BASE_URL } from '../../config';
 
 export interface Setting {
@@ -15,21 +15,44 @@ export interface UpdateSettingRequest {
     type?: string;
 }
 
+const baseQuery = fetchBaseQuery({
+    baseUrl: `${BASE_URL}/ecommerce/v1`,
+    prepareHeaders: (headers) => {
+        // Try admin_token first (for admin dashboard), then token (for customer)
+        const adminToken = localStorage.getItem('admin_token');
+        const customerToken = localStorage.getItem('token');
+        const token = adminToken || customerToken;
+        if (token) {
+            headers.set('authorization', `Bearer ${token}`);
+        }
+        return headers;
+    },
+});
+
+const baseQueryWithAuth: BaseQueryFn<
+    string | FetchArgs,
+    unknown,
+    FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+    let result = await baseQuery(args, api, extraOptions);
+
+    if (result.error) {
+        if (result.error.status === 401 || result.error.status === 403) {
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('admin_token');
+                if (window.location.pathname.startsWith('/admin')) {
+                    window.location.href = '/admin/login';
+                }
+            }
+        }
+    }
+
+    return result;
+};
+
 export const settingsApi = createApi({
     reducerPath: 'settingsApi',
-    baseQuery: fetchBaseQuery({
-        baseUrl: `${BASE_URL}/ecommerce/v1`,
-        prepareHeaders: (headers) => {
-            // Try admin_token first (for admin dashboard), then token (for customer)
-            const adminToken = localStorage.getItem('admin_token');
-            const customerToken = localStorage.getItem('token');
-            const token = adminToken || customerToken;
-            if (token) {
-                headers.set('authorization', `Bearer ${token}`);
-            }
-            return headers;
-        },
-    }),
+    baseQuery: baseQueryWithAuth,
     tagTypes: ['Settings'],
     endpoints: (builder) => ({
         getSettings: builder.query<Setting[], void>({

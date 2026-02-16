@@ -842,7 +842,7 @@ function GainsCalculatorContent() {
                       <div>
                         <div className="font-bold text-[#0c1b33]">Fuel:</div>
                         <div className="text-[#5c6c86] mt-1">
-                          {vrmData?.engineDetails?.specz?.energy || "Petrol"}
+                          {vrmData?.engineDetails?.specz?.energy || "-"}
                         </div>
                       </div>
                       <div>
@@ -850,7 +850,7 @@ function GainsCalculatorContent() {
                         <div className="text-[#5c6c86] mt-1">
                           {vrmData?.engineDetails?.specz?.["Cylinder content"]
                             ? `${vrmData.engineDetails.specz["Cylinder content"]} cc`
-                            : vrmData?.engine_size || "1329 cc"}
+                            : vrmData?.engine_size || "-"}
                         </div>
                       </div>
                     </div>
@@ -872,7 +872,7 @@ function GainsCalculatorContent() {
                       <div>
                         <div className="font-bold text-[#0c1b33]">ECU Type:</div>
                         <div className="text-[#5c6c86] mt-1">
-                          {vrmData?.engineDetails?.specz?.engine_ecu || "Marelli 8GM"}
+                          {vrmData?.engineDetails?.specz?.engine_ecu || "-"}
                         </div>
                       </div>
                     </div>
@@ -882,8 +882,8 @@ function GainsCalculatorContent() {
 
               {/* Vehicle Title and Description */}
               <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#1d70ff]">
-                  {vrmData?.name || vrmData?.engineDetails?.fullname || "Abarth 124 Spider 1.4 Turbo MultiAir 167 Bhp"}
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0c1b33]">
+                  {vrmData?.name || vrmData?.engineDetails?.fullname || "Select a vehicle to see details"}
                 </h2>
                 <p className="text-sm sm:text-base leading-relaxed text-[#5c6c86] max-w-4xl">
                   {vrmData?.engineDetails ? (
@@ -894,7 +894,7 @@ function GainsCalculatorContent() {
                     </>
                   ) : (
                     <>
-                      Our ECU Software remapping service for the Abarth 124 Spider includes Dyno Development to ensure
+                      Our ECU Software remapping service includes Dyno Development to ensure
                       optimal performance. We enhance Power & Torque while maintaining Fuel Economy and Reliability. Our
                       professional tuning delivers safe, tested improvements to your vehicle's performance.
                     </>
@@ -906,7 +906,7 @@ function GainsCalculatorContent() {
                 <div className="bg-white rounded-[12px] sm:rounded-[16px] p-4 sm:p-6 md:p-8">
                   <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33] mb-4 sm:mb-6">
                     <span className="hidden sm:inline">Vehicle Performance Chart - </span>
-                    {vrmData?.name || vrmData?.engineDetails?.fullname || "Abarth 124 Spider 1.4 Turbo MultiAir 167 Bhp"}
+                    {vrmData?.name || vrmData?.engineDetails?.fullname || "Vehicle Performance"}
                   </h3>
                   <div className="h-[300px] sm:h-[400px] md:h-[500px] rounded-[8px] sm:rounded-[12px] border border-gray-200 p-2 sm:p-3 md:p-4">
                     {chartData.length > 0 ? (
@@ -1058,7 +1058,10 @@ function GainsCalculatorContent() {
                       </div>
                     </div>
 
-                    <button className="w-full sm:w-[180px] rounded-[6px] bg-[#00a9f4] hover:bg-[#009de3] py-3 text-sm font-bold text-white transition-colors shadow-sm">
+                    <button
+                      className="w-full sm:w-[180px] rounded-[6px] bg-[#00a9f4] hover:bg-[#009de3] py-3 text-sm font-bold text-white transition-colors shadow-sm"
+                      onClick={() => window.location.href = "/contact"}
+                    >
                       Request Quote
                     </button>
                   </div>

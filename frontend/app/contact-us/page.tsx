@@ -212,21 +212,9 @@ export default function ContactUsPage() {
                       />
                       {/* Location Card Overlay */}
                       <div
-                        className="absolute bg-white border border-[#dfe6f2] shadow-lg opacity-100"
-                        style={{
-                          width: '563px',
-                          height: '93px',
-                          bottom: '20px',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          borderRadius: '8px',
-                          paddingTop: '14px',
-                          paddingRight: '15px',
-                          paddingBottom: '14px',
-                          paddingLeft: '15px',
-                        }}
+                        className="absolute bg-white border border-[#dfe6f2] shadow-lg opacity-100 left-1/2 -translate-x-1/2 bottom-5 rounded-lg p-3 sm:p-4 w-[calc(100%-2rem)] max-w-[563px]"
                       >
-                        <div className="flex items-start" style={{ gap: '10px' }}>
+                        <div className="flex items-start gap-2.5">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1d70ff]/10 flex-shrink-0">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-[#1d70ff]">
                               <path
@@ -238,8 +226,7 @@ export default function ContactUsPage() {
                           </div>
                           <div>
                             <h3 className="text-sm text-[#5c6c86]">Location</h3>
-                            <p className="text-lg font-bold text-[#0c1b33] mb-2">6391 Elgin St. Celina, Delaware 10299</p>
-
+                            <p className="text-sm sm:text-base font-bold text-[#0c1b33]">Unit 16, MS Performance, Five Tree Works Industrial Estate, Bakers Ln, West Hanningfield, Chelmsford CM2 8LD</p>
                           </div>
                         </div>
                       </div>
@@ -276,6 +263,33 @@ export default function ContactUsPage() {
                             <p className="text-sm font-semibold text-[#0c1b33]">E-mail:</p>
                             <p className="text-sm text-[#5c6c86]">info@msperformance.co.uk</p>
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Social Links */}
+                      <div className="mt-4 pt-4 border-t border-[#dfe6f2]">
+                        <p className="text-sm font-semibold text-[#0c1b33] mb-3">Follow Us</p>
+                        <div className="flex items-center gap-3">
+                          <a
+                            href="https://www.facebook.com/msperformanceltd"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1d70ff]/10 text-[#1d70ff] hover:bg-[#1d70ff] hover:text-white transition-colors"
+                          >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                            </svg>
+                          </a>
+                          <a
+                            href="https://www.tiktok.com/@msperformanceltd"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1d70ff]/10 text-[#1d70ff] hover:bg-[#1d70ff] hover:text-white transition-colors"
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.46V13.2a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-.81.07 4.84 4.84 0 01-2.38-.63v-.07h4V6.69z" />
+                            </svg>
+                          </a>
                         </div>
                       </div>
                     </div>

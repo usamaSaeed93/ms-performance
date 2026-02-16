@@ -163,19 +163,19 @@ const baseQuery = fetchBaseQuery({
   baseUrl: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/ecommerce/v1`,
   prepareHeaders: (headers, { getState }) => {
     // Get token from localStorage
-    const token = typeof window !== 'undefined' 
-      ? localStorage.getItem('admin_token') 
+    const token = typeof window !== 'undefined'
+      ? localStorage.getItem('admin_token')
       : null;
-    
+
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
     }
-    
+
     // Set Content-Type for JSON requests (will be overridden by FormData if needed)
     if (!headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
     }
-    
+
     return headers;
   },
 });
@@ -187,9 +187,9 @@ const baseQueryWithReauth: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
-  
+
   if (result.error) {
-    if (result.error.status === 403) {
+    if (result.error.status === 401 || result.error.status === 403) {
       // Token expired or invalid - clear it and redirect
       if (typeof window !== 'undefined') {
         localStorage.removeItem('admin_token');
@@ -206,7 +206,7 @@ const baseQueryWithReauth: BaseQueryFn<
       return { ...result, data: fastApiResponse.data };
     }
   }
-  
+
   return result;
 };
 
@@ -273,7 +273,7 @@ export const adminApi = createApi({
         if (params && params.per_page) queryParams.append('per_page', params.per_page.toString());
         if (params && params.order_by) queryParams.append('order_by', params.order_by);
         if (params && params.order) queryParams.append('order', params.order);
-        
+
         return `get_products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       },
       transformResponse: (response: any) => {
@@ -334,7 +334,7 @@ export const adminApi = createApi({
     }),
 
     getLowStockProducts: builder.query<{ products: Product[] }, number | void>({
-      query: (quantity_threshold = 10) => 
+      query: (quantity_threshold = 10) =>
         `get_low_stock_products?quantity_threshold=${quantity_threshold}`,
       providesTags: ['LowStock'],
     }),
@@ -407,7 +407,7 @@ export const adminApi = createApi({
         const queryParams = new URLSearchParams();
         if (params && params.page) queryParams.append('page', params.page.toString());
         if (params && params.per_page) queryParams.append('per_page', params.per_page.toString());
-        
+
         return `get_categories${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       },
       transformResponse: (response: any) => {
@@ -461,7 +461,7 @@ export const adminApi = createApi({
         if (params && params.order_by) queryParams.append('order_by', params.order_by);
         if (params && params.order) queryParams.append('order', params.order);
         if (params && params.search) queryParams.append('search', params.search);
-        
+
         return `get_tax_classes${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       },
       transformResponse: (response: any) => {
@@ -520,7 +520,7 @@ export const adminApi = createApi({
         if (params && params.search) queryParams.append('search', params.search);
         if (params && params.tax_class_id) queryParams.append('tax_class_id', params.tax_class_id.toString());
         if (params && params.country_code) queryParams.append('country_code', params.country_code);
-        
+
         return `get_tax_rates${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       },
       transformResponse: (response: any) => {
@@ -576,7 +576,7 @@ export const adminApi = createApi({
         if (params && params.per_page) queryParams.append('per_page', params.per_page.toString());
         if (params && params.order_by) queryParams.append('order_by', params.order_by);
         if (params && params.order) queryParams.append('order', params.order);
-        
+
         return `get_users${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       },
       providesTags: ['Users'],
@@ -602,7 +602,7 @@ export const adminApi = createApi({
         if (params && params.per_page) queryParams.append('per_page', params.per_page.toString());
         if (params && params.order_by) queryParams.append('order_by', params.order_by);
         if (params && params.order) queryParams.append('order', params.order);
-        
+
         return `get_orders${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       },
       providesTags: ['Orders'],
@@ -648,7 +648,7 @@ export const adminApi = createApi({
         if (params && params.end_date) queryParams.append('end_date', params.end_date);
         if (params && params.buckets) queryParams.append('buckets', params.buckets);
         if (params && params.include_sales_items) queryParams.append('include_sales_items', 'true');
-        
+
         return `get_sales_data${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       },
       providesTags: ['Sales'],
@@ -665,7 +665,7 @@ export const adminApi = createApi({
         if (params && params.per_page) queryParams.append('per_page', params.per_page.toString());
         if (params && params.order_by) queryParams.append('order_by', params.order_by);
         if (params && params.order) queryParams.append('order', params.order);
-        
+
         return `get_discounts${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       },
       providesTags: ['Discounts'],
@@ -704,13 +704,13 @@ export const adminApi = createApi({
       { file: File; folder: string }
     >({
       queryFn: async ({ file, folder }, _queryApi, _extraOptions, baseQuery) => {
-        const token = typeof window !== 'undefined' 
-          ? localStorage.getItem('admin_token') 
+        const token = typeof window !== 'undefined'
+          ? localStorage.getItem('admin_token')
           : null;
-        
+
         const baseUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/ecommerce/v1`;
         const url = `${baseUrl}/upload_image`;
-        
+
         console.log('[RTK Query] Starting image upload:', {
           filename: file.name,
           size: file.size,
@@ -718,20 +718,20 @@ export const adminApi = createApi({
           folder,
           url,
         });
-        
+
         // Validate FormData
         console.log('[RTK Query] Creating FormData...');
         const formData = new FormData();
         formData.append('file', file);
         formData.append('folder', folder);
-        
+
         // Verify FormData entries
         console.log('[RTK Query] FormData entries:', {
           hasFile: formData.has('file'),
           hasFolder: formData.has('folder'),
           fileValue: formData.get('file'),
         });
-        
+
         try {
           const headers: HeadersInit = {};
           if (token) {
@@ -741,7 +741,7 @@ export const adminApi = createApi({
             console.warn('[RTK Query] No token found!');
           }
           // Don't set Content-Type - browser will set it with boundary for FormData
-          
+
           console.log('[RTK Query] Making fetch request with timeout...', {
             url,
             method: 'POST',
@@ -751,17 +751,17 @@ export const adminApi = createApi({
             folder,
             headers: Object.keys(headers),
           });
-          
+
           // Create AbortController for timeout
           const controller = new AbortController();
           const timeoutId = setTimeout(() => {
             console.error('[RTK Query] Upload timeout after 30 seconds - aborting');
             controller.abort();
           }, 30000); // 30 second timeout for faster debugging
-          
+
           const startTime = Date.now();
           console.log('[RTK Query] Fetch start time:', startTime);
-          
+
           let response: Response;
           try {
             console.log('[RTK Query] About to call fetch() with:', {
@@ -771,21 +771,21 @@ export const adminApi = createApi({
               hasSignal: !!controller.signal,
               headersCount: Object.keys(headers).length,
             });
-            
+
             const fetchPromise = fetch(url, {
               method: 'POST',
               headers,
               body: formData,
               signal: controller.signal,
             });
-            
+
             console.log('[RTK Query] Fetch promise created at', Date.now(), '- waiting for response...');
-            
+
             // Add a check after 1 second to see if it's still pending
             setTimeout(() => {
               console.warn('[RTK Query] Fetch still pending after 1 second...');
             }, 1000);
-            
+
             response = await fetchPromise;
             const elapsed = Date.now() - startTime;
             console.log('[RTK Query] Fetch completed in', elapsed, 'ms');
@@ -798,7 +798,7 @@ export const adminApi = createApi({
               message: fetchError.message,
               stack: fetchError.stack,
             });
-            
+
             if (fetchError.name === 'AbortError') {
               console.error('[RTK Query] Upload aborted due to timeout');
               return {
@@ -810,7 +810,7 @@ export const adminApi = createApi({
             }
             throw fetchError;
           }
-          
+
           const headersObj: Record<string, string> = {};
           if (response.headers) {
             response.headers.forEach((value, key) => {
@@ -822,12 +822,12 @@ export const adminApi = createApi({
             statusText: response.statusText,
             headers: headersObj,
           });
-          
+
           if (!response.ok) {
             console.error('[RTK Query] Response not OK:', response.status, response.statusText);
             let errorText: string;
             let errorData: any;
-            
+
             try {
               errorText = await response.text();
               console.error('[RTK Query] Upload error response text:', errorText);
@@ -841,7 +841,7 @@ export const adminApi = createApi({
               console.error('[RTK Query] Failed to read error response:', textError);
               errorData = { message: `HTTP ${response.status}: ${response.statusText}` };
             }
-            
+
             return {
               error: {
                 status: response.status,
@@ -849,7 +849,7 @@ export const adminApi = createApi({
               },
             };
           }
-          
+
           console.log('[RTK Query] Reading response JSON...');
           let data: any;
           try {
@@ -866,17 +866,17 @@ export const adminApi = createApi({
               },
             };
           }
-          
+
           // Handle FastAPI response format: { success, data, message }
           if (data?.success && data?.data) {
             console.log('[RTK Query] Upload successful:', data.data);
             return { data: data.data };
           }
-          
+
           if (data?.data) {
             return { data: data.data };
           }
-          
+
           return { data };
         } catch (error: any) {
           console.error('[RTK Query] Upload exception:', error);
@@ -896,7 +896,7 @@ export const adminApi = createApi({
 export const {
   // Auth
   useLoginMutation,
-  
+
   // Products
   useGetProductsQuery,
   useGetProductQuery,
@@ -908,42 +908,42 @@ export const {
   useCreateProductImagesMutation,
   useGetProductImagesQuery,
   useUpdateProductImagesMutation,
-  
+
   // Categories
   useGetCategoriesQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
-  
+
   // Users
   useGetUsersQuery,
   useUpdateUserMutation,
-  
+
   // Orders
   useGetOrdersQuery,
   useUpdateOrderMutation,
-  
+
   // Sales
   useGetSalesDataQuery,
-  
+
   // Discounts
   useGetDiscountsQuery,
   useCreateDiscountMutation,
-  
+
   // Tax Classes
   useGetTaxClassesQuery,
   useCreateTaxClassMutation,
   useUpdateTaxClassMutation,
   useDeleteTaxClassMutation,
-  
+
   // Tax Rates
   useGetTaxRatesQuery,
   useCreateTaxRateMutation,
   useUpdateTaxRateMutation,
   useDeleteTaxRateMutation,
-  
+
   // Image Upload
   useUploadImageMutation,
-  
+
   // Utilities
   useLazyGetProductsQuery,
   useLazyGetProductQuery,

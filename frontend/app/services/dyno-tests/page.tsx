@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
+import { useServicePageImages } from "@/hooks/useServicePageImage";
 
 const faqs = [
     {
@@ -29,6 +30,7 @@ const faqs = [
 
 export default function DynoTestsPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
+    const { heroImage, content1Image, content2Image } = useServicePageImages("dyno-tests");
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -39,7 +41,7 @@ export default function DynoTestsPage() {
                     {/* Hero Section */}
                     <section className="relative overflow-hidden bg-[#030814] text-white">
                         <Image
-                            src="/images/services/IMG_4481.png"
+                            src={heroImage}
                             alt="Dyno Tests"
                             width={1600}
                             height={700}
@@ -74,7 +76,7 @@ export default function DynoTestsPage() {
                                 </div>
                                 <div className="relative overflow-hidden rounded-[20px] flex-shrink-0 animate-slide-right">
                                     <Image
-                                        src="/images/services/IMG_4399.png"
+                                        src={content1Image}
                                         alt="Dyno Graph"
                                         width={600}
                                         height={400}
@@ -84,7 +86,7 @@ export default function DynoTestsPage() {
                             </div>
                             <div className="relative overflow-hidden h-[650px] rounded-[20px] border-2 border-[#1d70ff] flex animate-slide-right">
                                 <Image
-                                    src="/images/services/IMG_4398.png"
+                                    src={content2Image}
                                     alt="Car on Dyno"
                                     width={600}
                                     height={400}

@@ -58,18 +58,18 @@ const baseQuery = fetchBaseQuery({
   baseUrl: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/ecommerce/v1`,
   prepareHeaders: (headers) => {
     headers.set('Content-Type', 'application/json');
-    
-    const token = typeof window !== 'undefined' 
-      ? localStorage.getItem('admin_token') 
+
+    const token = typeof window !== 'undefined'
+      ? localStorage.getItem('admin_token')
       : null;
-    
+
     if (token) {
       // Use 'Authorization' with capital A to match backend expectation
       headers.set('Authorization', `Bearer ${token}`);
     } else {
       console.warn('[BlogsAPI] No admin_token found in localStorage. User may need to log in.');
     }
-    
+
     return headers;
   },
 });
@@ -80,9 +80,9 @@ const baseQueryWithErrorHandling: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
-  
+
   if (result.error) {
-    if (result.error.status === 403) {
+    if (result.error.status === 401 || result.error.status === 403) {
       // Token expired or invalid - clear it and redirect to login
       if (typeof window !== 'undefined') {
         const token = localStorage.getItem('admin_token');
@@ -110,7 +110,7 @@ const baseQueryWithErrorHandling: BaseQueryFn<
       return { ...result, data: fastApiResponse.data };
     }
   }
-  
+
   return result;
 };
 
@@ -127,7 +127,7 @@ export const blogsApi = createApi({
         if (params?.order_by) queryParams.append('order_by', params.order_by);
         if (params?.order) queryParams.append('order', params.order);
         if (params?.status) queryParams.append('status', params.status);
-        
+
         return `get_blogs${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       },
       transformResponse: (response: any): BlogsResponse => {
@@ -165,7 +165,7 @@ export const blogsApi = createApi({
         if (params?.per_page) queryParams.append('per_page', params.per_page.toString());
         if (params?.order_by) queryParams.append('order_by', params.order_by);
         if (params?.order) queryParams.append('order', params.order);
-        
+
         return `get_published_blogs${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       },
       transformResponse: (response: any): BlogsResponse => {
@@ -233,7 +233,7 @@ export const blogsApi = createApi({
       },
     }),
 
-    updateBlog: builder.mutation<Blog, { blog_id: number; [key: string]: any }>({
+    updateBlog: builder.mutation<Blog, { blog_id: number;[key: string]: any }>({
       query: ({ blog_id, ...body }) => ({
         url: 'update_blog',
         method: 'PUT',
