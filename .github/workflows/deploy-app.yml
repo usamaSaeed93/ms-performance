@@ -1,0 +1,106 @@
+name: Deploy App
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/workflows/**'
+
+jobs:
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Next.js app
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_API_URL: https://test.msperformance.co.uk
+
+      - name: Deploy Frontend to Server
+        uses: easingthemes/ssh-deploy@v5.0.3
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}/frontend
+          SOURCE: "frontend/"
+          EXCLUDE: "/node_modules/, /.git/, /.github/, /.next/cache/"
+          SCRIPT_AFTER: |
+            cd ${{ secrets.TARGET_DIR }}/frontend
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            pnpm install --prod
+            # Restart or start frontend on port 3000
+            pm2 describe ms-frontend > /dev/null && pm2 restart ms-frontend || pm2 start npm --name "ms-frontend" -- start -- -p 3000
+            pm2 save
+
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    needs: deploy-frontend  # Optional: run sequentially or remove for parallel
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.0
+          virtualenvs-in-project: true
+
+      - name: Install Dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Deploy Backend to Server
+        uses: easingthemes/ssh-deploy@v5.0.3
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}/backend
+          SOURCE: "backend/"
+          EXCLUDE: "/.venv/, /.git/, /.github/, /__pycache__/"
+          SCRIPT_AFTER: |
+            cd ${{ secrets.TARGET_DIR }}/backend
+            # Ensure poetry is available directly or use full path
+            export PATH="$HOME/.local/bin:$PATH"
+            
+            # Install dependencies on server
+            poetry install --no-interaction
+            
+            # Run Migrations
+            poetry run alembic upgrade head
+            
+            # Restart or start backend on port 8000
+            pm2 describe ms-backend > /dev/null && pm2 restart ms-backend || pm2 start "poetry run uvicorn main:app --host 0.0.0.0 --port 8000" --name "ms-backend"
+            pm2 save
