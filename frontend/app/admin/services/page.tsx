@@ -24,25 +24,17 @@ import { SERVICE_PAGES, ServiceImageType } from "@/hooks/useServicePageImage";
 // Color tags for services
 const SERVICE_COLORS: Record<string, { bg: string; text: string; border: string; label: string }> = {
     "ECU Remapping": { bg: "bg-blue-100", text: "text-blue-700", border: "border-blue-200", label: "Software" },
-    "Dyno Tests": { bg: "bg-purple-100", text: "text-purple-700", border: "border-purple-200", label: "Testing" },
     "Custom Exhausts": { bg: "bg-orange-100", text: "text-orange-700", border: "border-orange-200", label: "Fabrication" },
     "DPF & EGR Solutions": { bg: "bg-green-100", text: "text-green-700", border: "border-green-200", label: "Emissions" },
     "Turbo Upgrades": { bg: "bg-red-100", text: "text-red-700", border: "border-red-200", label: "Hardware" },
-    "Performance Tuning": { bg: "bg-amber-100", text: "text-amber-700", border: "border-amber-200", label: "Tuning" },
-    "ECU Diagnostics": { bg: "bg-cyan-100", text: "text-cyan-700", border: "border-cyan-200", label: "Diagnostics" },
-    "Stage Upgrades": { bg: "bg-pink-100", text: "text-pink-700", border: "border-pink-200", label: "Packages" },
 };
 
 // Map service titles to detail page slugs
 const TITLE_TO_SLUG: Record<string, string> = {
     "ECU Remapping": "ecu-remapping",
-    "Dyno Tests": "dyno-tests",
     "Custom Exhausts": "custom-exhausts",
     "DPF & EGR Solutions": "dpf-egr-services",
     "Turbo Upgrades": "turbo-upgrades",
-    "Performance Tuning": "performance-tuning",
-    "ECU Diagnostics": "ecu-diagnostics",
-    "Stage Upgrades": "stage-upgrades",
 };
 
 // Tag style config for image uploaders
@@ -256,6 +248,11 @@ export default function ServicesPage() {
         );
     }
 
+    const excludedTitles = new Set([
+        "ECU Diagnostics",
+        "Stage Upgrades",
+        "Performance Tuning",
+    ]);
     const selectedSlug = selectedService ? getSlug(selectedService.title) : "";
     const selectedConfig = selectedSlug ? SERVICE_PAGES[selectedSlug] : null;
 
@@ -269,7 +266,7 @@ export default function ServicesPage() {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {services?.map((service) => {
+                {services?.filter((service) => !excludedTitles.has(service.title)).map((service) => {
                     const color = getColorTag(service.title);
                     const slug = getSlug(service.title);
                     const hasDetailImages = slug && SERVICE_PAGES[slug];

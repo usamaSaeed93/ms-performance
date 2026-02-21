@@ -12,11 +12,18 @@ export default function ServicesPage() {
 
     // Use API data with dynamic images, fallback to static
     const allServices = useMemo(() => {
+        const excludedTitles = new Set([
+            "ECU Diagnostics",
+            "Stage Upgrades",
+            "Performance Tuning",
+        ]);
         if (servicesData && servicesData.length > 0) {
-            return servicesData.map(s => ({
-                ...s,
-                image: s.image_url || `/images/services/IMG_4403.png`,
-            }));
+            return servicesData
+                .filter((service) => !excludedTitles.has(service.title))
+                .map(s => ({
+                    ...s,
+                    image: s.image_url || `/images/services/IMG_4403.png`,
+                }));
         }
         // Fallback to static data
         return [
@@ -26,34 +33,15 @@ export default function ServicesPage() {
                 description: "Enhanced turbo systems for maximum power and reliability.",
                 image: "/images/services/IMG_4403.png",
             },
-            {
-                title: "Performance Tuning",
-                description: "Professional engine tuning for optimal performance gains.",
-                image: "/images/services/IMG_4396.png",
-            },
-            {
-                title: "ECU Diagnostics",
-                description: "Comprehensive ECU diagnostics and fault code reading.",
-                image: "/images/services/IMG_4398.png",
-            },
-            {
-                title: "Stage Upgrades",
-                description: "Complete stage upgrade packages for your vehicle.",
-                image: "/images/services/IMG_4400.png",
-            },
-        ];
+        ].filter((service) => !excludedTitles.has(service.title));
     }, [servicesData]);
 
     const getServiceLink = (title: string) => {
         switch (title) {
             case "ECU Remapping": return "/services/ecu-remapping";
-            case "Dyno Tests": return "/services/dyno-tests";
             case "Custom Exhausts": return "/services/custom-exhausts";
             case "DPF & EGR Services": return "/services/dpf-egr-services";
             case "Turbo Upgrades": return "/services/turbo-upgrades";
-            case "Performance Tuning": return "/services/performance-tuning";
-            case "ECU Diagnostics": return "/services/ecu-diagnostics";
-            case "Stage Upgrades": return "/services/stage-upgrades";
             default: return "/services";
         }
     };

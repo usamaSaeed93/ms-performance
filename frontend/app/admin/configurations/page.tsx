@@ -7,9 +7,9 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Upload, ImageIcon } from "lucide-react";
+import { Loader2, Upload, ImageIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function ConfigurationsPage() {
@@ -20,6 +20,7 @@ export default function ConfigurationsPage() {
     const [ecommerceEnabled, setEcommerceEnabled] = useState(false);
     const [heroFile, setHeroFile] = useState<File | null>(null);
     const [heroPreview, setHeroPreview] = useState<string | null>(null);
+    const [heroImages, setHeroImages] = useState<string[]>([]);
 
     useEffect(() => {
         if (settings) {
@@ -33,6 +34,26 @@ export default function ConfigurationsPage() {
     }, [settings]);
 
     const heroImageUrl = settings?.find(s => s.key === "hero_image_url")?.value || "";
+    const heroImagesRaw = settings?.find(s => s.key === "hero_image_urls")?.value || "";
+
+    useEffect(() => {
+        if (!settings) return;
+        let images: string[] = [];
+        if (heroImagesRaw) {
+            try {
+                const parsed = JSON.parse(heroImagesRaw);
+                if (Array.isArray(parsed)) {
+                    images = parsed.filter((url) => typeof url === "string" && url.trim().length > 0);
+                }
+            } catch {
+                images = heroImagesRaw.split(",").map((url) => url.trim()).filter(Boolean);
+            }
+        }
+        if (images.length === 0 && heroImageUrl) {
+            images = [heroImageUrl];
+        }
+        setHeroImages(images);
+    }, [settings, heroImagesRaw, heroImageUrl]);
 
     const handleToggle = async (checked: boolean) => {
         try {
@@ -60,21 +81,44 @@ export default function ConfigurationsPage() {
         }
     };
 
+    const persistHeroImages = async (images: string[]) => {
+        await updateSetting({
+            key: "hero_image_urls",
+            value: JSON.stringify(images),
+            description: "Homepage hero carousel images",
+            type: "string"
+        }).unwrap();
+        await updateSetting({
+            key: "hero_image_url",
+            value: images[0] || "",
+            description: "Homepage hero background image",
+            type: "string"
+        }).unwrap();
+    };
+
     const handleHeroUpload = async () => {
         if (!heroFile) return;
         try {
             const res = await uploadImage({ file: heroFile, folder: "hero" }).unwrap();
-            await updateSetting({
-                key: "hero_image_url",
-                value: res.url,
-                description: "Homepage hero background image",
-                type: "string"
-            }).unwrap();
-            toast.success("Hero image updated");
+            const nextImages = [...heroImages, res.url];
+            await persistHeroImages(nextImages);
+            setHeroImages(nextImages);
+            toast.success("Hero images updated");
             setHeroFile(null);
             setHeroPreview(null);
         } catch (error) {
-            toast.error("Failed to update hero image");
+            toast.error("Failed to update hero images");
+        }
+    };
+
+    const handleRemoveHeroImage = async (url: string) => {
+        const nextImages = heroImages.filter((image) => image !== url);
+        try {
+            await persistHeroImages(nextImages);
+            setHeroImages(nextImages);
+            toast.success("Hero image removed");
+        } catch (error) {
+            toast.error("Failed to remove hero image");
         }
     };
 
@@ -86,7 +130,7 @@ export default function ConfigurationsPage() {
         );
     }
 
-    const displayUrl = heroPreview || heroImageUrl || "/images/services/hero-dyno-v2-ue.png";
+    const displayUrl = heroPreview || heroImages[0] || heroImageUrl || "/images/services/hero-dyno-v2-ue.png";
 
     return (
         <div className="space-y-6">
@@ -98,15 +142,15 @@ export default function ConfigurationsPage() {
             </div>
 
             <div className="grid gap-6">
-                {/* Homepage Hero Image */}
+                {/* Homepage Hero Carousel */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <ImageIcon className="h-5 w-5" />
-                            Homepage Hero Image
+                            Homepage Hero Carousel
                         </CardTitle>
                         <CardDescription>
-                            Set the background image for the homepage hero section.
+                            Manage the carousel images for the homepage hero section.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -122,6 +166,33 @@ export default function ConfigurationsPage() {
                             )}
                         </div>
 
+                        {heroImages.length > 0 ? (
+                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                {heroImages.map((url, index) => (
+                                    <div key={`${url}-${index}`} className="relative overflow-hidden rounded-lg border">
+                                        <div className="relative h-24 w-full">
+                                            <Image src={url} alt={`Hero ${index + 1}`} fill className="object-cover" />
+                                        </div>
+                                        <div className="flex items-center justify-between gap-2 p-2">
+                                            <p className="text-xs text-muted-foreground truncate">Hero {index + 1}</p>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7"
+                                                onClick={() => handleRemoveHeroImage(url)}
+                                                disabled={isUpdating}
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-xs text-muted-foreground">No hero images added yet.</p>
+                        )}
+
                         {/* Upload */}
                         <div className="relative">
                             <label
@@ -133,7 +204,7 @@ export default function ConfigurationsPage() {
                                     {heroFile ? (
                                         <span className="font-medium text-foreground">{heroFile.name}</span>
                                     ) : (
-                                        <>Click to select hero image</>
+                                        <>Click to add hero image</>
                                     )}
                                 </p>
                                 <Input
@@ -170,9 +241,9 @@ export default function ConfigurationsPage() {
                             </div>
                         )}
 
-                        {heroImageUrl && !heroFile && (
+                        {heroImages.length > 0 && !heroFile && (
                             <p className="text-xs text-muted-foreground truncate">
-                                Current: {heroImageUrl}
+                                Current: {heroImages.length} image{heroImages.length > 1 ? "s" : ""}
                             </p>
                         )}
                     </CardContent>

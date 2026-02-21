@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import {
     useGetAvailableSlotsQuery,
@@ -17,17 +16,12 @@ const SERVICE_TYPES = [
     { id: "custom-exhaust", name: "Custom Exhaust", description: "Hand-built exhaust systems" },
     { id: "dpf-egr", name: "DPF & EGR Services", description: "DPF cleaning and EGR solutions" },
     { id: "turbo-upgrade", name: "Turbo Upgrade", description: "Enhanced turbo systems" },
-    { id: "performance-tuning", name: "Performance Tuning", description: "Professional engine tuning" },
-    { id: "stage-upgrade", name: "Stage Upgrade", description: "Stage 1, 2 & 3 packages" },
-    { id: "diagnostics", name: "ECU Diagnostics", description: "Comprehensive fault reading" },
 ];
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 export default function BookAppointmentPage() {
-    const router = useRouter();
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [step, setStep] = useState(1);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -44,17 +38,6 @@ export default function BookAppointmentPage() {
         vehicle_registration: "",
         notes: "",
     });
-
-    // Check authentication on mount
-    useEffect(() => {
-        const token = localStorage.getItem('customer_token');
-        if (!token) {
-            toast.error("Please login to book an appointment");
-            router.push('/login?redirect=/book-appointment');
-        } else {
-            setIsAuthenticated(true);
-        }
-    }, [router]);
 
     // Format date for API
     const formattedDate = selectedDate ? selectedDate.toISOString().split('T')[0] : "";
@@ -152,15 +135,6 @@ export default function BookAppointmentPage() {
         const displayHour = hour % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
     };
-
-    // Show loading while checking auth
-    if (isAuthenticated === null) {
-        return (
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-                <div className="animate-spin h-12 w-12 border-4 border-[#1d70ff] border-t-transparent rounded-full" />
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gray-100">

@@ -130,21 +130,6 @@ export default function HomePage() {
       description: "Enhanced turbo systems for maximum power and reliability.",
       image: "/images/services/IMG_4403.png",
     },
-    {
-      title: "Performance Tuning",
-      description: "Professional engine tuning for optimal performance gains.",
-      image: "/images/services/IMG_4396.png",
-    },
-    {
-      title: "ECU Diagnostics",
-      description: "Comprehensive ECU diagnostics and fault code reading.",
-      image: "/images/services/IMG_4398.png",
-    },
-    {
-      title: "Stage Upgrades",
-      description: "Complete stage upgrade packages for your vehicle.",
-      image: "/images/services/IMG_4400.png",
-    },
   ];
 
 
@@ -178,25 +163,55 @@ export default function HomePage() {
 
   // Transform API services to include image field for compatibility
   const allServices = useMemo(() => {
+    const excludedTitles = new Set([
+      "ECU Diagnostics",
+      "Stage Upgrades",
+      "Performance Tuning",
+    ]);
     if (servicesData && servicesData.length > 0) {
       // Use API data - map image_url to image for compatibility
-      return servicesData.map(s => ({
+      return servicesData
+        .filter((service) => !excludedTitles.has(service.title))
+        .map(s => ({
         ...s,
         image: s.image_url || `/images/services/IMG_4403.png` // fallback image
       }));
     }
     // Fallback to static data if API fails or returns empty
-    return [...services, ...dummyServices];
+    return [...services, ...dummyServices].filter((service) => !excludedTitles.has(service.title));
   }, [servicesData]);
 
-  // Fetch hero image from settings
+  // Fetch hero images from settings
   const { data: settingsData } = useGetSettingsQuery();
   const heroImageUrl = useMemo(() => {
     const heroSetting = settingsData?.find(s => s.key === "hero_image_url");
-    return heroSetting?.value || "/images/services/hero-dyno-v2-ue.png";
+    return heroSetting?.value || "";
   }, [settingsData]);
+  const heroImages = useMemo(() => {
+    const heroImagesSetting = settingsData?.find(s => s.key === "hero_image_urls")?.value;
+    let urls: string[] = [];
+    if (heroImagesSetting) {
+      try {
+        const parsed = JSON.parse(heroImagesSetting);
+        if (Array.isArray(parsed)) {
+          urls = parsed.filter((url) => typeof url === "string" && url.trim().length > 0);
+        }
+      } catch {
+        urls = heroImagesSetting.split(",").map((url) => url.trim()).filter(Boolean);
+      }
+    }
+    if (urls.length === 0 && heroImageUrl) {
+      urls = [heroImageUrl];
+    }
+    if (urls.length === 0) {
+      urls = ["/images/services/hero-dyno-v2-ue.png"];
+    }
+    return urls;
+  }, [settingsData, heroImageUrl]);
 
   const allTestimonials = [...testimonials];
+
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
 
   // Stats animation state
   const [animatedStats, setAnimatedStats] = useState<{ [key: string]: number }>({});
@@ -275,6 +290,18 @@ export default function HomePage() {
       observer.disconnect();
     };
   }, [hasAnimated]);
+
+  useEffect(() => {
+    setCurrentHeroIndex(0);
+  }, [heroImages.length]);
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentHeroIndex((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
 
   // Services carousel functions
   const totalServicePages = Math.ceil(allServices.length / itemsPerPage);
@@ -525,16 +552,25 @@ export default function HomePage() {
       <main className=" space-y-20">
         <div>
           <section className="relative overflow-hidden bg-[#030814] text-white min-h-[300px] sm:min-h-[400px] md:min-h-[500px]">
-            <Image
-              src={heroImageUrl}
-              alt="MS Performance hero"
-              width={1600}
-              height={500}
-              className="absolute inset-0 h-full w-full object-cover object-center"
-              priority
-            />
+            <div
+              className="absolute inset-0 flex h-full w-full transition-transform duration-700 ease-in-out"
+              style={{ transform: `translateX(-${currentHeroIndex * 100}%)` }}
+            >
+              {heroImages.map((url, index) => (
+                <div key={`${url}-${index}`} className="relative h-full w-full flex-shrink-0">
+                  <Image
+                    src={url}
+                    alt="MS Performance hero"
+                    width={1600}
+                    height={500}
+                    className="absolute inset-0 h-full w-full object-cover object-center"
+                    priority={index === 0}
+                  />
+                </div>
+              ))}
+            </div>
             <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-            <div className="relative grid gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:gap-10 md:px-8 md:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:py-14">
+            <div className="relative z-10 grid gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:gap-10 md:px-8 md:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:py-14">
               <div className="space-y-4 animate-slide-left sm:space-y-5 md:space-y-6">
                 <p className="flex items-center gap-2 text-xs font-semibold text-white sm:gap-3 sm:text-sm animate-subtitle">
                   <span className="h-px w-8 bg-white sm:w-12" />
@@ -739,13 +775,9 @@ export default function HomePage() {
                   const getServiceLink = (title: string) => {
                     switch (title) {
                       case "ECU Remapping": return "/services/ecu-remapping";
-                      case "Dyno Tests": return "/services/dyno-tests";
                       case "Custom Exhausts": return "/services/custom-exhausts";
                       case "DPF & EGR Services": return "/services/dpf-egr-services";
                       case "Turbo Upgrades": return "/services/turbo-upgrades";
-                      case "Performance Tuning": return "/services/performance-tuning";
-                      case "ECU Diagnostics": return "/services/ecu-diagnostics";
-                      case "Stage Upgrades": return "/services/stage-upgrades";
                       default: return "/services";
                     }
                   };
@@ -840,6 +872,42 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
+              {heroImages.length > 1 && (
+                <>
+                  <button
+                    onClick={() =>
+                      setCurrentHeroIndex((prev) =>
+                        prev === 0 ? heroImages.length - 1 : prev - 1
+                      )
+                    }
+                    className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/30 bg-black/30 p-2 text-white backdrop-blur transition hover:bg-black/50 pointer-events-auto"
+                    aria-label="Previous hero image"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setCurrentHeroIndex((prev) => (prev + 1) % heroImages.length)}
+                    className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/30 bg-black/30 p-2 text-white backdrop-blur transition hover:bg-black/50 pointer-events-auto"
+                    aria-label="Next hero image"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/30 px-3 py-2 backdrop-blur pointer-events-auto">
+                    {heroImages.map((_, index) => (
+                      <button
+                        key={`hero-dot-${index}`}
+                        onClick={() => setCurrentHeroIndex(index)}
+                        className={`h-2 rounded-full transition-all ${index === currentHeroIndex ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white"}`}
+                        aria-label={`Go to hero image ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </section>
 
@@ -1250,4 +1318,3 @@ export default function HomePage() {
     </div>
   );
 }
-
