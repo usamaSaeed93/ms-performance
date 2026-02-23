@@ -6,6 +6,7 @@ import { authApi } from './api/authApi';
 import { appointmentsApi } from './api/appointmentsApi';
 import { servicesApi } from './api/servicesApi';
 import { settingsApi } from './api/settingsApi';
+import { mailingApi } from './api/mailingApi';
 
 export const makeStore = () => {
   return configureStore({
@@ -17,6 +18,7 @@ export const makeStore = () => {
       [appointmentsApi.reducerPath]: appointmentsApi.reducer,
       [servicesApi.reducerPath]: servicesApi.reducer,
       [settingsApi.reducerPath]: settingsApi.reducer,
+      [mailingApi.reducerPath]: mailingApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
@@ -29,6 +31,7 @@ export const makeStore = () => {
             appointmentsApi.util.getRunningQueriesThunk.type,
             servicesApi.util.getRunningQueriesThunk.type,
             settingsApi.util.getRunningQueriesThunk.type,
+            mailingApi.util.getRunningQueriesThunk.type,
           ],
         },
       }).concat(
@@ -38,7 +41,8 @@ export const makeStore = () => {
         authApi.middleware,
         appointmentsApi.middleware,
         servicesApi.middleware,
-        settingsApi.middleware
+        settingsApi.middleware,
+        mailingApi.middleware
       ),
   });
 };

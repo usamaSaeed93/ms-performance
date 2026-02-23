@@ -1,7 +1,9 @@
 import aiosmtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import Optional, Dict, Any
+from email.mime.base import MIMEBase
+from email import encoders
+from typing import Optional, Dict, Any, List
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import os
 from pathlib import Path
@@ -38,7 +40,8 @@ class EmailService:
         to_email: str,
         subject: str,
         html_content: str,
-        text_content: Optional[str] = None
+        text_content: Optional[str] = None,
+        attachments: Optional[List[Dict[str, Any]]] = None
     ) -> bool:
         """
         Send an email asynchronously.
@@ -73,6 +76,20 @@ class EmailService:
             part2 = MIMEText(html_content, 'html')
             message.attach(part2)
             logger.debug("HTML part attached")
+
+            if attachments:
+                for attachment in attachments:
+                    filename = attachment.get("filename", "attachment")
+                    content_type = attachment.get("content_type", "application/octet-stream")
+                    data = attachment.get("data", b"")
+                    if not data:
+                        continue
+                    maintype, subtype = (content_type.split("/", 1) + ["octet-stream"])[:2]
+                    part = MIMEBase(maintype, subtype)
+                    part.set_payload(data)
+                    encoders.encode_base64(part)
+                    part.add_header("Content-Disposition", f"attachment; filename={filename}")
+                    message.attach(part)
             
             # Send email - Gmail port 587 requires STARTTLS
             print(f"[EMAIL_SERVICE] Connecting to SMTP server {self.smtp_host}:{self.smtp_port}")  # Immediate output
@@ -271,7 +288,7 @@ MS Performance Team
         appointment_date: str,
         appointment_time: str,
         service_type: str,
-        vehicle_info: str = None
+        vehicle_info: Optional[str] = None
     ) -> bool:
         """Send appointment confirmation email."""
         html_content = self.render_template("appointment_confirmation.html", {
@@ -309,6 +326,38 @@ MS Performance Team
             text_content=text_content
         )
 
+    async def send_newsletter_email(
+        self,
+        to_email: str,
+        customer_name: str,
+        subject: str,
+        content: str,
+        attachments: Optional[List[Dict[str, Any]]] = None
+    ) -> bool:
+        """Send newsletter email."""
+        html_content = self.render_template("newsletter.html", {
+            "customer_name": customer_name,
+            "subject": subject,
+            "content": content,
+            "frontend_url": self.frontend_url
+        })
+
+        text_content = f"""
+Hello {customer_name},
+
+{content}
+
+Best regards,
+MS Performance Team
+"""
+
+        return await self.send_email(
+            to_email=to_email,
+            subject=subject,
+            html_content=html_content,
+            text_content=text_content,
+            attachments=attachments
+        )
+
 
 email_service = EmailService()
-

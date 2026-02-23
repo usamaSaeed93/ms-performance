@@ -1,0 +1,1 @@
+2026-02-16 16:28:54,069 - core.email - WARNING - SMTP send_message returned errors: ({}, '2.0.0 OK  1771241334 5b1f17b1804b1-4835dd0e327sm423379705e9.14 - gsmtp')

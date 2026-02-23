@@ -51,6 +51,11 @@ from .endpoints.check_order_status import CheckOrderStatus
 from .endpoints.check_webhook_status import CheckWebhookStatus
 from .endpoints.create_contact_message import CreateContactMessage
 from .endpoints.get_contact_messages import GetContactMessages
+from .endpoints.create_mailing_subscription import CreateMailingSubscription
+from .endpoints.get_mailing_subscriptions import GetMailingSubscriptions
+from .endpoints.create_mailing_job import CreateMailingJob
+from .endpoints.get_mailing_jobs import GetMailingJobs
+from .endpoints.upload_mailing_attachment import UploadMailingAttachment
 from .endpoints.validate_discount import ValidateDiscount
 from .endpoints.get_shop_hours import GetShopHours
 from .endpoints.update_shop_hours import UpdateShopHours
@@ -264,6 +269,26 @@ class RoutingV1(BaseRouting):
             GetContactMessages(),
             GetContactMessages.api_url,
         )
+        self.routing_collection[CreateMailingSubscription.api_name] = (
+            CreateMailingSubscription(),
+            CreateMailingSubscription.api_url,
+        )
+        self.routing_collection[GetMailingSubscriptions.api_name] = (
+            GetMailingSubscriptions(),
+            GetMailingSubscriptions.api_url,
+        )
+        self.routing_collection[CreateMailingJob.api_name] = (
+            CreateMailingJob(),
+            CreateMailingJob.api_url,
+        )
+        self.routing_collection[GetMailingJobs.api_name] = (
+            GetMailingJobs(),
+            GetMailingJobs.api_url,
+        )
+        self.routing_collection[UploadMailingAttachment.api_name] = (
+            UploadMailingAttachment(),
+            UploadMailingAttachment.api_url,
+        )
         self.routing_collection[ValidateDiscount.api_name] = (
             ValidateDiscount(),
             ValidateDiscount.api_url,
@@ -317,5 +342,3 @@ class RoutingV1(BaseRouting):
             UpdateSetting(),
             UpdateSetting.api_url,
         )
-
-

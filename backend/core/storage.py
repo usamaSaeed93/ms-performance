@@ -45,6 +45,11 @@ class StorageInterface(ABC):
         """Check if a file exists"""
         pass
 
+    @abstractmethod
+    async def download_file(self, bucket_name: str, object_name: str) -> bytes:
+        """Download a file and return bytes"""
+        pass
+
 
 class R2Storage(StorageInterface):
     """Cloudflare R2 storage implementation"""
@@ -175,6 +180,15 @@ class R2Storage(StorageInterface):
         except ClientError:
             return False
 
+    async def download_file(self, bucket_name: str, object_name: str) -> bytes:
+        """Download file from R2"""
+        try:
+            bucket = self.bucket_name
+            response = self.r2_client.get_object(Bucket=bucket, Key=object_name)
+            return response["Body"].read()
+        except ClientError as e:
+            raise Exception(f"Failed to download file: {str(e)}")
+
 
 class LocalStorage(StorageInterface):
     """Local filesystem storage implementation (useful for dev/test environments)"""
@@ -237,6 +251,12 @@ class LocalStorage(StorageInterface):
     async def file_exists(self, bucket_name: str, object_name: str) -> bool:
         safe_object = object_name.lstrip("/").replace("..", "")
         return (self.root_path / safe_object).exists()
+
+    async def download_file(self, bucket_name: str, object_name: str) -> bytes:
+        safe_object = object_name.lstrip("/").replace("..", "")
+        file_path = self.root_path / safe_object
+        with open(file_path, "rb") as file_obj:
+            return file_obj.read()
 
 
 class StorageService:

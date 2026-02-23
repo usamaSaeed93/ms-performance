@@ -95,4 +95,12 @@ app.post(f"/{config.API_PREFIX}/v1/stripe/webhook")(stripe_webhook)
 async def shutdown_event():
     """Cleanup on application shutdown."""
     from core.email_queue import email_queue
+    from core.mailing_scheduler import stop_mailing_scheduler
+    await stop_mailing_scheduler()
     await email_queue.shutdown()
+
+
+@app.on_event("startup")
+async def startup_event():
+    from core.mailing_scheduler import start_mailing_scheduler
+    start_mailing_scheduler()

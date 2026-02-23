@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ subject }}</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f4f6fb;
+        font-family: Arial, sans-serif;
+        color: #0c1b33;
+      }
+      .container {
+        max-width: 640px;
+        margin: 32px auto;
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(12, 27, 51, 0.08);
+      }
+      .header {
+        background: #0c1b33;
+        color: #ffffff;
+        padding: 24px 28px;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 20px;
+        letter-spacing: 0.5px;
+      }
+      .content {
+        padding: 28px;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+      .content h2 {
+        font-size: 18px;
+        margin: 0 0 12px;
+      }
+      .content p {
+        margin: 0 0 16px;
+      }
+      .footer {
+        padding: 20px 28px;
+        background: #f4f6fb;
+        font-size: 12px;
+        color: #5c6c86;
+      }
+      .footer a {
+        color: #00b8ff;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>{{ subject }}</h1>
+      </div>
+      <div class="content">
+        <h2>Hello {{ customer_name }},</h2>
+        <p>{{ content | replace('\n', '<br>') | safe }}</p>
+      </div>
+      <div class="footer">
+        <p>Thank you for subscribing to MS Performance updates.</p>
+        <p><a href="{{ frontend_url }}">Visit our website</a></p>
+      </div>
+    </div>
+  </body>
+</html>
