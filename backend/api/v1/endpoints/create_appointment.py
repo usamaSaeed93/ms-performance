@@ -11,7 +11,7 @@ class CreateAppointment(PostResource):
     """Create a new appointment."""
     api_name = "create_appointment"
     api_url = "appointments"
-    authentication_required = True  # Only authenticated users can book
+    authentication_required = False  # Public users can book
 
     async def create_booking(self):
         data = self.request.state.data
@@ -24,6 +24,17 @@ class CreateAppointment(PostResource):
             self.status_code = status.HTTP_400_BAD_REQUEST
             self.success = False
             self.response_message = "Date and time are required"
+            self.response_data = {}
+            return False
+            
+        customer_name = data.get("customer_name")
+        customer_email = data.get("customer_email")
+        customer_phone = data.get("customer_phone")
+        
+        if not customer_name or not customer_email or not customer_phone:
+            self.status_code = status.HTTP_400_BAD_REQUEST
+            self.success = False
+            self.response_message = "Name, email, and phone number are required"
             self.response_data = {}
             return False
         
@@ -109,7 +120,9 @@ class CreateAppointment(PostResource):
                 appointment_date=self.appointment.appointment_date.strftime("%A, %B %d, %Y"),
                 appointment_time=self.appointment.appointment_time.strftime("%I:%M %p"),
                 service_type=self.appointment.service_type,
-                vehicle_info=f"{self.appointment.vehicle_make} {self.appointment.vehicle_model}" if self.appointment.vehicle_make else None
+                vehicle_info=f"{self.appointment.vehicle_make} {self.appointment.vehicle_model}" if self.appointment.vehicle_make else None,
+                customer_phone=self.appointment.customer_phone,
+                notes=self.appointment.notes
             )
         except Exception as e:
             print(f"Failed to send confirmation email: {e}")

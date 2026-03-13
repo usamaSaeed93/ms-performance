@@ -1,0 +1,28 @@
+2026-02-23 14:52:16,150 - core.mailing_scheduler - ERROR - Mailing scheduler error: (pymysql.err.OperationalError) (1054, "Unknown column 'mailing_job.scheduled_at' in 'field list'")
+[SQL: SELECT mailing_job.id, mailing_job.subject, mailing_job.content, mailing_job.status, mailing_job.scheduled_at, mailing_job.total_recipients, mailing_job.sent_count, mailing_job.failed_count, mailing_job.last_error, mailing_job.started_at, mailing_job.completed_at, mailing_job.created_at 
+FROM mailing_job 
+WHERE mailing_job.status = %s AND mailing_job.scheduled_at IS NOT NULL AND mailing_job.scheduled_at <= %s]
+[parameters: ('scheduled', datetime.datetime(2026, 2, 23, 9, 52, 16, 20234))]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-02-23 14:52:46,347 - core.mailing_scheduler - ERROR - Mailing scheduler error: (pymysql.err.OperationalError) (1054, "Unknown column 'mailing_job.scheduled_at' in 'field list'")
+[SQL: SELECT mailing_job.id, mailing_job.subject, mailing_job.content, mailing_job.status, mailing_job.scheduled_at, mailing_job.total_recipients, mailing_job.sent_count, mailing_job.failed_count, mailing_job.last_error, mailing_job.started_at, mailing_job.completed_at, mailing_job.created_at 
+FROM mailing_job 
+WHERE mailing_job.status = %s AND mailing_job.scheduled_at IS NOT NULL AND mailing_job.scheduled_at <= %s]
+[parameters: ('scheduled', datetime.datetime(2026, 2, 23, 9, 52, 46, 172545))]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-02-23 14:53:16,427 - core.mailing_scheduler - ERROR - Mailing scheduler error: (pymysql.err.OperationalError) (1054, "Unknown column 'mailing_job.scheduled_at' in 'field list'")
+[SQL: SELECT mailing_job.id, mailing_job.subject, mailing_job.content, mailing_job.status, mailing_job.scheduled_at, mailing_job.total_recipients, mailing_job.sent_count, mailing_job.failed_count, mailing_job.last_error, mailing_job.started_at, mailing_job.completed_at, mailing_job.created_at 
+FROM mailing_job 
+WHERE mailing_job.status = %s AND mailing_job.scheduled_at IS NOT NULL AND mailing_job.scheduled_at <= %s]
+[parameters: ('scheduled', datetime.datetime(2026, 2, 23, 9, 53, 16, 409404))]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-02-23 14:53:46,454 - core.mailing_scheduler - ERROR - Mailing scheduler error: (pymysql.err.OperationalError) (1054, "Unknown column 'mailing_job.scheduled_at' in 'field list'")
+[SQL: SELECT mailing_job.id, mailing_job.subject, mailing_job.content, mailing_job.status, mailing_job.scheduled_at, mailing_job.total_recipients, mailing_job.sent_count, mailing_job.failed_count, mailing_job.last_error, mailing_job.started_at, mailing_job.completed_at, mailing_job.created_at 
+FROM mailing_job 
+WHERE mailing_job.status = %s AND mailing_job.scheduled_at IS NOT NULL AND mailing_job.scheduled_at <= %s]
+[parameters: ('scheduled', datetime.datetime(2026, 2, 23, 9, 53, 46, 432040))]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-02-23 15:01:23,099 - core.mailing_scheduler - ERROR - Mailing scheduler error: (pymysql.err.OperationalError) (1049, "Unknown database 'ms_performance'")
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-02-23 15:01:53,118 - core.mailing_scheduler - ERROR - Mailing scheduler error: (pymysql.err.OperationalError) (1049, "Unknown database 'ms_performance'")
+(Background on this error at: https://sqlalche.me/e/20/e3q8)

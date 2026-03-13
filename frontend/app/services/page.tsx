@@ -29,7 +29,7 @@ export default function ServicesPage() {
         return [
             ...baseServices,
             {
-                title: "Turbo Upgrades",
+                title: "Servicing",
                 description: "Enhanced turbo systems for maximum power and reliability.",
                 image: "/images/services/IMG_4403.png",
             },
@@ -41,7 +41,7 @@ export default function ServicesPage() {
             case "ECU Remapping": return "/services/ecu-remapping";
             case "Custom Exhausts": return "/services/custom-exhausts";
             case "DPF & EGR Services": return "/services/dpf-egr-services";
-            case "Turbo Upgrades": return "/services/turbo-upgrades";
+            case "Servicing": return "/services/servicing";
             default: return "/services";
         }
     };

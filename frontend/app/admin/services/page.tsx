@@ -26,7 +26,7 @@ const SERVICE_COLORS: Record<string, { bg: string; text: string; border: string;
     "ECU Remapping": { bg: "bg-blue-100", text: "text-blue-700", border: "border-blue-200", label: "Software" },
     "Custom Exhausts": { bg: "bg-orange-100", text: "text-orange-700", border: "border-orange-200", label: "Fabrication" },
     "DPF & EGR Solutions": { bg: "bg-green-100", text: "text-green-700", border: "border-green-200", label: "Emissions" },
-    "Turbo Upgrades": { bg: "bg-red-100", text: "text-red-700", border: "border-red-200", label: "Hardware" },
+    "Servicing": { bg: "bg-red-100", text: "text-red-700", border: "border-red-200", label: "Hardware" },
 };
 
 // Map service titles to detail page slugs
@@ -34,7 +34,7 @@ const TITLE_TO_SLUG: Record<string, string> = {
     "ECU Remapping": "ecu-remapping",
     "Custom Exhausts": "custom-exhausts",
     "DPF & EGR Solutions": "dpf-egr-services",
-    "Turbo Upgrades": "turbo-upgrades",
+    "Servicing": "servicing",
 };
 
 // Tag style config for image uploaders

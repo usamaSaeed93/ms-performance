@@ -38,10 +38,10 @@ async def seed_services():
             "image_url": None
         },
         {
-            "title": "Turbo Upgrades",
+            "title": "Servicing",
             "description": "Enhanced turbo systems for maximum power.",
             "icon": "TURBO",
-            "link": "/services/turbo-upgrades",
+            "link": "/services/servicing",
             "image_url": None
         },
         {

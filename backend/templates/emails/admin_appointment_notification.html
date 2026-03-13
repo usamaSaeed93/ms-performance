@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Appointment Booked - MS Performance Admin</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header -->
+        <tr>
+            <td style="background: linear-gradient(135deg, #030814 0%, #ff1d47 100%); padding: 40px 30px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 800;">NEW APPOINTMENT</h1>
+                <p style="color: rgba(255,255,255,0.8); margin: 10px 0 0 0; font-size: 14px;">Admin Notification</p>
+            </td>
+        </tr>
+        
+        <!-- Main Content -->
+        <tr>
+            <td style="padding: 40px 30px;">
+                <h2 style="color: #030814; margin: 0 0 20px 0; font-size: 24px;">A New Booking Has Arrived! 🔔</h2>
+                
+                <p style="color: #5c6c86; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+                    A customer just booked to get their vehicle serviced at your shop.
+                </p>
+                
+                <!-- Customer Details Card -->
+                <div style="background-color: #f8fafc; border-radius: 12px; padding: 25px; margin-bottom: 30px; border-left: 4px solid #1d70ff;">
+                    <h3 style="color: #030814; margin: 0 0 20px 0; font-size: 18px;">Customer Details</h3>
+                    
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+                                <span style="color: #5c6c86; font-size: 14px;">👤 Name</span>
+                            </td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                                <span style="color: #030814; font-size: 14px; font-weight: 600;">{{ customer_name }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+                                <span style="color: #5c6c86; font-size: 14px;">📧 Email</span>
+                            </td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                                <span style="color: #030814; font-size: 14px; font-weight: 600;">
+                                    <a href="mailto:{{ customer_email }}" style="color: #1d70ff; text-decoration: none;">{{ customer_email }}</a>
+                                </span>
+                            </td>
+                        </tr>
+                        {% if customer_phone %}
+                        <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+                                <span style="color: #5c6c86; font-size: 14px;">📞 Phone</span>
+                            </td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                                <span style="color: #030814; font-size: 14px; font-weight: 600;">
+                                    <a href="tel:{{ customer_phone }}" style="color: #1d70ff; text-decoration: none;">{{ customer_phone }}</a>
+                                </span>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+
+                <!-- Appointment Details Card -->
+                <div style="background-color: #f8fafc; border-radius: 12px; padding: 25px; margin-bottom: 30px; border-left: 4px solid #ffd200;">
+                    <h3 style="color: #030814; margin: 0 0 20px 0; font-size: 18px;">Appointment Details</h3>
+                    
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+                                <span style="color: #5c6c86; font-size: 14px;">📅 Date</span>
+                            </td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                                <span style="color: #030814; font-size: 14px; font-weight: 600;">{{ appointment_date }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+                                <span style="color: #5c6c86; font-size: 14px;">🕐 Time</span>
+                            </td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                                <span style="color: #030814; font-size: 14px; font-weight: 600;">{{ appointment_time }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+                                <span style="color: #5c6c86; font-size: 14px;">🔧 Service</span>
+                            </td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                                <span style="color: #030814; font-size: 14px; font-weight: 600;">{{ service_type }}</span>
+                            </td>
+                        </tr>
+                        {% if vehicle_info %}
+                        <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+                                <span style="color: #5c6c86; font-size: 14px;">🚗 Vehicle</span>
+                            </td>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
+                                <span style="color: #030814; font-size: 14px; font-weight: 600;">{{ vehicle_info }}</span>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% if notes %}
+                        <tr>
+                            <td style="padding: 10px 0; text-align: left;" colspan="2">
+                                <span style="color: #5c6c86; font-size: 14px; display: block; margin-bottom: 5px;">📝 Notes:</span>
+                                <span style="color: #030814; font-size: 14px; font-style: italic;">{{ notes }}</span>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+                
+                <p style="color: #5c6c86; font-size: 14px; line-height: 1.6; margin: 0;">
+                    Please check the admin dashboard for more information.
+                </p>
+            </td>
+        </tr>
+        
+        <!-- Footer -->
+        <tr>
+            <td style="background-color: #030814; padding: 30px; text-align: center;">
+                <p style="color: rgba(255,255,255,0.6); font-size: 12px; margin: 0 0 10px 0;">
+                    © 2024 MS Performance. All rights reserved.
+                </p>
+                <p style="color: rgba(255,255,255,0.4); font-size: 11px; margin: 0;">
+                    This is an automated notification from your server.
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

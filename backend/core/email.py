@@ -288,7 +288,9 @@ MS Performance Team
         appointment_date: str,
         appointment_time: str,
         service_type: str,
-        vehicle_info: Optional[str] = None
+        vehicle_info: Optional[str] = None,
+        customer_phone: Optional[str] = None,
+        notes: Optional[str] = None
     ) -> bool:
         """Send appointment confirmation email."""
         html_content = self.render_template("appointment_confirmation.html", {
@@ -319,12 +321,52 @@ Best regards,
 MS Performance Team
 """
         
-        return await self.send_email(
+        # Send confirmation to the customer
+        success = await self.send_email(
             to_email=to_email,
             subject="Appointment Confirmed - MS Performance",
             html_content=html_content,
             text_content=text_content
         )
+        
+        # Send notification to the admin/sender email
+        admin_text_content = f"""
+New Appointment Booked!
+
+Customer details:
+- Name: {customer_name}
+- Email: {to_email}
+{f'- Phone: {customer_phone}' if customer_phone else ''}
+
+Appointment Details:
+- Date: {appointment_date}
+- Time: {appointment_time}
+- Service: {service_type}
+{f'- Vehicle: {vehicle_info}' if vehicle_info else ''}
+{f'- Notes: {notes}' if notes else ''}
+"""
+        
+        # Render the styled HTML wrapper for the admin
+        admin_html_content = self.render_template("admin_appointment_notification.html", {
+            "customer_name": customer_name,
+            "customer_email": to_email,
+            "customer_phone": customer_phone,
+            "appointment_date": appointment_date,
+            "appointment_time": appointment_time,
+            "service_type": service_type,
+            "vehicle_info": vehicle_info,
+            "notes": notes,
+            "frontend_url": self.frontend_url
+        })
+        
+        await self.send_email(
+            to_email=self.from_email,
+            subject=f"New Appointment: {customer_name} - {service_type}",
+            html_content=admin_html_content,
+            text_content=admin_text_content
+        )
+        
+        return success
 
     async def send_newsletter_email(
         self,

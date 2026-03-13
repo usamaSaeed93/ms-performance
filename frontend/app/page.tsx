@@ -149,7 +149,7 @@ export default function Home() {
   // Add dummy service cards
   const dummyServiceCards = [
     {
-      title: "Turbo Upgrades",
+      title: "Servicing",
       description: "Enhanced turbo systems for maximum power.",
       icon: "TURBO",
     },
@@ -372,7 +372,7 @@ export default function Home() {
                     case "Dyno Tests": return "/services/dyno-tests";
                     case "Custom Exhausts": return "/services/custom-exhausts";
                     case "DPF & EGR Services": return "/services/dpf-egr-services";
-                    case "Turbo Upgrades": return "/services/turbo-upgrades";
+                    case "Servicing": return "/services/servicing";
                     case "Performance Tuning": return "/services/performance-tuning";
                     case "ECU Diagnostics": return "/services/ecu-diagnostics";
                     case "Stage Upgrades": return "/services/stage-upgrades";

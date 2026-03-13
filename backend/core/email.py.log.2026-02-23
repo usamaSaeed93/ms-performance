@@ -1,0 +1,117 @@
+2026-02-23 14:44:40,633 - core.email - ERROR - Exception during SMTP operation: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970d4c977sm18929945f8f.32 - gsmtp')
+2026-02-23 14:44:40,790 - core.email - ERROR - Failed to send email to usamamsaeed2@gmail.com: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970d4c977sm18929945f8f.32 - gsmtp')
+2026-02-23 14:44:40,790 - core.email - ERROR - Error type: SMTPAuthenticationError
+2026-02-23 14:44:40,803 - core.email - ERROR - Full traceback:
+Traceback (most recent call last):
+  File "/Users/usamasaeed/Desktop/untitled folder/backend/core/email.py", line 124, in send_email
+    await asyncio.wait_for(smtp.login(self.smtp_username, self.smtp_password), timeout=10.0)
+  File "/usr/local/Cellar/python@3.12/3.12.12/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1063, in login
+    raise exception or SMTPException("No suitable authentication method found.")
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1055, in login
+    response = await auth_method(username, password, timeout=timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1179, in auth_login
+    raise SMTPAuthenticationError(response.code, response.message)
+aiosmtplib.errors.SMTPAuthenticationError: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970d4c977sm18929945f8f.32 - gsmtp')
+
+2026-02-23 14:44:42,203 - core.email - ERROR - Exception during SMTP operation: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-483a9b66932sm192821965e9.1 - gsmtp')
+2026-02-23 14:44:42,353 - core.email - ERROR - Failed to send email to usama69saeed@gmail.com: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-483a9b66932sm192821965e9.1 - gsmtp')
+2026-02-23 14:44:42,353 - core.email - ERROR - Error type: SMTPAuthenticationError
+2026-02-23 14:44:42,355 - core.email - ERROR - Full traceback:
+Traceback (most recent call last):
+  File "/Users/usamasaeed/Desktop/untitled folder/backend/core/email.py", line 124, in send_email
+    await asyncio.wait_for(smtp.login(self.smtp_username, self.smtp_password), timeout=10.0)
+  File "/usr/local/Cellar/python@3.12/3.12.12/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1063, in login
+    raise exception or SMTPException("No suitable authentication method found.")
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1055, in login
+    response = await auth_method(username, password, timeout=timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1179, in auth_login
+    raise SMTPAuthenticationError(response.code, response.message)
+aiosmtplib.errors.SMTPAuthenticationError: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-483a9b66932sm192821965e9.1 - gsmtp')
+
+2026-02-23 14:44:43,777 - core.email - ERROR - Exception during SMTP operation: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970d54a68sm19076919f8f.39 - gsmtp')
+2026-02-23 14:44:43,931 - core.email - ERROR - Failed to send email to ahmed.abdullah9797@gmail.com: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970d54a68sm19076919f8f.39 - gsmtp')
+2026-02-23 14:44:43,931 - core.email - ERROR - Error type: SMTPAuthenticationError
+2026-02-23 14:44:43,932 - core.email - ERROR - Full traceback:
+Traceback (most recent call last):
+  File "/Users/usamasaeed/Desktop/untitled folder/backend/core/email.py", line 124, in send_email
+    await asyncio.wait_for(smtp.login(self.smtp_username, self.smtp_password), timeout=10.0)
+  File "/usr/local/Cellar/python@3.12/3.12.12/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1063, in login
+    raise exception or SMTPException("No suitable authentication method found.")
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1055, in login
+    response = await auth_method(username, password, timeout=timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1179, in auth_login
+    raise SMTPAuthenticationError(response.code, response.message)
+aiosmtplib.errors.SMTPAuthenticationError: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970d54a68sm19076919f8f.39 - gsmtp')
+
+2026-02-23 14:59:00,945 - core.email - ERROR - Exception during SMTP operation: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970c00db8sm17887719f8f.12 - gsmtp')
+2026-02-23 14:59:01,099 - core.email - ERROR - Failed to send email to usamamsaeed2@gmail.com: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970c00db8sm17887719f8f.12 - gsmtp')
+2026-02-23 14:59:01,100 - core.email - ERROR - Error type: SMTPAuthenticationError
+2026-02-23 14:59:01,105 - core.email - ERROR - Full traceback:
+Traceback (most recent call last):
+  File "/Users/usamasaeed/Desktop/untitled folder/backend/core/email.py", line 141, in send_email
+    await asyncio.wait_for(smtp.login(self.smtp_username, self.smtp_password), timeout=10.0)
+  File "/usr/local/Cellar/python@3.12/3.12.12/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1063, in login
+    raise exception or SMTPException("No suitable authentication method found.")
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1055, in login
+    response = await auth_method(username, password, timeout=timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1179, in auth_login
+    raise SMTPAuthenticationError(response.code, response.message)
+aiosmtplib.errors.SMTPAuthenticationError: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970c00db8sm17887719f8f.12 - gsmtp')
+
+2026-02-23 14:59:02,539 - core.email - ERROR - Exception during SMTP operation: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970c00485sm20317390f8f.9 - gsmtp')
+2026-02-23 14:59:02,694 - core.email - ERROR - Failed to send email to usama69saeed@gmail.com: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970c00485sm20317390f8f.9 - gsmtp')
+2026-02-23 14:59:02,694 - core.email - ERROR - Error type: SMTPAuthenticationError
+2026-02-23 14:59:02,696 - core.email - ERROR - Full traceback:
+Traceback (most recent call last):
+  File "/Users/usamasaeed/Desktop/untitled folder/backend/core/email.py", line 141, in send_email
+    await asyncio.wait_for(smtp.login(self.smtp_username, self.smtp_password), timeout=10.0)
+  File "/usr/local/Cellar/python@3.12/3.12.12/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1063, in login
+    raise exception or SMTPException("No suitable authentication method found.")
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1055, in login
+    response = await auth_method(username, password, timeout=timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1179, in auth_login
+    raise SMTPAuthenticationError(response.code, response.message)
+aiosmtplib.errors.SMTPAuthenticationError: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970c00485sm20317390f8f.9 - gsmtp')
+
+2026-02-23 14:59:04,117 - core.email - ERROR - Exception during SMTP operation: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970d401aasm17600424f8f.23 - gsmtp')
+2026-02-23 14:59:04,268 - core.email - ERROR - Failed to send email to ahmed.abdullah9797@gmail.com: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970d401aasm17600424f8f.23 - gsmtp')
+2026-02-23 14:59:04,268 - core.email - ERROR - Error type: SMTPAuthenticationError
+2026-02-23 14:59:04,270 - core.email - ERROR - Full traceback:
+Traceback (most recent call last):
+  File "/Users/usamasaeed/Desktop/untitled folder/backend/core/email.py", line 141, in send_email
+    await asyncio.wait_for(smtp.login(self.smtp_username, self.smtp_password), timeout=10.0)
+  File "/usr/local/Cellar/python@3.12/3.12.12/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1063, in login
+    raise exception or SMTPException("No suitable authentication method found.")
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1055, in login
+    response = await auth_method(username, password, timeout=timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/usamasaeed/Library/Caches/pypoetry/virtualenvs/fastapi-ecommerce-backend-AYYdyOiV-py3.12/lib/python3.12/site-packages/aiosmtplib/smtp.py", line 1179, in auth_login
+    raise SMTPAuthenticationError(response.code, response.message)
+aiosmtplib.errors.SMTPAuthenticationError: (535, '5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-43970d401aasm17600424f8f.23 - gsmtp')
+
+2026-02-23 15:02:35,968 - core.email - WARNING - SMTP send_message returned errors: ({}, '2.0.0 OK  1771840957 5b1f17b1804b1-483a9b21ceasm178751185e9.0 - gsmtp')
+2026-02-23 15:02:38,555 - core.email - WARNING - SMTP send_message returned errors: ({}, '2.0.0 OK  1771840960 5b1f17b1804b1-483a316eb08sm281995445e9.0 - gsmtp')
+2026-02-23 15:02:41,296 - core.email - WARNING - SMTP send_message returned errors: ({}, '2.0.0 OK  1771840962 ffacd0b85a97d-43970bf9f6csm20085620f8f.7 - gsmtp')

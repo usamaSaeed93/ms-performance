@@ -15,7 +15,7 @@ const SERVICE_TYPES = [
     { id: "dyno-test", name: "Dyno Test", description: "4WD dyno sessions with live logging" },
     { id: "custom-exhaust", name: "Custom Exhaust", description: "Hand-built exhaust systems" },
     { id: "dpf-egr", name: "DPF & EGR Services", description: "DPF cleaning and EGR solutions" },
-    { id: "turbo-upgrade", name: "Turbo Upgrade", description: "Enhanced turbo systems" },
+    { id: "servicing", name: "Servicing", description: "Enhanced turbo systems" },
 ];
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

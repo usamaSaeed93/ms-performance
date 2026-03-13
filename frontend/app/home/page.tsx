@@ -126,7 +126,7 @@ export default function HomePage() {
   // Add dummy services to extend the carousel
   const dummyServices = [
     {
-      title: "Turbo Upgrades",
+      title: "Servicing",
       description: "Enhanced turbo systems for maximum power and reliability.",
       image: "/images/services/IMG_4403.png",
     },
@@ -173,9 +173,9 @@ export default function HomePage() {
       return servicesData
         .filter((service) => !excludedTitles.has(service.title))
         .map(s => ({
-        ...s,
-        image: s.image_url || `/images/services/IMG_4403.png` // fallback image
-      }));
+          ...s,
+          image: s.image_url || `/images/services/IMG_4403.png` // fallback image
+        }));
     }
     // Fallback to static data if API fails or returns empty
     return [...services, ...dummyServices].filter((service) => !excludedTitles.has(service.title));
@@ -777,7 +777,7 @@ export default function HomePage() {
                       case "ECU Remapping": return "/services/ecu-remapping";
                       case "Custom Exhausts": return "/services/custom-exhausts";
                       case "DPF & EGR Services": return "/services/dpf-egr-services";
-                      case "Turbo Upgrades": return "/services/turbo-upgrades";
+                      case "Servicing": return "/services/servicing";
                       default: return "/services";
                     }
                   };

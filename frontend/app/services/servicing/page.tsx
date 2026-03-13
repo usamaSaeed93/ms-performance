@@ -28,9 +28,9 @@ const faqs = [
     },
 ];
 
-export default function TurboUpgradesPage() {
+export default function ServicingPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
-    const { heroImage, content1Image, content2Image } = useServicePageImages("turbo-upgrades");
+    const { heroImage, content1Image, content2Image } = useServicePageImages("servicing");
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -42,7 +42,7 @@ export default function TurboUpgradesPage() {
                     <section className="relative overflow-hidden bg-[#030814] text-white">
                         <Image
                             src={heroImage}
-                            alt="Turbo Upgrades"
+                            alt="Servicing"
                             width={1600}
                             height={700}
                             className="absolute inset-0 h-full w-full object-cover"
@@ -56,7 +56,7 @@ export default function TurboUpgradesPage() {
                                     Maximum Forced Induction
                                 </p>
                                 <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl lg:text-6xl animate-heading">
-                                    Turbo Upgrades
+                                    Servicing
                                 </h1>
                             </div>
                         </div>
