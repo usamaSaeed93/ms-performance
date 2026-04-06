@@ -43,6 +43,8 @@ class Environment(BaseSettings):
 class EmailConfig(BaseSettings):
     SMTP_HOST: str = "localhost"
     SMTP_PORT: int = 587
+    SMTP_USE_TLS: bool = False
+    SMTP_USE_STARTTLS: bool = True
     SMTP_USERNAME: str
     SMTP_PASSWORD: str
     SMTP_FROM_EMAIL: str

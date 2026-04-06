@@ -28,13 +28,43 @@ class EmailService:
     """Email service for sending emails asynchronously."""
     
     def __init__(self):
+        self._reload_config()
+
+    def _reload_config(self):
         self.smtp_host = config.EMAIL_CONFIG.SMTP_HOST
         self.smtp_port = config.EMAIL_CONFIG.SMTP_PORT
+        self.smtp_use_tls = config.EMAIL_CONFIG.SMTP_USE_TLS
+        self.smtp_use_starttls = config.EMAIL_CONFIG.SMTP_USE_STARTTLS
         self.smtp_username = config.EMAIL_CONFIG.SMTP_USERNAME
         self.smtp_password = config.EMAIL_CONFIG.SMTP_PASSWORD
         self.from_email = config.EMAIL_CONFIG.SMTP_FROM_EMAIL
         self.frontend_url = config.EMAIL_CONFIG.FRONTEND_URL
-        self.use_implicit_tls = self.smtp_port == 465
+
+    def _get_smtp_attempts(self):
+        attempts = [
+            {
+                "host": self.smtp_host,
+                "port": self.smtp_port,
+                "use_tls": self.smtp_use_tls,
+                "use_starttls": self.smtp_use_starttls,
+            }
+        ]
+
+        fallback = {
+            "host": self.smtp_host,
+            "port": 587,
+            "use_tls": False,
+            "use_starttls": True,
+        }
+
+        if (fallback["port"], fallback["use_tls"], fallback["use_starttls"]) != (
+            self.smtp_port,
+            self.smtp_use_tls,
+            self.smtp_use_starttls,
+        ):
+            attempts.append(fallback)
+
+        return attempts
     
     async def send_email(
         self,
@@ -57,10 +87,12 @@ class EmailService:
             bool: True if email was sent successfully, False otherwise
         """
         try:
+            self._reload_config()
             print(f"[EMAIL_SERVICE] Starting email send to {to_email} with subject: {subject}")  # Immediate output
             logger.info(f"Starting email send to {to_email} with subject: {subject}")
             logger.debug(f"SMTP config: host={self.smtp_host}, port={self.smtp_port}, from={self.from_email}")
             print(f"[EMAIL_SERVICE] SMTP config: host={self.smtp_host}, port={self.smtp_port}, from={self.from_email}")  # Immediate output
+            print(f"[EMAIL_SERVICE] SMTP security: use_tls={self.smtp_use_tls}, starttls={self.smtp_use_starttls}")  # Immediate output
             
             # Create message
             message = MIMEMultipart('alternative')
@@ -92,92 +124,91 @@ class EmailService:
                     part.add_header("Content-Disposition", f"attachment; filename={filename}")
                     message.attach(part)
             
-            # Support both STARTTLS (587) and implicit TLS (465).
-            print(f"[EMAIL_SERVICE] Connecting to SMTP server {self.smtp_host}:{self.smtp_port}")  # Immediate output
-            logger.info(f"Connecting to SMTP server {self.smtp_host}:{self.smtp_port}")
-            
+            # Support both implicit TLS and STARTTLS, configurable from env.
             import asyncio
             import aiosmtplib.errors
-            
-            smtp = aiosmtplib.SMTP(
-                hostname=self.smtp_host,
-                port=self.smtp_port,
-                timeout=30,
-                use_tls=self.use_implicit_tls,
-                start_tls=False,
-            )
-            
-            try:
-                print(f"[EMAIL_SERVICE] SMTP object created, calling connect()...")  # Immediate output
-                
-                # Connect first. For port 465 this is already wrapped in TLS.
-                await asyncio.wait_for(smtp.connect(), timeout=30.0)
-                print(f"[EMAIL_SERVICE] SMTP connection established!")  # Immediate output
-                logger.debug("SMTP connection established")
-                
-                # Send EHLO first
-                print(f"[EMAIL_SERVICE] Sending EHLO...")  # Immediate output
-                await asyncio.wait_for(smtp.ehlo(), timeout=10.0)
-                print(f"[EMAIL_SERVICE] EHLO sent successfully!")  # Immediate output
-                
-                if not self.use_implicit_tls:
-                    try:
-                        print(f"[EMAIL_SERVICE] Attempting TLS upgrade (STARTTLS)...")  # Immediate output
-                        await asyncio.wait_for(smtp.starttls(), timeout=10.0)
-                        print(f"[EMAIL_SERVICE] TLS upgrade completed!")  # Immediate output
-                        logger.debug("TLS upgrade completed")
+            last_error = None
 
-                        print(f"[EMAIL_SERVICE] Sending EHLO after TLS...")  # Immediate output
-                        await asyncio.wait_for(smtp.ehlo(), timeout=10.0)
-                        print(f"[EMAIL_SERVICE] EHLO after TLS sent successfully!")  # Immediate output
-                    except (aiosmtplib.errors.SMTPException, Exception) as tls_err:
-                        error_str = str(tls_err)
-                        if "already using TLS" in error_str or "Connection already using TLS" in error_str:
-                            print(f"[EMAIL_SERVICE] Connection already using TLS, continuing without STARTTLS...")  # Immediate output
-                            logger.debug("Connection already using TLS, skipping STARTTLS")
-                        else:
-                            print(f"[EMAIL_SERVICE] STARTTLS error (not 'already using TLS'), re-raising: {error_str}")  # Immediate output
-                            raise
-                
-                # Login
-                print(f"[EMAIL_SERVICE] Logging in as {self.smtp_username}...")  # Immediate output
-                logger.debug(f"Logging in as {self.smtp_username}...")
-                await asyncio.wait_for(smtp.login(self.smtp_username, self.smtp_password), timeout=10.0)
-                print(f"[EMAIL_SERVICE] Login successful!")  # Immediate output
-                logger.debug("Login successful")
-                
-                # Send message
-                print(f"[EMAIL_SERVICE] Sending message to {to_email}...")  # Immediate output
-                logger.debug(f"Sending message to {to_email}...")
-                errors = await asyncio.wait_for(smtp.send_message(message), timeout=30.0)
-                if errors:
-                    print(f"[EMAIL_SERVICE] WARNING: SMTP returned errors: {errors}")  # Immediate output
-                    logger.warning(f"SMTP send_message returned errors: {errors}")
-                else:
-                    print(f"[EMAIL_SERVICE] Message sent successfully (no errors)!")  # Immediate output
-                    logger.debug("Message sent successfully (no errors returned)")
-                
-                # Close connection
-                print(f"[EMAIL_SERVICE] Closing SMTP connection...")  # Immediate output
-                await smtp.quit()
-                print(f"[EMAIL_SERVICE] SMTP connection closed!")  # Immediate output
-                
-            except asyncio.TimeoutError as e:
-                print(f"[EMAIL_SERVICE ERROR] Timeout during SMTP operation: {str(e)}")  # Immediate output
-                logger.error(f"Timeout during SMTP operation: {str(e)}")
+            for attempt in self._get_smtp_attempts():
+                print(
+                    f"[EMAIL_SERVICE] Connecting to SMTP server {attempt['host']}:{attempt['port']} "
+                    f"(tls={attempt['use_tls']}, starttls={attempt['use_starttls']})"
+                )  # Immediate output
+                logger.info(
+                    f"Connecting to SMTP server {attempt['host']}:{attempt['port']} "
+                    f"(tls={attempt['use_tls']}, starttls={attempt['use_starttls']})"
+                )
+
+                smtp = aiosmtplib.SMTP(
+                    hostname=attempt["host"],
+                    port=attempt["port"],
+                    timeout=30,
+                    use_tls=attempt["use_tls"],
+                    start_tls=False,
+                )
+
                 try:
+                    print(f"[EMAIL_SERVICE] SMTP object created, calling connect()...")  # Immediate output
+                    await asyncio.wait_for(smtp.connect(), timeout=30.0)
+                    print(f"[EMAIL_SERVICE] SMTP connection established!")  # Immediate output
+                    logger.debug("SMTP connection established")
+
+                    print(f"[EMAIL_SERVICE] Sending EHLO...")  # Immediate output
+                    await asyncio.wait_for(smtp.ehlo(), timeout=10.0)
+                    print(f"[EMAIL_SERVICE] EHLO sent successfully!")  # Immediate output
+
+                    if attempt["use_starttls"]:
+                        try:
+                            print(f"[EMAIL_SERVICE] Attempting TLS upgrade (STARTTLS)...")  # Immediate output
+                            await asyncio.wait_for(smtp.starttls(), timeout=10.0)
+                            print(f"[EMAIL_SERVICE] TLS upgrade completed!")  # Immediate output
+                            logger.debug("TLS upgrade completed")
+
+                            print(f"[EMAIL_SERVICE] Sending EHLO after TLS...")  # Immediate output
+                            await asyncio.wait_for(smtp.ehlo(), timeout=10.0)
+                            print(f"[EMAIL_SERVICE] EHLO after TLS sent successfully!")  # Immediate output
+                        except (aiosmtplib.errors.SMTPException, Exception) as tls_err:
+                            error_str = str(tls_err)
+                            if "already using TLS" in error_str or "Connection already using TLS" in error_str:
+                                print(f"[EMAIL_SERVICE] Connection already using TLS, continuing without STARTTLS...")  # Immediate output
+                                logger.debug("Connection already using TLS, skipping STARTTLS")
+                            else:
+                                print(f"[EMAIL_SERVICE] STARTTLS error (not 'already using TLS'), re-raising: {error_str}")  # Immediate output
+                                raise
+
+                    print(f"[EMAIL_SERVICE] Logging in as {self.smtp_username}...")  # Immediate output
+                    logger.debug(f"Logging in as {self.smtp_username}...")
+                    await asyncio.wait_for(smtp.login(self.smtp_username, self.smtp_password), timeout=10.0)
+                    print(f"[EMAIL_SERVICE] Login successful!")  # Immediate output
+                    logger.debug("Login successful")
+
+                    print(f"[EMAIL_SERVICE] Sending message to {to_email}...")  # Immediate output
+                    logger.debug(f"Sending message to {to_email}...")
+                    errors = await asyncio.wait_for(smtp.send_message(message), timeout=30.0)
+                    if errors:
+                        print(f"[EMAIL_SERVICE] WARNING: SMTP returned errors: {errors}")  # Immediate output
+                        logger.warning(f"SMTP send_message returned errors: {errors}")
+                    else:
+                        print(f"[EMAIL_SERVICE] Message sent successfully (no errors)!")  # Immediate output
+                        logger.debug("Message sent successfully (no errors returned)")
+
+                    print(f"[EMAIL_SERVICE] Closing SMTP connection...")  # Immediate output
                     await smtp.quit()
-                except:
-                    pass
-                raise
-            except Exception as e:
-                print(f"[EMAIL_SERVICE ERROR] Exception during SMTP operation: {str(e)}")  # Immediate output
-                logger.error(f"Exception during SMTP operation: {str(e)}")
-                try:
-                    await smtp.quit()
-                except:
-                    pass
-                raise
+                    print(f"[EMAIL_SERVICE] SMTP connection closed!")  # Immediate output
+                    last_error = None
+                    break
+
+                except Exception as e:
+                    last_error = e
+                    print(f"[EMAIL_SERVICE ERROR] SMTP attempt failed: {str(e)}")  # Immediate output
+                    logger.error(f"SMTP attempt failed: host={attempt['host']} port={attempt['port']} error={str(e)}")
+                    try:
+                        await smtp.quit()
+                    except:
+                        pass
+
+            if last_error is not None:
+                raise last_error
             
             print(f"[EMAIL_SERVICE] Email sent successfully to {to_email}!")  # Immediate output
             logger.info(f"Email sent successfully to {to_email}")
