@@ -34,6 +34,7 @@ class EmailService:
         self.smtp_password = config.EMAIL_CONFIG.SMTP_PASSWORD
         self.from_email = config.EMAIL_CONFIG.SMTP_FROM_EMAIL
         self.frontend_url = config.EMAIL_CONFIG.FRONTEND_URL
+        self.use_implicit_tls = self.smtp_port == 465
     
     async def send_email(
         self,
@@ -91,20 +92,25 @@ class EmailService:
                     part.add_header("Content-Disposition", f"attachment; filename={filename}")
                     message.attach(part)
             
-            # Send email - Gmail port 587 requires STARTTLS
+            # Support both STARTTLS (587) and implicit TLS (465).
             print(f"[EMAIL_SERVICE] Connecting to SMTP server {self.smtp_host}:{self.smtp_port}")  # Immediate output
             logger.info(f"Connecting to SMTP server {self.smtp_host}:{self.smtp_port}")
             
             import asyncio
             import aiosmtplib.errors
             
-            # Create SMTP object with explicit no-TLS for port 587
-            smtp = aiosmtplib.SMTP(hostname=self.smtp_host, port=self.smtp_port, timeout=30, use_tls=False)
+            smtp = aiosmtplib.SMTP(
+                hostname=self.smtp_host,
+                port=self.smtp_port,
+                timeout=30,
+                use_tls=self.use_implicit_tls,
+                start_tls=False,
+            )
             
             try:
                 print(f"[EMAIL_SERVICE] SMTP object created, calling connect()...")  # Immediate output
                 
-                # Connect without TLS
+                # Connect first. For port 465 this is already wrapped in TLS.
                 await asyncio.wait_for(smtp.connect(), timeout=30.0)
                 print(f"[EMAIL_SERVICE] SMTP connection established!")  # Immediate output
                 logger.debug("SMTP connection established")
@@ -114,26 +120,24 @@ class EmailService:
                 await asyncio.wait_for(smtp.ehlo(), timeout=10.0)
                 print(f"[EMAIL_SERVICE] EHLO sent successfully!")  # Immediate output
                 
-                # Try to upgrade to TLS using STARTTLS
-                # If it's already using TLS, that's fine - we'll catch and continue
-                try:
-                    print(f"[EMAIL_SERVICE] Attempting TLS upgrade (STARTTLS)...")  # Immediate output
-                    await asyncio.wait_for(smtp.starttls(), timeout=10.0)
-                    print(f"[EMAIL_SERVICE] TLS upgrade completed!")  # Immediate output
-                    logger.debug("TLS upgrade completed")
-                    
-                    # Send EHLO again after TLS
-                    print(f"[EMAIL_SERVICE] Sending EHLO after TLS...")  # Immediate output
-                    await asyncio.wait_for(smtp.ehlo(), timeout=10.0)
-                    print(f"[EMAIL_SERVICE] EHLO after TLS sent successfully!")  # Immediate output
-                except (aiosmtplib.errors.SMTPException, Exception) as tls_err:
-                    error_str = str(tls_err)
-                    if "already using TLS" in error_str or "Connection already using TLS" in error_str:
-                        print(f"[EMAIL_SERVICE] Connection already using TLS, continuing without STARTTLS...")  # Immediate output
-                        logger.debug("Connection already using TLS, skipping STARTTLS")
-                    else:
-                        print(f"[EMAIL_SERVICE] STARTTLS error (not 'already using TLS'), re-raising: {error_str}")  # Immediate output
-                        raise
+                if not self.use_implicit_tls:
+                    try:
+                        print(f"[EMAIL_SERVICE] Attempting TLS upgrade (STARTTLS)...")  # Immediate output
+                        await asyncio.wait_for(smtp.starttls(), timeout=10.0)
+                        print(f"[EMAIL_SERVICE] TLS upgrade completed!")  # Immediate output
+                        logger.debug("TLS upgrade completed")
+
+                        print(f"[EMAIL_SERVICE] Sending EHLO after TLS...")  # Immediate output
+                        await asyncio.wait_for(smtp.ehlo(), timeout=10.0)
+                        print(f"[EMAIL_SERVICE] EHLO after TLS sent successfully!")  # Immediate output
+                    except (aiosmtplib.errors.SMTPException, Exception) as tls_err:
+                        error_str = str(tls_err)
+                        if "already using TLS" in error_str or "Connection already using TLS" in error_str:
+                            print(f"[EMAIL_SERVICE] Connection already using TLS, continuing without STARTTLS...")  # Immediate output
+                            logger.debug("Connection already using TLS, skipping STARTTLS")
+                        else:
+                            print(f"[EMAIL_SERVICE] STARTTLS error (not 'already using TLS'), re-raising: {error_str}")  # Immediate output
+                            raise
                 
                 # Login
                 print(f"[EMAIL_SERVICE] Logging in as {self.smtp_username}...")  # Immediate output

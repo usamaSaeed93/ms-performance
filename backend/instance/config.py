@@ -41,7 +41,7 @@ class Environment(BaseSettings):
 
 
 class EmailConfig(BaseSettings):
-    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_HOST: str = "localhost"
     SMTP_PORT: int = 587
     SMTP_USERNAME: str
     SMTP_PASSWORD: str
