@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import status
 
 from api.base_resource import PostResource
@@ -21,15 +21,19 @@ class CreateMailingJob(PostResource):
 
     async def process_flow(self):
         total_recipients = await mailing_subscription.get_active_count(self.db)
+        scheduled_at = self.request_data.scheduled_at
+        if scheduled_at and scheduled_at.tzinfo is not None:
+            scheduled_at = scheduled_at.astimezone(timezone.utc).replace(tzinfo=None)
+
         job_payload = {
             "subject": self.request_data.subject,
             "content": self.request_data.content,
-            "scheduled_at": self.request_data.scheduled_at,
+            "scheduled_at": scheduled_at,
         }
         job = await mailing_job.create(self.db, obj_in=job_payload)
 
         now = datetime.utcnow()
-        is_scheduled = bool(self.request_data.scheduled_at and self.request_data.scheduled_at > now)
+        is_scheduled = bool(scheduled_at and scheduled_at > now)
         status_value = "scheduled" if is_scheduled else "queued"
 
         job = await mailing_job.update(
@@ -58,6 +62,6 @@ class CreateMailingJob(PostResource):
         if not is_scheduled:
             asyncio.create_task(send_mailing_job(job.id))
 
-        self.response_data = job
+        self.response_data = await mailing_job.get(self.db, id=job.id)
         self.status_code = status.HTTP_201_CREATED
         self.response_message = "Mailing job queued successfully"
