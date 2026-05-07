@@ -12,7 +12,6 @@ import { toast } from "sonner";
 
 const SERVICE_TYPES = [
     { id: "ecu-remapping", name: "ECU Remapping", description: "Unlock your vehicle's true potential" },
-    { id: "dyno-test", name: "Dyno Test", description: "4WD dyno sessions with live logging" },
     { id: "custom-exhaust", name: "Custom Exhaust", description: "Hand-built exhaust systems" },
     { id: "dpf-egr", name: "DPF & EGR Services", description: "DPF cleaning and EGR solutions" },
     { id: "servicing", name: "Servicing", description: "Enhanced turbo systems" },

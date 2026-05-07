@@ -36,11 +36,16 @@ export default function ServicesPage() {
         ].filter((service) => !excludedTitles.has(service.title));
     }, [servicesData]);
 
-    const getServiceLink = (title: string) => {
+    const getServiceLink = (title: string, apiLink?: string) => {
+        // Use API-provided link if available
+        if (apiLink) return apiLink;
+        // Fallback for static data
         switch (title) {
             case "ECU Remapping": return "/services/ecu-remapping";
+            case "Dyno Tests": return "/services/dyno-tests";
             case "Custom Exhausts": return "/services/custom-exhausts";
             case "DPF & EGR Services": return "/services/dpf-egr-services";
+            case "Turbo Upgrades": return "/services/servicing";
             case "Servicing": return "/services/servicing";
             default: return "/services";
         }
@@ -84,7 +89,7 @@ export default function ServicesPage() {
                             {allServices.map((service, index) => (
                                 <Link
                                     key={service.title}
-                                    href={getServiceLink(service.title)}
+                                    href={getServiceLink(service.title, service.link)}
                                     className={`group flex flex-col gap-4 rounded-2xl bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-gray-100 sm:rounded-[24px] sm:p-5 shadow-sm card-hover ${index % 4 === 0 ? 'animate-card' :
                                         index % 4 === 1 ? 'animate-card-delay-1' :
                                             index % 4 === 2 ? 'animate-card-delay-2' :
