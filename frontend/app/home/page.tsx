@@ -12,7 +12,6 @@ import {
   stats,
   products,
   testimonials,
-  blogPosts,
   footerLinks,
 } from "@/lib/constants";
 import {
@@ -135,27 +134,15 @@ export default function HomePage() {
 
   // No need for dummy testimonials, we have enough in constants
 
-  // Transform blogs for display - combine dynamic blogs with static ones
+  // Transform blogs for display - fully dynamic from API
   const allBlogPosts = useMemo(() => {
-    const dynamicBlogs = blogsData?.blogs?.map((blog) => ({
+    return blogsData?.blogs?.map((blog) => ({
       id: blog.id,
       title: blog.title,
       summary: blog.excerpt || "Read more about this topic...",
       image: blog.featured_image || "/images/blog/latest1.png",
       slug: blog.slug,
     })) || [];
-
-    // Combine with static blog posts from constants
-    const staticBlogs = blogPosts.map((post) => ({
-      id: null,
-      title: post.title,
-      summary: post.summary,
-      image: post.image,
-      slug: null,
-    }));
-
-    // Combine dynamic and static, prioritizing dynamic blogs
-    return [...dynamicBlogs, ...staticBlogs];
   }, [blogsData]);
 
   // Fetch services from API with fallback to static
@@ -1208,12 +1195,10 @@ export default function HomePage() {
                   {displayedBlogs.map((post, index) => {
                     const blogUrl = post.slug
                       ? `/blog/${post.slug}`
-                      : post.id
-                        ? `/blog/${post.id}`
-                        : '#';
+                      : `/blog/${post.id}`;
                     return (
                       <Link
-                        key={post.id ? `blog-${post.id}` : `static-${index}`}
+                        key={`blog-${post.id}`}
                         href={blogUrl}
                         className="flex w-full gap-4 rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
                       >

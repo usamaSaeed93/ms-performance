@@ -436,5 +436,51 @@ MS Performance Team
             attachments=attachments
         )
 
+    async def send_contact_notification_email(
+        self,
+        name: str,
+        email: str,
+        message: str,
+        phone: Optional[str] = None,
+        address: Optional[str] = None,
+        subject: Optional[str] = None,
+    ) -> bool:
+        """Send contact form notification email to the admin/SMTP sender."""
+        html_content = self.render_template("contact_notification.html", {
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "address": address,
+            "subject": subject,
+            "message": message,
+            "frontend_url": self.frontend_url,
+        })
+
+        text_content = f"""
+New Contact Form Submission
+
+From: {name} ({email})
+{f'Phone: {phone}' if phone else ''}
+{f'Address: {address}' if address else ''}
+{f'Subject: {subject}' if subject else ''}
+
+Message:
+{message}
+
+---
+This is an automated notification from your website contact form.
+"""
+
+        email_subject = f"New Contact Message from {name}"
+        if subject:
+            email_subject = f"Contact: {subject} - from {name}"
+
+        return await self.send_email(
+            to_email=self.from_email,
+            subject=email_subject,
+            html_content=html_content,
+            text_content=text_content,
+        )
+
 
 email_service = EmailService()

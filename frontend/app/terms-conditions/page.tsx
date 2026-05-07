@@ -25,7 +25,7 @@ export default function TermsConditionsPage() {
                             <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl lg:text-6xl">
                                 Terms & Conditions
                             </h1>
-                            <p className="mt-4 text-gray-300">Last updated: December 2024</p>
+                            <p className="mt-4 text-gray-300">Last updated: May 2026</p>
                         </div>
                     </div>
                 </section>

@@ -1022,7 +1022,7 @@ function GainsCalculatorContent() {
 
             {/* Engine Specifications and Results Section */}
             <section className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 md:py-10">
-              <div className="bg-[#E5E5E5] rounded-[10px] w-full max-w-[1291px] mx-auto p-4 sm:p-6 lg:px-12 lg:py-8">
+              <div className="bg-white rounded-[12px] sm:rounded-[16px] border border-gray-200 w-full max-w-[1291px] mx-auto p-4 sm:p-6 lg:px-12 lg:py-8">
                 <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1fr_1.8fr] items-start">
 
                   {/* Engine Specifications - Left Side */}
@@ -1070,9 +1070,9 @@ function GainsCalculatorContent() {
                   <div className="space-y-4">
 
                     {/* Power Row - Unified Card */}
-                    <div className="flex flex-col sm:flex-row w-full max-w-[721px] bg-[#6767671A] rounded-[10px] overflow-hidden">
+                    <div className="flex flex-col sm:flex-row w-full max-w-[721px] bg-white border border-gray-200 rounded-[12px] sm:rounded-[16px] overflow-hidden">
                       {/* Label Section (Left) */}
-                      <div className="w-full sm:w-[120px] md:w-[163px] py-4 sm:py-0 sm:h-auto bg-[#3A3A3A17] flex flex-col items-center justify-center flex-shrink-0">
+                      <div className="w-full sm:w-[120px] md:w-[163px] py-4 sm:py-0 sm:h-auto bg-gray-50 flex flex-col items-center justify-center flex-shrink-0">
                         <span className="text-xl sm:text-2xl font-black text-black">Power</span>
                         <span className="text-gray-600 font-normal text-xs sm:text-sm">(Hp)</span>
                       </div>
@@ -1105,9 +1105,9 @@ function GainsCalculatorContent() {
                     </div>
 
                     {/* Torque Row - Unified Card */}
-                    <div className="flex flex-col sm:flex-row w-full max-w-[721px] bg-[#6767671A] rounded-[10px] overflow-hidden">
+                    <div className="flex flex-col sm:flex-row w-full max-w-[721px] bg-white border border-gray-200 rounded-[12px] sm:rounded-[16px] overflow-hidden">
                       {/* Label Section (Left) */}
-                      <div className="w-full sm:w-[120px] md:w-[163px] py-4 sm:py-0 sm:h-auto bg-[#3A3A3A17] flex flex-col items-center justify-center flex-shrink-0">
+                      <div className="w-full sm:w-[120px] md:w-[163px] py-4 sm:py-0 sm:h-auto bg-gray-50 flex flex-col items-center justify-center flex-shrink-0">
                         <span className="text-xl sm:text-2xl font-black text-black">Torque</span>
                         <span className="text-gray-600 font-normal text-xs sm:text-sm">(Nm)</span>
                       </div>

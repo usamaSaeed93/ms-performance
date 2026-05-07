@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import { navLinks, blogPosts } from "@/lib/constants";
 import { useGetPublishedBlogsQuery } from "@/lib/store/api/blogsApi";
 import { Navbar } from "@/components/Navbar";
 
@@ -19,25 +18,11 @@ export default function BlogPage() {
     order: "desc",
   });
 
-  // Transform static blog posts to match dynamic blog structure
-  const staticBlogs = blogPosts.map((blog, index) => ({
-    id: `static-${index + 1}`,
-    slug: `static-blog-${index + 1}`,
-    title: blog.title,
-    excerpt: blog.summary,
-    featured_image: blog.image,
-    author_name: "MS Performance",
-    published_at: new Date().toISOString(), // Use current date for static blogs
-    view_count: 0,
-    status: "published",
-    isStatic: true, // Flag to identify static blogs
-  }));
-
-  // Combine static and dynamic blogs (static blogs first, then dynamic)
-  const allBlogs = [...staticBlogs, ...(blogsData?.blogs || [])];
+  // Use only dynamic blogs from the API
+  const allBlogs = blogsData?.blogs || [];
 
   // Sort by published_at (most recent first)
-  const sortedBlogs = allBlogs.sort((a, b) => {
+  const sortedBlogs = [...allBlogs].sort((a, b) => {
     const dateA = new Date(a.published_at || 0).getTime();
     const dateB = new Date(b.published_at || 0).getTime();
     return dateB - dateA;
@@ -112,7 +97,7 @@ export default function BlogPage() {
                     <span className="inline-block rounded-[8px] bg-white/20 px-3 py-1 text-xs font-semibold text-white">
                       Featured
                     </span>
-                    <Link href={featuredBlog.isStatic ? "/blog/detail" : `/blog/${featuredBlog.slug || featuredBlog.id}`}>
+                    <Link href={`/blog/${featuredBlog.slug || featuredBlog.id}`}>
                       <h1 className="text-4xl font-black leading-tight lg:text-5xl animate-heading cursor-pointer hover:text-[#1d70ff] transition">
                         {featuredBlog.title}
                       </h1>
@@ -187,7 +172,7 @@ export default function BlogPage() {
                 {sortedBlogs.slice(1, 4).map((blog, index) => (
                   <Link
                     key={blog.id}
-                    href={blog.isStatic ? "/blog/detail" : `/blog/${blog.slug || blog.id}`}
+                    href={`/blog/${blog.slug || blog.id}`}
                     className={`bg-white rounded-[16px] overflow-hidden hover:shadow-lg transition-shadow cursor-pointer shadow-sm card-hover ${index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : 'animate-card-delay-2'
                       }`}
                   >
@@ -254,13 +239,13 @@ export default function BlogPage() {
                 {getVisibleBlogs().map((article, index) => (
                   <Link
                     key={article.id}
-                    href={article.isStatic ? "/blog/detail" : `/blog/${article.slug || article.id}`}
+                    href={`/blog/${article.slug || article.id}`}
                     className={`bg-white rounded-[16px] overflow-hidden hover:shadow-lg transition-shadow cursor-pointer shadow-sm card-hover ${index === 0 ? 'animate-card' : index === 1 ? 'animate-card-delay-1' : index === 2 ? 'animate-card-delay-2' : index === 3 ? 'animate-card-delay-3' : 'animate-card animate-stagger-4'
                       }`}
                   >
                     <div className="relative h-48 overflow-hidden">
                       <Image
-                        src={article.featured_image || article.image || "/images/blog/latest1.png"}
+                        src={article.featured_image || "/images/blog/latest1.png"}
                         alt={article.title}
                         width={400}
                         height={200}
@@ -272,7 +257,7 @@ export default function BlogPage() {
                         {article.title}
                       </h3>
                       <p className="text-sm text-[#5c6c86] line-clamp-2">
-                        {article.excerpt || article.description || "Read more about this topic..."}
+                        {article.excerpt || "Read more about this topic..."}
                       </p>
                       <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#1d70ff] text-white hover:bg-[#1a5fdd] transition animate-button">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -313,4 +298,3 @@ export default function BlogPage() {
     </div>
   );
 }
-

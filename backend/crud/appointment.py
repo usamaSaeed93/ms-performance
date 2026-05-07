@@ -2,6 +2,7 @@ from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from datetime import date, time, datetime, timedelta
+import pytz
 
 from models.appointment import ShopHours, Appointment
 
@@ -86,6 +87,20 @@ async def bulk_update_shop_hours(db: AsyncSession, hours_data: list) -> List[Sho
     return result
 
 
+# Shop timezone - Chelmsford, UK
+SHOP_TIMEZONE = pytz.timezone("Europe/London")
+
+
+def _get_shop_now() -> datetime:
+    """Get the current datetime in the shop's timezone (Europe/London)."""
+    return datetime.now(pytz.utc).astimezone(SHOP_TIMEZONE)
+
+
+def _get_shop_today() -> date:
+    """Get today's date in the shop's timezone."""
+    return _get_shop_now().date()
+
+
 async def get_available_slots(db: AsyncSession, target_date: date) -> dict:
     """Get available time slots for a specific date."""
     day_of_week = target_date.weekday()
@@ -113,15 +128,18 @@ async def get_available_slots(db: AsyncSession, target_date: date) -> dict:
     
     booked_times = {appt.appointment_time for appt in existing_appointments}
     
+    # Use shop timezone for "today" and "now" comparisons
+    shop_today = _get_shop_today()
+    shop_now_time = _get_shop_now().time()
+    
     # Generate slots
     while current_time + slot_duration <= end_time:
         slot_time = current_time.time()
         is_available = slot_time not in booked_times
         
-        # Don't show past slots for today
-        if target_date == date.today():
-            now = datetime.now().time()
-            if slot_time <= now:
+        # Don't show past slots for today (using shop's local time)
+        if target_date == shop_today:
+            if slot_time <= shop_now_time:
                 is_available = False
         
         slots.append({

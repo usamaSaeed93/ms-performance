@@ -2,7 +2,7 @@ from fastapi import status
 from datetime import datetime, date
 
 from api.base_resource import GetResource
-from crud.appointment import get_available_slots
+from crud.appointment import get_available_slots, _get_shop_today
 
 
 class GetAvailableSlots(GetResource):
@@ -30,8 +30,8 @@ class GetAvailableSlots(GetResource):
             self.response_data = {}
             return False
         
-        # Don't allow booking in the past
-        if self.target_date < date.today():
+        # Don't allow booking in the past (using shop's local timezone)
+        if self.target_date < _get_shop_today():
             self.status_code = status.HTTP_400_BAD_REQUEST
             self.success = False
             self.response_message = "Cannot view slots for past dates"
