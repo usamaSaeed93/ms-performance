@@ -39,8 +39,8 @@ export default function LegalInformationPage() {
                             <div className="bg-gray-50 rounded-xl p-6 space-y-2">
                                 <p className="text-[#0c1b33] font-semibold text-lg">MS Performance Ltd</p>
                                 <p className="text-[#5c6c86]">Registered Address: Unit 16, Bakers Ln, Chelmsford CM2 8LD</p>
-                                <p className="text-[#5c6c86]">Company Registration Number: [Company Number]</p>
-                                <p className="text-[#5c6c86]">VAT Registration Number: [VAT Number]</p>
+                                {/* <p className="text-[#5c6c86]">Company Registration Number: [Company Number]</p>
+                                <p className="text-[#5c6c86]">VAT Registration Number: [VAT Number]</p> */}
                             </div>
                         </div>
 
