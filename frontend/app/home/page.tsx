@@ -36,6 +36,39 @@ import { useEcommerceEnabled } from "@/hooks/useEcommerceEnabled";
 import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
 import { useGetSettingsQuery } from "@/lib/store/api/settingsApi";
 
+const DEFAULT_HERO_IMAGE = "/images/services/hero-dyno-v2-ue.png";
+
+// Hero image component with error fallback
+function HeroImage({ src, priority }: { src: string; priority?: boolean }) {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+  const isExternal = src.startsWith("http");
+
+  // Reset when src changes (e.g. new carousel images loaded from API)
+  useEffect(() => {
+    setImgSrc(src);
+    setHasError(false);
+  }, [src]);
+
+  return (
+    <Image
+      src={hasError ? DEFAULT_HERO_IMAGE : imgSrc}
+      alt="MS Performance hero"
+      width={1600}
+      height={500}
+      className="absolute inset-0 h-full w-full object-cover object-center"
+      priority={priority}
+      unoptimized={isExternal && !hasError}
+      onError={() => {
+        if (!hasError) {
+          setHasError(true);
+          setImgSrc(DEFAULT_HERO_IMAGE);
+        }
+      }}
+    />
+  );
+}
+
 // FAQ Item Component
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -191,7 +224,7 @@ export default function HomePage() {
       urls = [heroImageUrl];
     }
     if (urls.length === 0) {
-      urls = ["/images/services/hero-dyno-v2-ue.png"];
+      urls = [DEFAULT_HERO_IMAGE];
     }
     return urls;
   }, [settingsData, heroImageUrl]);
@@ -545,14 +578,7 @@ export default function HomePage() {
             >
               {heroImages.map((url, index) => (
                 <div key={`${url}-${index}`} className="relative h-full w-full flex-shrink-0">
-                  <Image
-                    src={url}
-                    alt="MS Performance hero"
-                    width={1600}
-                    height={500}
-                    className="absolute inset-0 h-full w-full object-cover object-center"
-                    priority={index === 0}
-                  />
+                  <HeroImage src={url} priority={index === 0} />
                 </div>
               ))}
             </div>
