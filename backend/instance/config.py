@@ -7,7 +7,10 @@ from sqlalchemy.ext.asyncio import create_async_engine
 try:
     APPLICATION_SETTINGS_PATH: str = os.environ.get("APPLICATION_SETTINGS")
     if not APPLICATION_SETTINGS_PATH:
-        APPLICATION_SETTINGS_PATH = os.path.join(os.getcwd(), ".vars")
+        # Resolve path relative to this file to be robust against different working directories
+        APPLICATION_SETTINGS_PATH = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".vars"
+        )
     dotenv.load_dotenv(APPLICATION_SETTINGS_PATH)
 except:
     pass
