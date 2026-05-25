@@ -33,3 +33,9 @@ def create_jwt_token(payload: dict, typ: str = "access") -> str:
 def generate_email_confirmation_token() -> str:
     """Generate a secure random token for email confirmation."""
     return secrets.token_urlsafe(32)
+
+
+def generate_password_reset_token() -> str:
+    """Generate a secure random token for password reset."""
+    return secrets.token_urlsafe(32)
+

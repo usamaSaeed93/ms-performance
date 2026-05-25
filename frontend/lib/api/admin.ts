@@ -318,5 +318,15 @@ export const adminApi = {
       images,
     });
   },
+
+  async forgotPassword(data: { email: string }): Promise<{ message: string }> {
+    const response = await apiClient.post<{ message: string }>('forgot_password', data);
+    return response;
+  },
+
+  async resetPassword(data: { token: string; new_password: string }): Promise<{ message: string }> {
+    const response = await apiClient.post<{ message: string }>('reset_password', data);
+    return response;
+  },
 };
 

@@ -141,5 +141,64 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def set_password_reset_token(
+        self, db: AsyncSession, *, db_obj: User, token: str
+    ) -> User:
+        """Set password reset token for a user.
+
+        Args:
+            db (AsyncSession): SQLAlchemy session
+            db_obj (User): The user object
+            token (str): The reset token
+
+        Returns:
+            User: The updated user object
+        """
+        from datetime import datetime
+        db_obj.password_reset_token = token
+        db_obj.password_reset_sent_at = datetime.utcnow()
+        db.add(db_obj)
+        await db.commit()
+        await db.refresh(db_obj)
+        return db_obj
+
+    async def get_by_reset_token(
+        self, db: AsyncSession, *, token: str
+    ) -> Optional[User]:
+        """Get a user by password reset token.
+
+        Args:
+            db (AsyncSession): SQLAlchemy session
+            token (str): The reset token
+
+        Returns:
+            Optional[User]: The user object or None
+        """
+        stmt = select(self.model).filter(self.model.password_reset_token == token)
+        result = await db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def reset_password(
+        self, db: AsyncSession, *, db_obj: User, new_password: str
+    ) -> User:
+        """Reset user's password and clear the reset token.
+
+        Args:
+            db (AsyncSession): SQLAlchemy session
+            db_obj (User): The user object
+            new_password (str): The new plain text password
+
+        Returns:
+            User: The updated user object
+        """
+        db_obj.hashed_password = get_password_hash(new_password)
+        db_obj.password_reset_token = None
+        db_obj.password_reset_sent_at = None
+        db.add(db_obj)
+        await db.commit()
+        await db.refresh(db_obj)
+        return db_obj
+
 
 user = CRUDUser(User)
+

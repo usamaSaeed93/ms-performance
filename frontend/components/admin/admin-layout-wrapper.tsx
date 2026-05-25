@@ -15,10 +15,10 @@ export function AdminLayoutWrapper({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/admin/login";
+  const isAuthPage = pathname === "/admin/login" || pathname === "/admin/forgot-password" || pathname === "/admin/reset-password";
 
-  // For login page, don't show sidebar
-  if (isLoginPage) {
+  // For login and auth pages, don't show sidebar
+  if (isAuthPage) {
     return <div className="admin-theme">{children}</div>;
   }
 

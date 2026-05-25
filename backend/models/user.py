@@ -17,6 +17,8 @@ class User(Base):
     email_confirmed = Column(Boolean, nullable=False, default=False, index=True)
     email_confirmation_token = Column(String(255), nullable=True, unique=True, index=True)
     email_confirmation_sent_at = Column(TIMESTAMP, nullable=True)
+    password_reset_token = Column(String(255), nullable=True, unique=True, index=True)
+    password_reset_sent_at = Column(TIMESTAMP, nullable=True)
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated_at = Column(
         TIMESTAMP, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow

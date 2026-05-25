@@ -272,6 +272,36 @@ MS Performance Team
             text_content=text_content
         )
     
+    async def send_password_reset_email(self, to_email: str, first_name: str, reset_token: str) -> bool:
+        """Send password reset email."""
+        reset_url = f"{self.frontend_url}/reset-password?token={reset_token}"
+        
+        html_content = self.render_template("password_reset.html", {
+            "first_name": first_name,
+            "reset_url": reset_url,
+            "frontend_url": self.frontend_url
+        })
+        
+        text_content = f"""
+Hello {first_name},
+
+We received a request to reset your password. Click the link below to set a new password:
+
+{reset_url}
+
+This link will expire in 1 hour. If you didn't request a password reset, please ignore this email.
+
+Best regards,
+MS Performance Team
+"""
+        
+        return await self.send_email(
+            to_email=to_email,
+            subject="Reset Your Password - MS Performance",
+            html_content=html_content,
+            text_content=text_content
+        )
+    
     async def send_order_confirmation_email(
         self,
         to_email: str,

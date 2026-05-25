@@ -15,13 +15,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem("admin_token");
-    if (!token && pathname !== "/admin/login") {
+    const isAuthPage = pathname === "/admin/login" || pathname === "/admin/forgot-password" || pathname === "/admin/reset-password";
+    if (!token && !isAuthPage) {
       router.push("/admin/login");
     }
   }, [pathname, router]);
 
-  // No shell for login page
-  if (pathname === "/admin/login") {
+  // No shell for login and auth pages
+  const isAuthPage = pathname === "/admin/login" || pathname === "/admin/forgot-password" || pathname === "/admin/reset-password";
+  if (isAuthPage) {
     return <>{children}</>;
   }
 

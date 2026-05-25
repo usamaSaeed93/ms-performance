@@ -172,3 +172,7 @@ pyrightconfig.json
 
 # Logs folder
 .logs/*
+
+# Local MySQL data and variables
+mysql-data/
+.vars

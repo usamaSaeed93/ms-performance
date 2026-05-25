@@ -4,6 +4,8 @@ from .endpoints.register_user import RegisterUser
 from .endpoints.signup import Signup
 from .endpoints.login_user import LoginUser
 from .endpoints.confirm_email import ConfirmEmailGet, ConfirmEmailPost, ResendConfirmationEmail
+from .endpoints.forgot_password import ForgotPassword
+from .endpoints.reset_password import ResetPassword
 from .endpoints.create_product import CreateProduct
 from .endpoints.add_inventory import AddInventory
 from .endpoints.get_product import GetProduct
@@ -85,6 +87,8 @@ class RoutingV1(BaseRouting):
         self.routing_collection[ConfirmEmailGet.api_name] = (ConfirmEmailGet(), ConfirmEmailGet.api_url)
         self.routing_collection[ConfirmEmailPost.api_name] = (ConfirmEmailPost(), ConfirmEmailPost.api_url)
         self.routing_collection[ResendConfirmationEmail.api_name] = (ResendConfirmationEmail(), ResendConfirmationEmail.api_url)
+        self.routing_collection[ForgotPassword.api_name] = (ForgotPassword(), ForgotPassword.api_url)
+        self.routing_collection[ResetPassword.api_name] = (ResetPassword(), ResetPassword.api_url)
         self.routing_collection[CreateProduct.api_name] = (
             CreateProduct(),
             CreateProduct.api_url,
