@@ -5,7 +5,7 @@ from ..schemas.settings import GetSettingsResponse
 
 class GetSettings(GetResource):
     response_schema = GetSettingsResponse
-    authentication_required = True # Admin only likely
+    authentication_required = False
     
     api_name = "get_settings"
     api_url = "settings" # GET /v1/settings

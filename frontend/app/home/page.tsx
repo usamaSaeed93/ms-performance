@@ -202,12 +202,15 @@ export default function HomePage() {
   }, [servicesData]);
 
   // Fetch hero images from settings
-  const { data: settingsData } = useGetSettingsQuery();
+  const { data: settingsData, isLoading: isSettingsLoading } = useGetSettingsQuery();
   const heroImageUrl = useMemo(() => {
     const heroSetting = settingsData?.find(s => s.key === "hero_image_url");
     return heroSetting?.value || "";
   }, [settingsData]);
   const heroImages = useMemo(() => {
+    // While the settings are still loading, return an empty array so we don't
+    // prematurely flash the default image before the real uploaded banner arrives.
+    if (isSettingsLoading) return [];
     const heroImagesSetting = settingsData?.find(s => s.key === "hero_image_urls")?.value;
     let urls: string[] = [];
     if (heroImagesSetting) {
@@ -227,7 +230,7 @@ export default function HomePage() {
       urls = [DEFAULT_HERO_IMAGE];
     }
     return urls;
-  }, [settingsData, heroImageUrl]);
+  }, [settingsData, heroImageUrl, isSettingsLoading]);
 
   const allTestimonials = [...testimonials];
 
@@ -576,11 +579,15 @@ export default function HomePage() {
               className="absolute inset-0 flex h-full w-full transition-transform duration-700 ease-in-out"
               style={{ transform: `translateX(-${currentHeroIndex * 100}%)` }}
             >
-              {heroImages.map((url, index) => (
-                <div key={`${url}-${index}`} className="relative h-full w-full flex-shrink-0">
-                  <HeroImage src={url} priority={index === 0} />
-                </div>
-              ))}
+              {isSettingsLoading ? (
+                <div className="relative h-full w-full flex-shrink-0 bg-[#030814]" />
+              ) : (
+                heroImages.map((url, index) => (
+                  <div key={`${url}-${index}`} className="relative h-full w-full flex-shrink-0">
+                    <HeroImage src={url} priority={index === 0} />
+                  </div>
+                ))
+              )}
             </div>
             <div className="absolute inset-0 bg-black/40 pointer-events-none" />
             <div className="relative z-10 grid gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:gap-10 md:px-8 md:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:py-14">
