@@ -32,9 +32,10 @@ const SERVICE_COLORS: Record<string, { bg: string; text: string; border: string;
 // Map service titles to detail page slugs
 const TITLE_TO_SLUG: Record<string, string> = {
     "ECU Remapping": "ecu-remapping",
+    "Dyno Tests": "dyno-tests",
     "Custom Exhausts": "custom-exhausts",
-    "DPF & EGR Solutions": "dpf-egr-services",
-    "Servicing": "servicing",
+    "DPF & EGR Services": "dpf-egr-services",
+    "Turbo Upgrades": "servicing",
 };
 
 // Tag style config for image uploaders
