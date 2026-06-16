@@ -40,14 +40,16 @@ export default function DynoTestsPage() {
                 <main className="space-y-20">
                     {/* Hero Section */}
                     <section className="relative overflow-hidden bg-[#030814] text-white">
-                        <Image
-                            src={heroImage}
-                            alt="Dyno Tests"
-                            width={1600}
-                            height={700}
-                            className="absolute inset-0 h-full w-full object-cover"
-                            priority
-                        />
+                        {heroImage && (
+                            <Image
+                                src={heroImage}
+                                alt="Dyno Tests"
+                                width={1600}
+                                height={700}
+                                className="absolute inset-0 h-full w-full object-cover"
+                                priority
+                            />
+                        )}
                         <div className="absolute inset-0 bg-black/60" />
                         <div className="relative px-4 py-12 sm:px-6 sm:py-16 md:px-8 md:py-20 lg:px-12">
                             <div className="space-y-4 max-w-3xl sm:space-y-5 md:space-y-6">
@@ -75,23 +77,27 @@ export default function DynoTestsPage() {
                                     </p>
                                 </div>
                                 <div className="relative overflow-hidden rounded-[20px] flex-shrink-0 animate-slide-right">
+                                    {content1Image && (
+                                        <Image
+                                            src={content1Image}
+                                            alt="Dyno Graph"
+                                            width={600}
+                                            height={400}
+                                            className="w-full h-auto object-cover animate-image-hover"
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                            <div className="relative overflow-hidden h-[650px] rounded-[20px] border-2 border-[#1d70ff] flex animate-slide-right">
+                                {content2Image && (
                                     <Image
-                                        src={content1Image}
-                                        alt="Dyno Graph"
+                                        src={content2Image}
+                                        alt="Car on Dyno"
                                         width={600}
                                         height={400}
                                         className="w-full h-auto object-cover animate-image-hover"
                                     />
-                                </div>
-                            </div>
-                            <div className="relative overflow-hidden h-[650px] rounded-[20px] border-2 border-[#1d70ff] flex animate-slide-right">
-                                <Image
-                                    src={content2Image}
-                                    alt="Car on Dyno"
-                                    width={600}
-                                    height={400}
-                                    className="w-full h-auto object-cover animate-image-hover"
-                                />
+                                )}
                             </div>
                         </div>
                     </section>

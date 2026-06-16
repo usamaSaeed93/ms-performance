@@ -64,23 +64,27 @@ export const SERVICE_PAGES = SERVICE_PAGE_CONFIG;
 
 /**
  * Hook to get all 3 dynamic images for a service detail page.
+ * Returns null for image URLs while the settings query is in-flight so pages
+ * can avoid flashing the static fallback before the real uploaded image arrives.
  * @param slug - The service page slug (e.g., "ecu-remapping")
- * @returns Object with heroImage, content1Image, content2Image URLs
+ * @returns Object with heroImage, content1Image, content2Image URLs (null when loading) and isLoading flag
  */
 export function useServicePageImages(slug: string) {
-    const { data: settings } = useGetSettingsQuery();
+    const { data: settings, isLoading: isSettingsLoading } = useGetSettingsQuery();
     const config = SERVICE_PAGE_CONFIG[slug];
 
     return useMemo(() => {
         if (!config) {
             return {
-                heroImage: "/images/services/IMG_4394.png",
-                content1Image: "/images/services/IMG_4395.png",
-                content2Image: "/images/services/IMG_4396.png",
+                heroImage: isSettingsLoading ? null : "/images/services/IMG_4394.png",
+                content1Image: isSettingsLoading ? null : "/images/services/IMG_4395.png",
+                content2Image: isSettingsLoading ? null : "/images/services/IMG_4396.png",
+                isLoading: isSettingsLoading,
             };
         }
 
-        const getImage = (type: ServiceImageType) => {
+        const getImage = (type: ServiceImageType): string | null => {
+            if (isSettingsLoading) return null;
             const imgConfig = config[type];
             const setting = settings?.find(s => s.key === imgConfig.settingsKey);
             return setting?.value || imgConfig.fallbackImage;
@@ -90,12 +94,13 @@ export function useServicePageImages(slug: string) {
             heroImage: getImage("hero"),
             content1Image: getImage("content1"),
             content2Image: getImage("content2"),
+            isLoading: isSettingsLoading,
         };
-    }, [settings, config]);
+    }, [settings, config, isSettingsLoading]);
 }
 
 // Backward compatible single-image hook
-export function useServicePageImage(slug: string): string {
+export function useServicePageImage(slug: string): string | null {
     const { heroImage } = useServicePageImages(slug);
     return heroImage;
 }
