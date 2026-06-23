@@ -28,7 +28,7 @@ const faqs = [
     },
 ];
 
-export default function ServicingPage() {
+export default function TurboUpgradesPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
     const { heroImage, content1Image, content2Image } = useServicePageImages("servicing");
 
@@ -43,7 +43,7 @@ export default function ServicingPage() {
                         {heroImage && (
                             <Image
                                 src={heroImage}
-                                alt="Servicing"
+                                alt="Turbo Upgrades"
                                 width={1600}
                                 height={700}
                                 className="absolute inset-0 h-full w-full object-cover"
@@ -58,7 +58,7 @@ export default function ServicingPage() {
                                     Maximum Forced Induction
                                 </p>
                                 <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl lg:text-6xl animate-heading">
-                                    Servicing
+                                    Turbo Upgrades
                                 </h1>
                             </div>
                         </div>

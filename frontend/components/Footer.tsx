@@ -134,7 +134,7 @@ export function Footer() {
                         <h4 className="text-sm font-bold text-white">For overseas customers:</h4>
                         <div className="flex items-center gap-2">
                             <Phone className="h-4 w-4 text-[#00b8ff]" />
-                            <p className="text-sm text-gray-400">+44 (0)1637 875 209</p>
+                            <p className="text-sm text-gray-400">+44 7751 798603</p>
                         </div>
                     </div>
                 </div>
