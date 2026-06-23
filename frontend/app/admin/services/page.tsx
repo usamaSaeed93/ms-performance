@@ -35,7 +35,7 @@ const TITLE_TO_SLUG: Record<string, string> = {
     "Dyno Tests": "dyno-tests",
     "Custom Exhausts": "custom-exhausts",
     "DPF & EGR Services": "dpf-egr-services",
-    "Turbo Upgrades": "servicing",
+    "Turbo Upgrades": "turbo-upgrades",
 };
 
 // Tag style config for image uploaders

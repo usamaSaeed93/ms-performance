@@ -38,8 +38,10 @@ export default function BookAppointmentPage() {
         notes: "",
     });
 
-    // Format date for API
-    const formattedDate = selectedDate ? selectedDate.toISOString().split('T')[0] : "";
+    // Format date for API using local date parts to avoid UTC offset shifting the date
+    const formattedDate = selectedDate
+        ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`
+        : "";
 
     // Fetch available slots with 60-second polling
     const { data: slotsData, isLoading: slotsLoading, refetch } = useGetAvailableSlotsQuery(

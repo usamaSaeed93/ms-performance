@@ -8,10 +8,13 @@ import { services as baseServices } from "@/lib/constants/services";
 import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
 
 export default function ServicesPage() {
-    const { data: servicesData } = useGetServicesQuery();
+    const { data: servicesData, isLoading: isServicesLoading } = useGetServicesQuery();
 
     // Use API data with dynamic images, fallback to static
     const allServices = useMemo(() => {
+        // Return empty while loading to prevent flash of default images
+        if (isServicesLoading) return [];
+
         const excludedTitles = new Set([
             "ECU Diagnostics",
             "Stage Upgrades",
@@ -34,7 +37,7 @@ export default function ServicesPage() {
                 image: "/images/services/IMG_4403.png",
             },
         ].filter((service) => !excludedTitles.has(service.title));
-    }, [servicesData]);
+    }, [servicesData, isServicesLoading]);
 
     const getServiceLink = (title: string, apiLink?: string) => {
         // Use API-provided link if available
@@ -45,8 +48,8 @@ export default function ServicesPage() {
             case "Dyno Tests": return "/services/dyno-tests";
             case "Custom Exhausts": return "/services/custom-exhausts";
             case "DPF & EGR Services": return "/services/dpf-egr-services";
-            case "Turbo Upgrades": return "/services/servicing";
-            case "Servicing": return "/services/servicing";
+            case "Turbo Upgrades": return "/services/turbo-upgrades";
+            case "Servicing": return "/services/turbo-upgrades";
             default: return "/services";
         }
     };
@@ -85,6 +88,11 @@ export default function ServicesPage() {
                 {/* Services Grid */}
                 <section className="px-4 sm:px-6 md:px-8 lg:px-12">
                     <div className="mx-auto max-w-7xl">
+                        {isServicesLoading && (
+                            <div className="flex justify-center py-16">
+                                <div className="animate-spin h-10 w-10 border-4 border-[#1d70ff] border-t-transparent rounded-full" />
+                            </div>
+                        )}
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {allServices.map((service, index) => (
                                 <Link

@@ -30,7 +30,7 @@ const faqs = [
 
 export default function TurboUpgradesPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
-    const { heroImage, content1Image, content2Image } = useServicePageImages("servicing");
+    const { heroImage, content1Image, content2Image } = useServicePageImages("turbo-upgrades");
 
     return (
         <div className="min-h-screen bg-gray-100">

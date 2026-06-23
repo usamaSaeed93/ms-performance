@@ -3,7 +3,7 @@ from datetime import datetime, date, time
 import asyncio
 
 from api.base_resource import PostResource
-from crud.appointment import create_appointment, is_slot_available, get_shop_hours_for_day
+from crud.appointment import create_appointment, is_slot_available, get_shop_hours_for_day, _get_shop_today
 from core.email import email_service
 
 
@@ -51,8 +51,8 @@ class CreateAppointment(PostResource):
             self.response_data = {}
             return False
         
-        # Validate date is not in the past
-        if appt_date < date.today():
+        # Validate date is not in the past (using shop's UK timezone)
+        if appt_date < _get_shop_today():
             self.status_code = status.HTTP_400_BAD_REQUEST
             self.success = False
             self.response_message = "Cannot book appointments in the past"
