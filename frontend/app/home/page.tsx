@@ -179,10 +179,12 @@ export default function HomePage() {
   }, [blogsData]);
 
   // Fetch services from API with fallback to static
-  const { data: servicesData } = useGetServicesQuery();
+  const { data: servicesData, isLoading: isServicesLoading } = useGetServicesQuery();
 
   // Transform API services to include image field for compatibility
   const allServices = useMemo(() => {
+    // Return empty while loading to prevent flash of default images
+    if (isServicesLoading) return [];
     const excludedTitles = new Set([
       "ECU Diagnostics",
       "Stage Upgrades",
@@ -199,7 +201,7 @@ export default function HomePage() {
     }
     // Fallback to static data if API fails or returns empty
     return [...services, ...dummyServices].filter((service) => !excludedTitles.has(service.title));
-  }, [servicesData]);
+  }, [servicesData, isServicesLoading]);
 
   // Fetch hero images from settings
   const { data: settingsData, isLoading: isSettingsLoading } = useGetSettingsQuery();
@@ -790,6 +792,11 @@ export default function HomePage() {
             </div>
 
             <div className="relative overflow-hidden">
+              {isServicesLoading && (
+                <div className="flex justify-center py-16">
+                  <div className="animate-spin h-10 w-10 border-4 border-[#1d70ff] border-t-transparent rounded-full" />
+                </div>
+              )}
               <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
                 {getVisibleServices().map((service, index) => {
                   const getServiceLink = (title: string) => {
@@ -797,7 +804,8 @@ export default function HomePage() {
                       case "ECU Remapping": return "/services/ecu-remapping";
                       case "Custom Exhausts": return "/services/custom-exhausts";
                       case "DPF & EGR Services": return "/services/dpf-egr-services";
-                      case "Servicing": return "/services/servicing";
+                      case "Turbo Upgrades": return "/services/turbo-upgrades";
+                      case "Servicing": return "/services/turbo-upgrades";
                       default: return "/services";
                     }
                   };

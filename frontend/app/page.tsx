@@ -232,11 +232,11 @@ export default function Home() {
   }, [blogsData]);
 
   // Fetch services
-  const { data: servicesData } = useGetServicesQuery();
+  const { data: servicesData, isLoading: isServicesLoading } = useGetServicesQuery();
 
   // Combine real and dummy data
-  // Use explicit fallback ensuring an array is always returned
-  const servicesRaw = servicesData && servicesData.length > 0 ? servicesData : serviceCards;
+  // Return empty while loading to prevent flash of default images
+  const servicesRaw = isServicesLoading ? [] : (servicesData && servicesData.length > 0 ? servicesData : serviceCards);
   const allServiceCards: any[] = servicesRaw ? [...servicesRaw] : [];
   // const allServiceCards = [...serviceCards, ...dummyServiceCards];
   const allAdvantages = [...advantages, ...dummyAdvantages];
@@ -372,7 +372,8 @@ export default function Home() {
                     case "Dyno Tests": return "/services/dyno-tests";
                     case "Custom Exhausts": return "/services/custom-exhausts";
                     case "DPF & EGR Services": return "/services/dpf-egr-services";
-                    case "Servicing": return "/services/servicing";
+                    case "Turbo Upgrades": return "/services/turbo-upgrades";
+                    case "Servicing": return "/services/turbo-upgrades";
                     case "Performance Tuning": return "/services/performance-tuning";
                     case "ECU Diagnostics": return "/services/ecu-diagnostics";
                     case "Stage Upgrades": return "/services/stage-upgrades";
