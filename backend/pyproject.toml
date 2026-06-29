@@ -34,7 +34,6 @@ aiosmtplib = "^3.0.0"
 apscheduler = "^3.10.4"
 jinja2 = "^3.1.2"
 stripe = "^7.0.0"
-httpx = "^0.27.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"

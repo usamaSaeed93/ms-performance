@@ -8,15 +8,19 @@ Required env vars (add to .vars):
     SETMORE_REFRESH_TOKEN  – Your Setmore API refresh token
                              (Setmore dashboard → Apps & Integrations → API)
     SETMORE_STAFF_KEY      – Staff member key to assign appointments to
-                             (fetch via GET /api/v1/bookingapi/staff)
-    SETMORE_SERVICE_KEY    – Service key to use for appointments
-                             (fetch via GET /api/v1/bookingapi/services)
-                             Leave blank to let Setmore pick the first service.
+    SETMORE_SERVICE_KEY    – Service key to use for appointments (optional)
+
+Uses only Python standard-library HTTP (urllib.request) — no extra packages needed.
 """
 from __future__ import annotations
 
-import httpx
+import asyncio
+import json
+import urllib.request
+import urllib.parse
+import urllib.error
 from datetime import datetime, timedelta
+from functools import partial
 
 from instance.config import config
 from core.logger import Logger
@@ -24,20 +28,36 @@ from core.logger import Logger
 logger = Logger.get_logger(__file__, __name__)
 
 SETMORE_BASE = "https://developer.setmore.com"
-_REFRESH_URL = f"{SETMORE_BASE}/api/v1/bookingapi/auth/refreshtoken"
-_CREATE_URL = f"{SETMORE_BASE}/api/v1/bookingapi/appointment/create"
-_SERVICES_URL = f"{SETMORE_BASE}/api/v1/bookingapi/services"
+
+
+def _http_get(url: str, headers: dict | None = None) -> dict:
+    """Synchronous GET, returns parsed JSON (or raises)."""
+    req = urllib.request.Request(url, headers=headers or {}, method="GET")
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        return json.loads(resp.read().decode())
+
+
+def _http_post(url: str, payload: dict, headers: dict | None = None) -> dict:
+    """Synchronous POST with JSON body, returns parsed JSON (or raises)."""
+    body = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={**(headers or {}), "Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        return json.loads(resp.read().decode())
 
 
 class SetmoreClient:
-    """Thin async wrapper around the Setmore Booking API."""
+    """Async-friendly wrapper around the Setmore Booking API."""
 
     def __init__(self) -> None:
         cfg = config.SETMORE_CONFIG
         self.refresh_token: str = cfg.SETMORE_REFRESH_TOKEN
         self.staff_key: str = cfg.SETMORE_STAFF_KEY
         self.service_key: str = cfg.SETMORE_SERVICE_KEY
-        self._access_token: str | None = None
 
     @property
     def enabled(self) -> bool:
@@ -48,19 +68,14 @@ class SetmoreClient:
     # ------------------------------------------------------------------
 
     async def _get_access_token(self) -> str | None:
-        """Exchange the stored refresh token for a short-lived access token."""
+        url = f"{SETMORE_BASE}/api/v1/bookingapi/auth/refreshtoken?refreshToken={urllib.parse.quote(self.refresh_token)}"
         try:
-            async with httpx.AsyncClient(timeout=10) as client:
-                resp = await client.get(
-                    _REFRESH_URL,
-                    params={"refreshToken": self.refresh_token},
-                )
-                data = resp.json()
-                if data.get("response") and data.get("data", {}).get("token"):
-                    token = data["data"]["token"].get("access_token") or data["data"]["token"].get("accessToken")
-                    self._access_token = token
-                    return token
-                logger.error(f"Setmore token exchange failed: {data}")
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(None, _http_get, url)
+            if data.get("response") and data.get("data", {}).get("token"):
+                token_obj = data["data"]["token"]
+                return token_obj.get("access_token") or token_obj.get("accessToken")
+            logger.error(f"Setmore token exchange failed: {data}")
         except Exception as exc:
             logger.error(f"Setmore auth request failed: {exc}")
         return None
@@ -70,16 +85,14 @@ class SetmoreClient:
     # ------------------------------------------------------------------
 
     async def _get_first_service_key(self, access_token: str) -> str | None:
+        url = f"{SETMORE_BASE}/api/v1/bookingapi/services"
+        headers = {"Authorization": f"Bearer {access_token}"}
         try:
-            async with httpx.AsyncClient(timeout=10) as client:
-                resp = await client.get(
-                    _SERVICES_URL,
-                    headers={"Authorization": f"Bearer {access_token}"},
-                )
-                data = resp.json()
-                services = data.get("data", {}).get("services", [])
-                if services:
-                    return services[0].get("key")
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(None, partial(_http_get, url, headers))
+            services = data.get("data", {}).get("services", [])
+            if services:
+                return services[0].get("key")
         except Exception as exc:
             logger.error(f"Setmore services fetch failed: {exc}")
         return None
@@ -95,15 +108,15 @@ class SetmoreClient:
         customer_email: str,
         customer_phone: str,
         service_type: str,
-        appointment_date: str,   # "YYYY-MM-DD"
-        appointment_time: str,   # "HH:MM:SS" or "HH:MM"
+        appointment_date: str,          # "YYYY-MM-DD"
+        appointment_time: str,          # "HH:MM:SS" or "HH:MM"
         notes: str = "",
         slot_duration_minutes: int = 30,
     ) -> bool:
         """
         Push an approved appointment to Setmore.
-        Returns True on success, False if disabled or on any error
-        (failures are logged but never raise, so they won't break the approval flow).
+        Returns True on success; False if disabled or on any error.
+        Failures are logged but never raise, so they won't break the approval flow.
         """
         if not self.enabled:
             logger.info("Setmore sync skipped — SETMORE_REFRESH_TOKEN not configured.")
@@ -127,11 +140,7 @@ class SetmoreClient:
             return False
 
         end_dt = start_dt + timedelta(minutes=slot_duration_minutes)
-
-        # Setmore expects "dd/MM/yyyy HH:mm"
         fmt = "%d/%m/%Y %H:%M"
-        start_str = start_dt.strftime(fmt)
-        end_str = end_dt.strftime(fmt)
 
         name_parts = customer_name.strip().split(" ", 1)
         first_name = name_parts[0]
@@ -147,29 +156,29 @@ class SetmoreClient:
                 "email_id": customer_email,
                 "cell_phone": customer_phone or "",
             },
-            "start_time": start_str,
-            "end_time": end_str,
+            "start_time": start_dt.strftime(fmt),
+            "end_time": end_dt.strftime(fmt),
             "label": service_type,
             "comment": notes or "",
         }
 
+        url = f"{SETMORE_BASE}/api/v1/bookingapi/appointment/create"
+        headers = {"Authorization": f"Bearer {access_token}"}
+
         try:
-            async with httpx.AsyncClient(timeout=15) as client:
-                resp = await client.post(
-                    _CREATE_URL,
-                    json=payload,
-                    headers={"Authorization": f"Bearer {access_token}"},
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(
+                None, partial(_http_post, url, payload, headers)
+            )
+            if data.get("response"):
+                logger.info(
+                    f"Setmore appointment created for {customer_email} "
+                    f"on {appointment_date} at {time_str}"
                 )
-                data = resp.json()
-                if data.get("response"):
-                    logger.info(
-                        f"Setmore appointment created for {customer_email} "
-                        f"on {appointment_date} at {time_str}"
-                    )
-                    return True
-                else:
-                    logger.error(f"Setmore create appointment failed: {data}")
-                    return False
+                return True
+            else:
+                logger.error(f"Setmore create appointment failed: {data}")
+                return False
         except Exception as exc:
             logger.error(f"Setmore API call failed: {exc}")
             return False
