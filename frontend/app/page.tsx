@@ -373,7 +373,9 @@ export default function Home() {
                     case "Custom Exhausts": return "/services/custom-exhausts";
                     case "DPF & EGR Services": return "/services/dpf-egr-services";
                     case "Turbo Upgrades": return "/services/turbo-upgrades";
-                    case "Servicing": return "/services/turbo-upgrades";
+                    case "Servicing": return "/services/servicing";
+                    case "Number Plates": return "/services/number-plates";
+                    case "Adblue Solutions": return "/services/adblue-solutions";
                     case "Performance Tuning": return "/services/performance-tuning";
                     case "ECU Diagnostics": return "/services/ecu-diagnostics";
                     case "Stage Upgrades": return "/services/stage-upgrades";

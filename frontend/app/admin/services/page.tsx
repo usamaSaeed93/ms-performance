@@ -36,6 +36,9 @@ const TITLE_TO_SLUG: Record<string, string> = {
     "Custom Exhausts": "custom-exhausts",
     "DPF & EGR Services": "dpf-egr-services",
     "Turbo Upgrades": "turbo-upgrades",
+    "Servicing": "servicing",
+    "Number Plates": "number-plates",
+    "Adblue Solutions": "adblue-solutions",
 };
 
 // Tag style config for image uploaders
@@ -435,7 +438,7 @@ export default function ServicesPage() {
                                         These 3 images appear on the <span className="font-medium text-foreground">{selectedService?.title}</span> detail page — the hero banner and two content section images.
                                     </p>
 
-                                    <div className="grid gap-3 sm:grid-cols-3">
+                                    <div className={`grid gap-3 ${selectedConfig.content3 ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
                                         <ImageUploader
                                             label="Hero Banner"
                                             tag="Hero"
@@ -472,6 +475,20 @@ export default function ServicesPage() {
                                             )}
                                             isUploading={isUploading}
                                         />
+                                        {selectedConfig.content3 && (
+                                            <ImageUploader
+                                                label="Gallery Image"
+                                                tag="Content 3"
+                                                currentUrl={getSettingValue(selectedConfig.content3.settingsKey)}
+                                                fallbackUrl={selectedConfig.content3.fallbackImage}
+                                                onUpload={(file) => handleDetailImageUpload(
+                                                    selectedConfig.content3!.settingsKey,
+                                                    `Gallery image for ${selectedService?.title} page`,
+                                                    file
+                                                )}
+                                                isUploading={isUploading}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             </>

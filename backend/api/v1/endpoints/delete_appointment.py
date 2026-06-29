@@ -1,7 +1,14 @@
+import asyncio
 from fastapi import status
 
 from api.base_resource import DeleteResource, PutResource
-from crud.appointment import delete_appointment, update_appointment_status
+from crud.appointment import (
+    delete_appointment,
+    update_appointment_status,
+    get_appointment_by_id,
+)
+from core.email import email_service
+from core.setmore import setmore_client
 
 
 class DeleteAppointment(DeleteResource):
@@ -75,7 +82,7 @@ class UpdateAppointmentStatus(PutResource):
             self.response_data = {}
             return False
         
-        valid_statuses = ["confirmed", "completed", "cancelled"]
+        valid_statuses = ["pending", "confirmed", "denied", "completed", "cancelled"]
         if new_status not in valid_statuses:
             self.status_code = status.HTTP_400_BAD_REQUEST
             self.success = False
@@ -91,7 +98,17 @@ class UpdateAppointmentStatus(PutResource):
             self.response_message = "Invalid appointment ID"
             self.response_data = {}
             return False
-        
+
+        # Fetch the appointment before updating so we have the full data for emails/Setmore
+        self.old_appointment = await get_appointment_by_id(self.db, appointment_id)
+        if not self.old_appointment:
+            self.status_code = status.HTTP_404_NOT_FOUND
+            self.success = False
+            self.response_message = "Appointment not found"
+            self.response_data = {}
+            return False
+
+        self.new_status = new_status
         self.appointment = await update_appointment_status(self.db, appointment_id, new_status)
         
         if not self.appointment:
@@ -100,8 +117,64 @@ class UpdateAppointmentStatus(PutResource):
             self.response_message = "Appointment not found"
             self.response_data = {}
             return False
+
+        # Fire-and-forget side-effects (email + Setmore)
+        try:
+            asyncio.create_task(self._handle_status_side_effects())
+        except Exception as exc:
+            print(f"Failed to queue status side-effects: {exc}")
         
         return True
+
+    async def _handle_status_side_effects(self):
+        appt = self.appointment
+        fmt_date = appt.appointment_date.strftime("%A, %B %d, %Y")
+        fmt_time = appt.appointment_time.strftime("%I:%M %p")
+        vehicle_info = None
+        if appt.vehicle_make:
+            vehicle_info = f"{appt.vehicle_make} {appt.vehicle_model or ''}".strip()
+
+        if self.new_status == "confirmed":
+            # 1. Send confirmation email to customer
+            try:
+                await email_service.send_appointment_confirmation_email(
+                    to_email=appt.customer_email,
+                    customer_name=appt.customer_name,
+                    appointment_date=fmt_date,
+                    appointment_time=fmt_time,
+                    service_type=appt.service_type,
+                    vehicle_info=vehicle_info,
+                    customer_phone=appt.customer_phone,
+                    notes=appt.notes,
+                )
+            except Exception as exc:
+                print(f"Failed to send confirmation email: {exc}")
+
+            # 2. Sync to Setmore
+            try:
+                await setmore_client.create_appointment(
+                    customer_name=appt.customer_name,
+                    customer_email=appt.customer_email,
+                    customer_phone=appt.customer_phone or "",
+                    service_type=appt.service_type,
+                    appointment_date=appt.appointment_date.isoformat(),
+                    appointment_time=appt.appointment_time.isoformat(),
+                    notes=appt.notes or "",
+                )
+            except Exception as exc:
+                print(f"Failed to sync to Setmore: {exc}")
+
+        elif self.new_status == "denied":
+            try:
+                await email_service.send_appointment_denied_email(
+                    to_email=appt.customer_email,
+                    customer_name=appt.customer_name,
+                    appointment_date=fmt_date,
+                    appointment_time=fmt_time,
+                    service_type=appt.service_type,
+                )
+            except Exception as exc:
+                print(f"Failed to send denial email: {exc}")
 
     async def generate_response(self):
         self.status_code = status.HTTP_200_OK

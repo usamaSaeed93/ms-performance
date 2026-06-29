@@ -38,10 +38,32 @@ async def seed_services():
             "image_url": None
         },
         {
-            "title": "Servicing",
-            "description": "Enhanced turbo systems for maximum power.",
+            "title": "Turbo Upgrades",
+            "description": "Enhanced turbo systems for maximum power and reliability.",
             "icon": "TURBO",
+            "link": "/services/turbo-upgrades",
+            "image_url": None,
+            "rename_from": "Servicing"   # rename old "Servicing" entry to this
+        },
+        {
+            "title": "Servicing",
+            "description": "Comprehensive vehicle servicing to keep your car running at its best.",
+            "icon": "SVC",
             "link": "/services/servicing",
+            "image_url": None
+        },
+        {
+            "title": "Number Plates",
+            "description": "Custom show plates and road-legal number plates made to order.",
+            "icon": "PLATE",
+            "link": "/services/number-plates",
+            "image_url": None
+        },
+        {
+            "title": "Adblue Solutions",
+            "description": "Professional AdBlue system diagnostics, refill, and fault resolution.",
+            "icon": "ADBLUE",
+            "link": "/services/adblue-solutions",
             "image_url": None
         },
         {
@@ -69,7 +91,26 @@ async def seed_services():
 
     async with db as session:
         for index, service_data in enumerate(services):
-            # Verify if these crud functions accept 'session' as first arg
+            rename_from = service_data.pop("rename_from", None)
+
+            # If this entry was previously stored under a different title, rename it
+            if rename_from:
+                old_service = await get_service_by_title(session, rename_from)
+                if old_service:
+                    print(f"Renaming service '{rename_from}' → '{service_data['title']}'")
+                    await update_service(
+                        session,
+                        service_id=old_service.id,
+                        title=service_data["title"],
+                        link=service_data["link"],
+                        description=service_data["description"],
+                        icon=service_data.get("icon"),
+                    )
+                    old_service.display_order = index
+                    session.add(old_service)
+                    await session.commit()
+                    continue
+
             existing_service = await get_service_by_title(session, service_data["title"])
             if not existing_service:
                 print(f"Creating service: {service_data['title']}")
@@ -84,7 +125,7 @@ async def seed_services():
                 )
             else:
                 print(f"Service already exists: {service_data['title']}")
-                # Ensure display order is correct
+                # Ensure display order and link are correct
                 if existing_service.display_order != index:
                     existing_service.display_order = index
                     session.add(existing_service)

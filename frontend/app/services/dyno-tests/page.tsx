@@ -30,7 +30,7 @@ const faqs = [
 
 export default function DynoTestsPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
-    const { heroImage, content1Image, content2Image } = useServicePageImages("dyno-tests");
+    const { heroImage, content1Image, content2Image, content3Image } = useServicePageImages("dyno-tests");
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -179,6 +179,20 @@ export default function DynoTestsPage() {
                             </div>
                         </div>
                     </section>
+
+                    {/* Section 3b: Additional Gallery Image */}
+                    {content3Image && (
+                        <section className="px-4 sm:px-6 md:px-8 lg:px-12">
+                            <div className="relative overflow-hidden rounded-[20px] border-2 border-[#1d70ff] h-[350px] sm:h-[450px] md:h-[550px]">
+                                <Image
+                                    src={content3Image}
+                                    alt="Dyno Session"
+                                    fill
+                                    className="object-cover animate-image-hover"
+                                />
+                            </div>
+                        </section>
+                    )}
 
                     {/* Section 4: FAQ */}
                     <section className="px-8 py-10 lg:px-12">

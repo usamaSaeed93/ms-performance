@@ -346,6 +346,117 @@ MS Performance Team
             text_content=text_content
         )
     
+    async def send_appointment_pending_email(
+        self,
+        to_email: str,
+        customer_name: str,
+        appointment_date: str,
+        appointment_time: str,
+        service_type: str,
+        vehicle_info: Optional[str] = None,
+        admin_dashboard_url: Optional[str] = None,
+    ) -> bool:
+        """
+        Send two emails:
+        1. Customer — "your request is under review".
+        2. Admin  — "new appointment pending your approval" with a link to the dashboard.
+        """
+        # --- Customer email ---
+        customer_html = f"""
+<html><body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:20px;">
+  <div style="background:#0c1b33;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:24px;">MS Performance</h1>
+  </div>
+  <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-radius:0 0 12px 12px;">
+    <h2 style="color:#0c1b33;">Hi {customer_name},</h2>
+    <p>Thank you for booking with us! Your appointment request has been received and is <strong>pending review</strong> by our team.</p>
+    <p>We will confirm or respond to your request within <strong>1 business day</strong>.</p>
+    <div style="background:#f3f4f6;padding:20px;border-radius:8px;margin:24px 0;">
+      <h3 style="color:#0c1b33;margin-top:0;">Request Details</h3>
+      <p><strong>Service:</strong> {service_type}</p>
+      <p><strong>Date:</strong> {appointment_date}</p>
+      <p><strong>Time:</strong> {appointment_time}</p>
+      {"<p><strong>Vehicle:</strong> " + vehicle_info + "</p>" if vehicle_info else ""}
+    </div>
+    <p style="color:#6b7280;font-size:14px;">If you have any questions in the meantime, reply to this email or call us.</p>
+    <p>Best regards,<br><strong>MS Performance Team</strong></p>
+  </div>
+</body></html>"""
+
+        await self.send_email(
+            to_email=to_email,
+            subject="Appointment Request Received — MS Performance",
+            html_content=customer_html,
+            text_content=f"Hi {customer_name},\n\nYour appointment request ({service_type} on {appointment_date} at {appointment_time}) is pending review. We'll confirm within 1 business day.\n\nBest regards,\nMS Performance Team",
+        )
+
+        # --- Admin notification email ---
+        dashboard_link = admin_dashboard_url or f"{self.frontend_url}/admin/appointments"
+        admin_html = f"""
+<html><body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:20px;">
+  <div style="background:#0c1b33;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:24px;">New Appointment Request</h1>
+  </div>
+  <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-radius:0 0 12px 12px;">
+    <p>A new appointment request is waiting for your approval:</p>
+    <div style="background:#fef3c7;border:1px solid #f59e0b;padding:20px;border-radius:8px;margin:24px 0;">
+      <p><strong>Customer:</strong> {customer_name} ({to_email})</p>
+      <p><strong>Service:</strong> {service_type}</p>
+      <p><strong>Date:</strong> {appointment_date}</p>
+      <p><strong>Time:</strong> {appointment_time}</p>
+      {"<p><strong>Vehicle:</strong> " + vehicle_info + "</p>" if vehicle_info else ""}
+    </div>
+    <div style="text-align:center;margin:32px 0;">
+      <a href="{dashboard_link}" style="background:#1d70ff;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
+        Review in Dashboard →
+      </a>
+    </div>
+    <p style="color:#6b7280;font-size:13px;">Log in to the admin dashboard to approve or deny this request.</p>
+  </div>
+</body></html>"""
+
+        return await self.send_email(
+            to_email=self.from_email,
+            subject=f"[ACTION REQUIRED] New Appointment: {customer_name} — {service_type}",
+            html_content=admin_html,
+            text_content=f"New appointment request from {customer_name} ({to_email}).\nService: {service_type}\nDate: {appointment_date} at {appointment_time}\n\nApprove or deny at: {dashboard_link}",
+        )
+
+    async def send_appointment_denied_email(
+        self,
+        to_email: str,
+        customer_name: str,
+        appointment_date: str,
+        appointment_time: str,
+        service_type: str,
+    ) -> bool:
+        """Notify the customer that their appointment was not approved."""
+        html_content = f"""
+<html><body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:20px;">
+  <div style="background:#0c1b33;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:24px;">MS Performance</h1>
+  </div>
+  <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-radius:0 0 12px 12px;">
+    <h2 style="color:#0c1b33;">Hi {customer_name},</h2>
+    <p>Unfortunately, we are unable to accommodate your appointment request at this time.</p>
+    <div style="background:#fef2f2;border:1px solid #fca5a5;padding:20px;border-radius:8px;margin:24px 0;">
+      <p><strong>Service:</strong> {service_type}</p>
+      <p><strong>Requested Date:</strong> {appointment_date}</p>
+      <p><strong>Requested Time:</strong> {appointment_time}</p>
+    </div>
+    <p>Please <a href="{self.frontend_url}/book-appointment" style="color:#1d70ff;">book a different time slot</a> or contact us directly and we will do our best to find a suitable time for you.</p>
+    <p>We apologise for any inconvenience.</p>
+    <p>Best regards,<br><strong>MS Performance Team</strong></p>
+  </div>
+</body></html>"""
+
+        return await self.send_email(
+            to_email=to_email,
+            subject="Appointment Update — MS Performance",
+            html_content=html_content,
+            text_content=f"Hi {customer_name},\n\nUnfortunately we cannot accommodate your {service_type} appointment on {appointment_date} at {appointment_time}.\n\nPlease book another slot at {self.frontend_url}/book-appointment or contact us.\n\nBest regards,\nMS Performance Team",
+        )
+
     async def send_appointment_confirmation_email(
         self,
         to_email: str,

@@ -122,7 +122,7 @@ export default function BookAppointmentPage() {
                 notes: formData.notes || undefined,
             }).unwrap();
 
-            toast.success("Appointment booked successfully! Check your email for confirmation.");
+            toast.success("Appointment request submitted! We'll email you once it's been reviewed.");
             setStep(4); // Success step
         } catch (error: any) {
             toast.error(error?.data?.error || "Failed to book appointment. Please try again.");
@@ -465,12 +465,15 @@ export default function BookAppointmentPage() {
                     {/* Step 4: Success */}
                     {step === 4 && (
                         <div className="animate-fade-in text-center py-12">
-                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
-                                <span className="text-4xl text-green-600">✓</span>
+                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-yellow-100 flex items-center justify-center">
+                                <span className="text-4xl">⏳</span>
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-4">Booking Confirmed!</h2>
-                            <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                                Your appointment has been booked successfully. We've sent a confirmation email to {formData.customer_email}.
+                            <h2 className="text-2xl font-bold text-gray-900 mb-4">Request Received!</h2>
+                            <p className="text-gray-600 mb-2 max-w-md mx-auto">
+                                Your appointment request has been submitted and is <strong>pending review</strong> by our team.
+                            </p>
+                            <p className="text-gray-500 text-sm mb-8 max-w-md mx-auto">
+                                We'll email you at <strong>{formData.customer_email}</strong> within 1 business day to confirm or update your booking.
                             </p>
                             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 max-w-md mx-auto mb-8">
                                 <div className="space-y-3 text-left">

@@ -86,7 +86,7 @@ class CreateAppointment(PostResource):
             self.response_data = {}
             return False
         
-        # Create the appointment
+        # Create the appointment with "pending" status — admin must approve before confirming
         appointment_data = {
             "appointment_date": appt_date,
             "appointment_time": appt_time,
@@ -98,38 +98,40 @@ class CreateAppointment(PostResource):
             "vehicle_registration": data.get("vehicle_registration"),
             "service_type": data.get("service_type"),
             "notes": data.get("notes"),
-            "status": "confirmed"
+            "status": "pending"
         }
         
         self.appointment = await create_appointment(self.db, appointment_data)
         
-        # Send confirmation email
+        # Notify customer (pending review) and alert admin
         try:
-            asyncio.create_task(self._send_confirmation_email())
+            asyncio.create_task(self._send_pending_email())
         except Exception as e:
-            print(f"Failed to queue confirmation email: {e}")
+            print(f"Failed to queue pending email: {e}")
         
         return True
     
-    async def _send_confirmation_email(self):
-        """Send appointment confirmation email."""
+    async def _send_pending_email(self):
+        """Send 'pending review' email to customer and alert to admin."""
         try:
-            await email_service.send_appointment_confirmation_email(
+            vehicle_info = None
+            if self.appointment.vehicle_make:
+                vehicle_info = f"{self.appointment.vehicle_make} {self.appointment.vehicle_model or ''}".strip()
+
+            await email_service.send_appointment_pending_email(
                 to_email=self.appointment.customer_email,
                 customer_name=self.appointment.customer_name,
                 appointment_date=self.appointment.appointment_date.strftime("%A, %B %d, %Y"),
                 appointment_time=self.appointment.appointment_time.strftime("%I:%M %p"),
                 service_type=self.appointment.service_type,
-                vehicle_info=f"{self.appointment.vehicle_make} {self.appointment.vehicle_model}" if self.appointment.vehicle_make else None,
-                customer_phone=self.appointment.customer_phone,
-                notes=self.appointment.notes
+                vehicle_info=vehicle_info,
             )
         except Exception as e:
-            print(f"Failed to send confirmation email: {e}")
+            print(f"Failed to send pending email: {e}")
 
     async def generate_response(self):
         self.status_code = status.HTTP_201_CREATED
-        self.response_message = "Appointment booked successfully"
+        self.response_message = "Appointment request submitted — pending admin approval"
         self.response_data = {
             "appointment": {
                 "id": self.appointment.id,

@@ -802,10 +802,13 @@ export default function HomePage() {
                   const getServiceLink = (title: string) => {
                     switch (title) {
                       case "ECU Remapping": return "/services/ecu-remapping";
+                      case "Dyno Tests": return "/services/dyno-tests";
                       case "Custom Exhausts": return "/services/custom-exhausts";
                       case "DPF & EGR Services": return "/services/dpf-egr-services";
                       case "Turbo Upgrades": return "/services/turbo-upgrades";
-                      case "Servicing": return "/services/turbo-upgrades";
+                      case "Servicing": return "/services/servicing";
+                      case "Number Plates": return "/services/number-plates";
+                      case "Adblue Solutions": return "/services/adblue-solutions";
                       default: return "/services";
                     }
                   };
@@ -872,18 +875,18 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 overflow-hidden">
+          <section className="px-4 py-8 sm:px-6 sm:py-10 md:px-8 md:py-12 overflow-hidden">
             <div className="relative w-full overflow-hidden">
-              <div className="flex items-center gap-8 sm:gap-12 md:gap-16 lg:gap-20 animate-scroll-logos">
+              <div className="flex items-center gap-12 sm:gap-16 md:gap-20 lg:gap-28 animate-scroll-logos">
                 {/* First set of logos */}
                 {brandLogos.map((logo, index) => (
                   <div key={`logo-1-${index}`} className="flex-shrink-0">
                     <Image
                       src={logo}
                       alt={`Brand logo ${index + 1}`}
-                      width={140}
-                      height={60}
-                      className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity sm:h-10 md:h-12"
+                      width={180}
+                      height={80}
+                      className="h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity sm:h-14 md:h-16"
                     />
                   </div>
                 ))}
@@ -893,9 +896,9 @@ export default function HomePage() {
                     <Image
                       src={logo}
                       alt={`Brand logo ${index + 1}`}
-                      width={140}
-                      height={60}
-                      className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity sm:h-10 md:h-12"
+                      width={180}
+                      height={80}
+                      className="h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity sm:h-14 md:h-16"
                     />
                   </div>
                 ))}

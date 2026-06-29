@@ -5,15 +5,6 @@ const nextConfig: NextConfig = {
     // Disable TypeScript checking during build
     ignoreBuildErrors: true,
   },
-  async redirects() {
-    return [
-      {
-        source: "/services/servicing",
-        destination: "/services/turbo-upgrades",
-        permanent: false,
-      },
-    ];
-  },
   images: {
     remotePatterns: [
       {

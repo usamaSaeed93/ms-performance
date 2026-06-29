@@ -640,17 +640,17 @@ function GainsCalculatorContent() {
           <main className="space-y-8 sm:space-y-10 md:space-y-12">
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-[#030814] text-white h-[250px] sm:h-[350px] md:h-[450px] lg:h-[530px]">
-              {/* Background Image with backdrop blur */}
+              {/* Background Image */}
               <Image
                 src="/images/hero/gainsHero.png"
                 alt="Vehicle Gains"
                 width={1600}
                 height={530}
-                className="absolute inset-0 h-full w-full object-cover blur-sm"
+                className="absolute inset-0 h-full w-full object-cover"
                 priority
               />
               {/* Dark overlay for text readability */}
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-none z-10" />
+              <div className="absolute inset-0 bg-black/50 pointer-events-none z-10" />
               <div className="relative h-full flex items-center px-4 sm:px-6 md:px-8 lg:px-12 py-8 sm:py-12 md:py-16 lg:py-20 z-20">
                 <div className="space-y-4 sm:space-y-5 md:space-y-6 max-w-3xl">
                   <p className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold text-[#7ab6ff] animate-subtitle">
@@ -1145,8 +1145,8 @@ function GainsCalculatorContent() {
             </section>
 
 
-            {/* Detailed Results Graph */}
-            <section className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 md:py-10">
+            {/* Detailed Results Graph - removed */}
+            {false && <section className="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-6 sm:py-8 md:py-10">
               <div className="bg-white rounded-[12px] sm:rounded-[16px] border border-gray-200 p-4 sm:p-6 md:p-8">
                 <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[#0c1b33] mb-3 sm:mb-4">
                   RESULTS
@@ -1424,7 +1424,7 @@ function GainsCalculatorContent() {
                   </table>
                 </div>
               </div>
-            </section>
+            </section>}
 
 
           </main>

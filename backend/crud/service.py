@@ -19,7 +19,7 @@ async def get_service_by_title(db: AsyncSession, title: str) -> Optional[Service
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
-async def update_service(db: AsyncSession, service_id: int, image_url: str = None, link: str = None, description: str = None) -> Optional[Service]:
+async def update_service(db: AsyncSession, service_id: int, image_url: str = None, link: str = None, description: str = None, title: str = None, icon: str = None) -> Optional[Service]:
     service = await get_service(db, service_id)
     if not service:
         return None
@@ -30,6 +30,10 @@ async def update_service(db: AsyncSession, service_id: int, image_url: str = Non
         service.link = link
     if description is not None:
         service.description = description
+    if title is not None:
+        service.title = title
+    if icon is not None:
+        service.icon = icon
         
     db.add(service)
     await db.commit()

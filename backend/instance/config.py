@@ -54,6 +54,13 @@ class EmailConfig(BaseSettings):
     FRONTEND_URL: str = "http://localhost:3000"
 
 
+class SetmoreConfig(BaseSettings):
+    """Setmore booking integration — all fields are optional; leave blank to disable sync."""
+    SETMORE_REFRESH_TOKEN: str = ""
+    SETMORE_STAFF_KEY: str = ""
+    SETMORE_SERVICE_KEY: str = ""
+
+
 class Configuration:
     ENVIRONMENT: Environment = Environment()
     APP_ENVIRONMENT: str = ENVIRONMENT.APP_ENVIRONMENT
@@ -64,6 +71,9 @@ class Configuration:
     
     # Email Configuration
     EMAIL_CONFIG: EmailConfig = EmailConfig()
+
+    # Setmore Integration (optional)
+    SETMORE_CONFIG: SetmoreConfig = SetmoreConfig()
 
     # SQLAlchemy Engines
     # Enable echo=True for SQL query logging (controlled by LOG_LEVEL env var)

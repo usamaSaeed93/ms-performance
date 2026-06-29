@@ -166,7 +166,29 @@ export const appointmentsApi = createApi({
                 body: { status },
             }),
             transformResponse: (response: { data: { appointment: Appointment } }) => response.data,
-            invalidatesTags: ['Appointments'],
+            invalidatesTags: ['Appointments', 'AvailableSlots'],
+        }),
+
+        // Approve a pending appointment (sets status → confirmed, triggers email + Setmore sync)
+        approveAppointment: builder.mutation<{ appointment: Appointment }, number>({
+            query: (id) => ({
+                url: `/appointments/${id}/status`,
+                method: 'PUT',
+                body: { status: 'confirmed' },
+            }),
+            transformResponse: (response: { data: { appointment: Appointment } }) => response.data,
+            invalidatesTags: ['Appointments', 'AvailableSlots'],
+        }),
+
+        // Deny a pending appointment (sets status → denied, sends denial email)
+        denyAppointment: builder.mutation<{ appointment: Appointment }, number>({
+            query: (id) => ({
+                url: `/appointments/${id}/status`,
+                method: 'PUT',
+                body: { status: 'denied' },
+            }),
+            transformResponse: (response: { data: { appointment: Appointment } }) => response.data,
+            invalidatesTags: ['Appointments', 'AvailableSlots'],
         }),
     }),
 });
@@ -179,4 +201,6 @@ export const {
     useGetAppointmentsQuery,
     useCancelAppointmentMutation,
     useUpdateAppointmentStatusMutation,
+    useApproveAppointmentMutation,
+    useDenyAppointmentMutation,
 } = appointmentsApi;
