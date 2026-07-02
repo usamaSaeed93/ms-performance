@@ -21,6 +21,7 @@ from models.contact_message import ContactMessage
 from models.appointment import ShopHours, Appointment
 from models.setting import Setting
 from models.service import Service
+from models.client import Client
 from models.mailing_subscription import MailingSubscription
 from models.mailing_job import MailingJob
 from models.mailing_attachment import MailingAttachment

@@ -35,6 +35,7 @@ import { Navbar } from "@/components/Navbar";
 import { useEcommerceEnabled } from "@/hooks/useEcommerceEnabled";
 import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
 import { useGetSettingsQuery } from "@/lib/store/api/settingsApi";
+import { useGetClientsQuery } from "@/lib/store/api/clientsApi";
 
 const DEFAULT_HERO_IMAGE = "/images/services/hero-dyno-v2-ue.png";
 
@@ -153,17 +154,28 @@ export default function HomePage() {
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const testimonialsPerPage = 3;
 
-  // Our Clients carousel state
-  const clients = [
-    { name: "BMW 140i B58 Chip Tuning", details: "444 bhp | ECU & TCU remap | Chiptuning", image: "/images/services/hero-dyno-v2-ue.png" },
-    { name: "Ford Transit Custom 2.0 TDCi 105bhp Chip Tuning", details: "189 bhp | ECU remap | Chiptuning", image: "/images/services/ecu-remapping.png" },
-    { name: "Ford Fiesta ST 1.5 EcoBoost Chip Tuning", details: "240 bhp | ECU remap | Chiptuning", image: "/images/services/custom-exhausts.png" },
-    { name: "VW Golf R Stage 2 Remap", details: "380 bhp | Stage 2 ECU remap | Chiptuning", image: "/images/services/dyno-tests.png" },
-    { name: "Audi S3 8V Custom Exhaust", details: "310 bhp | ECU remap | Custom Exhaust", image: "/images/services/dpf-egr.png" },
-    { name: "Mercedes A45 AMG Hybrid Turbo", details: "420 bhp | Turbo upgrade | ECU remap", image: "/images/services/ecu-remap-card.png" },
-    { name: "Subaru WRX STI Dyno Tune", details: "340 bhp | Full dyno tune | Chiptuning", image: "/images/services/our-service.png" },
-    { name: "Toyota Supra A90 Stage 1", details: "395 bhp | Stage 1 ECU remap | Dyno verified", image: "/images/services/Services1.png" },
-  ];
+  // Our Clients carousel — fetched from API
+  const { data: apiClients } = useGetClientsQuery();
+  const clients = useMemo(() => {
+    if (apiClients && apiClients.length > 0) {
+      return apiClients.map((c: { name: string; details: string | null; image_url: string | null }) => ({
+        name: c.name,
+        details: c.details ?? "",
+        image: c.image_url ?? "/images/services/hero-dyno-v2-ue.png",
+      }));
+    }
+    // Fallback static entries shown until the admin populates the table
+    return [
+      { name: "BMW 140i B58 Chip Tuning", details: "444 bhp | ECU & TCU remap | Chiptuning", image: "/images/services/hero-dyno-v2-ue.png" },
+      { name: "Ford Transit Custom 2.0 TDCi 105bhp Chip Tuning", details: "189 bhp | ECU remap | Chiptuning", image: "/images/services/ecu-remapping.png" },
+      { name: "Ford Fiesta ST 1.5 EcoBoost Chip Tuning", details: "240 bhp | ECU remap | Chiptuning", image: "/images/services/custom-exhausts.png" },
+      { name: "VW Golf R Stage 2 Remap", details: "380 bhp | Stage 2 ECU remap | Chiptuning", image: "/images/services/dyno-tests.png" },
+      { name: "Audi S3 8V Custom Exhaust", details: "310 bhp | ECU remap | Custom Exhaust", image: "/images/services/dpf-egr.png" },
+      { name: "Mercedes A45 AMG Hybrid Turbo", details: "420 bhp | Turbo upgrade | ECU remap", image: "/images/services/ecu-remap-card.png" },
+      { name: "Subaru WRX STI Dyno Tune", details: "340 bhp | Full dyno tune | Chiptuning", image: "/images/services/our-service.png" },
+      { name: "Toyota Supra A90 Stage 1", details: "395 bhp | Stage 1 ECU remap | Dyno verified", image: "/images/services/Services1.png" },
+    ];
+  }, [apiClients]);
   const [clientIndex, setClientIndex] = useState(0);
   const prevClient = () => setClientIndex((prev) => (prev - 1 + clients.length) % clients.length);
   const nextClient = () => setClientIndex((prev) => (prev + 1) % clients.length);
@@ -617,7 +629,7 @@ export default function HomePage() {
                   Maximize Power And Fuel Efficiency With Our ECU Remapping Services
                 </h1>
               </div>
-              {/* <div className="flex justify-center sm:justify-end animate-slide-right">
+              <div className="flex justify-center sm:justify-end animate-slide-right">
                 <div className="w-full max-w-[400px] rounded-xl backdrop-blur-[16px] p-4 text-white shadow-[0_30px_70px_rgba(2,6,14,0.7)] sm:rounded-2xl sm:p-6 md:rounded-[15px] md:p-8 animate-card" style={{ background: 'rgba(0, 0, 0, 0.4)' }}>
                   <p className="text-base font-semibold sm:text-lg">Select Your Vehicle</p>
                   <div className="mt-4 space-y-2 sm:mt-6">
@@ -778,7 +790,7 @@ export default function HomePage() {
                     View Gains
                   </button>
                 </div>
-              </div> */}
+              </div>
             </div>
           </section>
           <section id="services" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
@@ -1133,7 +1145,7 @@ export default function HomePage() {
               <button
                 onClick={prevClient}
                 aria-label="Previous client"
-                className="absolute left-0 top-1/2 z-10 -translate-y-1/2 sm:-translate-x-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#cc0000] text-white shadow-lg transition hover:bg-[#aa0000]"
+                className="absolute left-0 top-1/2 z-10 -translate-y-1/2 sm:-translate-x-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#1d70ff] text-white shadow-lg transition hover:bg-[#1558cc]"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -1174,14 +1186,9 @@ export default function HomePage() {
                       className="object-cover"
                     />
                   </div>
-                  <div className="flex items-start justify-between gap-4 p-5">
-                    <div className="min-w-0">
-                      <p className="text-sm font-black uppercase text-[#0c1b33]">{clients[clientIndex].name}</p>
-                      <p className="mt-1 text-xs text-[#cc0000]">{clients[clientIndex].details}</p>
-                    </div>
-                    <button className="shrink-0 rounded-full bg-[#cc0000] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#aa0000]">
-                      Read More
-                    </button>
+                  <div className="p-5">
+                    <p className="text-sm font-black uppercase text-[#0c1b33]">{clients[clientIndex].name}</p>
+                    <p className="mt-1 text-xs text-[#cc0000]">{clients[clientIndex].details}</p>
                   </div>
                 </div>
 
@@ -1212,7 +1219,7 @@ export default function HomePage() {
               <button
                 onClick={nextClient}
                 aria-label="Next client"
-                className="absolute right-0 top-1/2 z-10 -translate-y-1/2 sm:translate-x-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#cc0000] text-white shadow-lg transition hover:bg-[#aa0000]"
+                className="absolute right-0 top-1/2 z-10 -translate-y-1/2 sm:translate-x-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#1d70ff] text-white shadow-lg transition hover:bg-[#1558cc]"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -1225,7 +1232,7 @@ export default function HomePage() {
                   <button
                     key={i}
                     onClick={() => setClientIndex(i)}
-                    className={`h-2 rounded-full transition-all ${i === clientIndex ? "w-8 bg-[#cc0000]" : "w-2 bg-gray-300 hover:bg-[#cc0000]/50"}`}
+                    className={`h-2 rounded-full transition-all ${i === clientIndex ? "w-8 bg-[#1d70ff]" : "w-2 bg-gray-300 hover:bg-[#1d70ff]/50"}`}
                     aria-label={`Go to client ${i + 1}`}
                   />
                 ))}

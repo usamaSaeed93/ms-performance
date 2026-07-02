@@ -69,6 +69,11 @@ from .endpoints.get_services import GetServices
 from .endpoints.update_service import UpdateService
 from .endpoints.get_settings import GetSettings
 from .endpoints.update_setting import UpdateSetting
+from .endpoints.get_clients import GetClients
+from .endpoints.get_all_clients import GetAllClients
+from .endpoints.create_client import CreateClient
+from .endpoints.update_client import UpdateClient
+from .endpoints.delete_client import DeleteClient
 
 
 class RoutingV1(BaseRouting):
@@ -345,4 +350,24 @@ class RoutingV1(BaseRouting):
         self.routing_collection[UpdateSetting.api_name] = (
             UpdateSetting(),
             UpdateSetting.api_url,
+        )
+        self.routing_collection[GetClients.api_name] = (
+            GetClients(),
+            GetClients.api_url,
+        )
+        self.routing_collection[GetAllClients.api_name] = (
+            GetAllClients(),
+            GetAllClients.api_url,
+        )
+        self.routing_collection[CreateClient.api_name] = (
+            CreateClient(),
+            CreateClient.api_url,
+        )
+        self.routing_collection[UpdateClient.api_name] = (
+            UpdateClient(),
+            UpdateClient.api_url,
+        )
+        self.routing_collection[DeleteClient.api_name] = (
+            DeleteClient(),
+            DeleteClient.api_url,
         )
