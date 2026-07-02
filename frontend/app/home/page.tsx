@@ -149,9 +149,24 @@ export default function HomePage() {
     order: 'desc',
   });
 
-  // Testimonials carousel state
+  // Testimonials carousel state (kept but section is replaced by Our Clients)
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const testimonialsPerPage = 3;
+
+  // Our Clients carousel state
+  const clients = [
+    { name: "BMW 140i B58 Chip Tuning", details: "444 bhp | ECU & TCU remap | Chiptuning", image: "/images/services/hero-dyno-v2-ue.png" },
+    { name: "Ford Transit Custom 2.0 TDCi 105bhp Chip Tuning", details: "189 bhp | ECU remap | Chiptuning", image: "/images/services/ecu-remapping.png" },
+    { name: "Ford Fiesta ST 1.5 EcoBoost Chip Tuning", details: "240 bhp | ECU remap | Chiptuning", image: "/images/services/custom-exhausts.png" },
+    { name: "VW Golf R Stage 2 Remap", details: "380 bhp | Stage 2 ECU remap | Chiptuning", image: "/images/services/dyno-tests.png" },
+    { name: "Audi S3 8V Custom Exhaust", details: "310 bhp | ECU remap | Custom Exhaust", image: "/images/services/dpf-egr.png" },
+    { name: "Mercedes A45 AMG Hybrid Turbo", details: "420 bhp | Turbo upgrade | ECU remap", image: "/images/services/ecu-remap-card.png" },
+    { name: "Subaru WRX STI Dyno Tune", details: "340 bhp | Full dyno tune | Chiptuning", image: "/images/services/our-service.png" },
+    { name: "Toyota Supra A90 Stage 1", details: "395 bhp | Stage 1 ECU remap | Dyno verified", image: "/images/services/Services1.png" },
+  ];
+  const [clientIndex, setClientIndex] = useState(0);
+  const prevClient = () => setClientIndex((prev) => (prev - 1 + clients.length) % clients.length);
+  const nextClient = () => setClientIndex((prev) => (prev + 1) % clients.length);
 
   // Blog display - no carousel, just show 4 blogs
 
@@ -886,7 +901,7 @@ export default function HomePage() {
                       alt={`Brand logo ${index + 1}`}
                       width={180}
                       height={80}
-                      className="h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity sm:h-14 md:h-16"
+                      className="h-12 w-auto object-contain opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 sm:h-14 md:h-16"
                     />
                   </div>
                 ))}
@@ -898,7 +913,7 @@ export default function HomePage() {
                       alt={`Brand logo ${index + 1}`}
                       width={180}
                       height={80}
-                      className="h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity sm:h-14 md:h-16"
+                      className="h-12 w-auto object-contain opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 sm:h-14 md:h-16"
                     />
                   </div>
                 ))}
@@ -949,14 +964,27 @@ export default function HomePage() {
                   Customized Performance Solutions
                 </p>
                 <h2 className="text-3xl font-black text-[#0c1b33] sm:text-4xl md:text-5xl">
-                  Chelmsford&apos;s Premier Car Tuning &amp; Exhaust Specialists
+                  We&apos;re Chelmsford&apos;s Finest Car Tuning &amp; Exhaust Destination
                 </h2>
-                <p className="text-base text-[#5c6c86] sm:text-lg md:text-xl leading-relaxed">
-                  Over a decade of expertise in ECU remapping, custom exhausts, and performance upgrades. We unlock your vehicle&apos;s true potential with dyno-proven results.
+                <p className="text-sm text-[#5c6c86] sm:text-base md:text-lg leading-relaxed">
+                  With over a decade of experience in car tuning and custom exhaust installation, we are industry leaders. Our advanced programming capabilities unlock unique features for your vehicle. From exhilarating pops and bangs to mesmerizing flames, we can customize your exhaust system to deliver stunning effects. Trust us to elevate your car&apos;s performance and sound to new heights.
                 </p>
-                <p className="text-base text-[#5c6c86] sm:text-lg md:text-xl leading-relaxed">
-                  Stage 1, 2 &amp; 3 upgrades. DPF &amp; EGR solutions. Pops, bangs &amp; flames. All backed by real data from our in-house rolling road.
-                </p>
+                <ul className="space-y-3 pt-1">
+                  {[
+                    "Precise Workmanship, Exceeding Customer Expectations",
+                    "100% Committed to Excellence in Every Project",
+                    "Extensive Selection of Premium Performance Upgrades",
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-3">
+                      <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#1d70ff]">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                          <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <span className="text-sm font-semibold text-[#0c1b33] sm:text-base">{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
               <div className="relative h-[250px] w-full overflow-hidden sm:h-[300px] md:h-[400px] lg:h-full">
                 <Image
@@ -1080,127 +1108,130 @@ export default function HomePage() {
             </section>
           )}
 
-          <section id="testimonials" className="relative space-y-6 bg-[#f5f7fa] px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
-            {/* Left border line */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1d70ff]" />
+          {/* ── Our Clients Carousel ─────────────────────────────────────────── */}
+          <section id="clients" className="relative overflow-hidden bg-white py-14 px-4 sm:px-6 md:px-8 lg:px-12">
 
-            <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#1d70ff] sm:text-xs">
-                  What People Say
-                </p>
-                <h2 className="mt-1 text-lg font-black text-[#0c1b33] sm:mt-2 sm:text-xl md:text-2xl lg:text-3xl truncate">Our Testimonials</h2>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={prevTestimonials}
-                  className="rounded-lg border border-[#d9e0ef] bg-white p-2.5 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-xl sm:p-3 animate-button flex-shrink-0"
-                  aria-label="Previous testimonials"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <button
-                  onClick={nextTestimonials}
-                  className="rounded-lg border border-[#d9e0ef] bg-white p-2.5 text-[#0c1b33] transition hover:border-[#1d70ff] hover:text-[#1d70ff] sm:rounded-xl sm:p-3 animate-button flex-shrink-0"
-                  aria-label="Next testimonials"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              </div>
+            {/* Watermark background text */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center select-none">
+              <span className="text-[8rem] sm:text-[12rem] md:text-[16rem] font-black uppercase tracking-widest text-gray-100 leading-none">
+                CLIENTS
+              </span>
             </div>
 
-            <div className="relative overflow-hidden">
-              <div
-                ref={testimonialsCarouselRef}
-                className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+            {/* Heading */}
+            <div className="relative mb-10 text-center">
+              <h2 className="text-4xl font-black sm:text-5xl">
+                <span className="text-[#0c1b33]">OUR </span>
+                <span className="text-[#cc0000]">CLIENTS</span>
+              </h2>
+            </div>
+
+            {/* Carousel */}
+            <div className="relative mx-auto max-w-5xl">
+
+              {/* Left arrow */}
+              <button
+                onClick={prevClient}
+                aria-label="Previous client"
+                className="absolute left-0 top-1/2 z-10 -translate-y-1/2 sm:-translate-x-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#cc0000] text-white shadow-lg transition hover:bg-[#aa0000]"
               >
-                {getVisibleTestimonials().map((testimonial, index) => (
-                  <div
-                    key={`${testimonial.name}-${index}`}
-                    className="flex flex-shrink-0 w-[320px] sm:w-[340px] md:w-[360px] flex-col gap-4 rounded-2xl bg-white p-5 sm:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.08)] card-hover"
-                  >
-                    {/* Header with profile and Google logo */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <Image
-                          src={testimonial.image}
-                          alt={testimonial.name}
-                          width={50}
-                          height={50}
-                          className="h-12 w-12 rounded-full object-cover"
-                        />
-                        <div>
-                          <p className="font-bold text-[#0c1b33]">{testimonial.name}</p>
-                          <p className="text-xs text-[#5c6c86]">{testimonial.date}</p>
-                        </div>
-                      </div>
-                      {testimonial.source === "google" && (
-                        <div className="flex-shrink-0">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
 
-                    {/* Rating stars */}
-                    <div className="flex gap-0.5">
-                      {Array.from({ length: 5 }).map((_, idx) => (
-                        <svg
-                          key={idx}
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill={idx < (testimonial.rating || 5) ? "#FFB200" : "none"}
-                          stroke={idx < (testimonial.rating || 5) ? "#FFB200" : "#E0E0E0"}
-                          strokeWidth="1"
-                          className="flex-shrink-0"
-                        >
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                      ))}
-                    </div>
+              {/* Cards row */}
+              <div className="flex items-center justify-center gap-4 px-12 sm:px-8">
 
-                    {/* Quote */}
-                    <p className="text-sm leading-relaxed text-[#5c6c86]">"{testimonial.quote}"</p>
+                {/* Left side card */}
+                <div
+                  className="hidden sm:block w-[200px] shrink-0 cursor-pointer opacity-50 transition-opacity hover:opacity-70"
+                  onClick={prevClient}
+                >
+                  <div className="relative h-[140px] overflow-hidden rounded-xl">
+                    <Image
+                      src={clients[(clientIndex - 1 + clients.length) % clients.length].image}
+                      alt={clients[(clientIndex - 1 + clients.length) % clients.length].name}
+                      fill
+                      className="object-cover grayscale"
+                    />
                   </div>
-                ))}
-              </div>
-            </div>
+                  <p className="mt-2 truncate text-xs font-bold uppercase text-[#0c1b33]">
+                    {clients[(clientIndex - 1 + clients.length) % clients.length].name}
+                  </p>
+                  <p className="truncate text-[10px] text-[#cc0000]">
+                    {clients[(clientIndex - 1 + clients.length) % clients.length].details}
+                  </p>
+                </div>
 
-            {/* Testimonials Carousel Indicators */}
-            {allTestimonials.length > testimonialsPerPage && (
-              <div className="flex justify-center gap-2 mt-6">
-                {Array.from({ length: totalTestimonialPages }).map((_, index) => (
+                {/* Center featured card */}
+                <div className="w-full max-w-sm shrink-0 overflow-hidden rounded-2xl bg-white shadow-2xl">
+                  <div className="relative h-[260px] sm:h-[300px]">
+                    <Image
+                      src={clients[clientIndex].image}
+                      alt={clients[clientIndex].name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex items-start justify-between gap-4 p-5">
+                    <div className="min-w-0">
+                      <p className="text-sm font-black uppercase text-[#0c1b33]">{clients[clientIndex].name}</p>
+                      <p className="mt-1 text-xs text-[#cc0000]">{clients[clientIndex].details}</p>
+                    </div>
+                    <button className="shrink-0 rounded-full bg-[#cc0000] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#aa0000]">
+                      Read More
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right side card */}
+                <div
+                  className="hidden sm:block w-[200px] shrink-0 cursor-pointer opacity-50 transition-opacity hover:opacity-70"
+                  onClick={nextClient}
+                >
+                  <div className="relative h-[140px] overflow-hidden rounded-xl">
+                    <Image
+                      src={clients[(clientIndex + 1) % clients.length].image}
+                      alt={clients[(clientIndex + 1) % clients.length].name}
+                      fill
+                      className="object-cover grayscale"
+                    />
+                  </div>
+                  <p className="mt-2 truncate text-xs font-bold uppercase text-[#0c1b33]">
+                    {clients[(clientIndex + 1) % clients.length].name}
+                  </p>
+                  <p className="truncate text-[10px] text-[#cc0000]">
+                    {clients[(clientIndex + 1) % clients.length].details}
+                  </p>
+                </div>
+
+              </div>
+
+              {/* Right arrow */}
+              <button
+                onClick={nextClient}
+                aria-label="Next client"
+                className="absolute right-0 top-1/2 z-10 -translate-y-1/2 sm:translate-x-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#cc0000] text-white shadow-lg transition hover:bg-[#aa0000]"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+
+              {/* Dot indicators */}
+              <div className="mt-8 flex justify-center gap-2">
+                {clients.map((_, i) => (
                   <button
-                    key={index}
-                    onClick={() => {
-                      setCurrentTestimonialIndex(index);
-                      if (testimonialsCarouselRef.current) {
-                        const cardWidth = 340; // Approximate card width + gap
-                        const scrollAmount = cardWidth * testimonialsPerPage * index;
-                        testimonialsCarouselRef.current.scrollTo({
-                          left: scrollAmount,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
-                    className={`h-2 rounded-full transition-all ${index === currentTestimonialIndex
-                      ? 'w-8 bg-[#1d70ff]'
-                      : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
-                      }`}
-                    aria-label={`Go to page ${index + 1}`}
+                    key={i}
+                    onClick={() => setClientIndex(i)}
+                    className={`h-2 rounded-full transition-all ${i === clientIndex ? "w-8 bg-[#cc0000]" : "w-2 bg-gray-300 hover:bg-[#cc0000]/50"}`}
+                    aria-label={`Go to client ${i + 1}`}
                   />
                 ))}
               </div>
-            )}
+
+            </div>
           </section>
 
           <section id="blog" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
