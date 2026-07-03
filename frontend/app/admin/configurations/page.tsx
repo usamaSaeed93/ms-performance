@@ -443,7 +443,10 @@ export default function ConfigurationsPage() {
                                 </Button>
                             </div>
                             <p className="text-[10px] text-muted-foreground">
-                                Standard UK new-style: <code className="bg-muted px-1 rounded text-[10px]">^[A-Z]{{2}}[0-9]{{2}}[A-Z]{{3}}$</code>
+                                Standard UK new-style:{" "}
+                                <code className="bg-muted px-1 rounded text-[10px]">
+                                    {`^[A-Z]{2}[0-9]{2}[A-Z]{3}$`}
+                                </code>
                             </p>
                         </div>
 
