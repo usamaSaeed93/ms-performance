@@ -33,6 +33,7 @@ import {
   Settings,
   Mail,
   Star,
+  ThumbsUp,
 } from "lucide-react";
 
 const navItems = [
@@ -50,6 +51,7 @@ const navItems = [
   { label: "Mailing", href: "/admin/mailing", icon: Mail },
   { label: "Services", href: "/admin/services", icon: CheckCircle },
   { label: "Our Clients", href: "/admin/clients", icon: Star },
+  { label: "Reviews", href: "/admin/reviews", icon: ThumbsUp },
   { label: "Settings", href: "/admin/configurations", icon: Settings },
 ];
 

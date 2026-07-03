@@ -36,6 +36,7 @@ import { useEcommerceEnabled } from "@/hooks/useEcommerceEnabled";
 import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
 import { useGetSettingsQuery } from "@/lib/store/api/settingsApi";
 import { useGetClientsQuery } from "@/lib/store/api/clientsApi";
+import { useGetGoogleReviewsQuery } from "@/lib/store/api/googleReviewsApi";
 
 const DEFAULT_HERO_IMAGE = "/images/services/hero-dyno-v2-ue.png";
 
@@ -156,6 +157,9 @@ export default function HomePage() {
 
   // Our Clients carousel — fetched from API
   const { data: apiClients } = useGetClientsQuery();
+
+  // Google Reviews
+  const { data: googleReviews = [] } = useGetGoogleReviewsQuery();
   const clients = useMemo(() => {
     if (apiClients && apiClients.length > 0) {
       return apiClients.map((c: { name: string; details: string | null; image_url: string | null }) => ({
@@ -851,20 +855,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Carousel Indicators */}
-            <div className="flex justify-center gap-2 mt-6">
-              {Array.from({ length: totalServicePages }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentServiceIndex(index)}
-                  className={`h-2 rounded-full transition-all ${index === currentServiceIndex
-                    ? 'w-8 bg-[#1d70ff]'
-                    : 'w-2 bg-[#dfe6f2] hover:bg-[#1d70ff]/50'
-                    }`}
-                  aria-label={`Go to page ${index + 1}`}
-                />
-              ))}
-            </div>
+            {/* Carousel Indicators — hidden */}
           </section>
 
           <section className="px-4 py-8 sm:px-6 sm:py-10 md:px-8 md:py-12 overflow-hidden">
@@ -878,7 +869,7 @@ export default function HomePage() {
                       alt={`Brand logo ${index + 1}`}
                       width={180}
                       height={80}
-                      className="h-12 w-auto object-contain opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 sm:h-14 md:h-16"
+                      className="h-16 w-auto object-contain opacity-90 sm:h-18 md:h-20"
                     />
                   </div>
                 ))}
@@ -890,7 +881,7 @@ export default function HomePage() {
                       alt={`Brand logo ${index + 1}`}
                       width={180}
                       height={80}
-                      className="h-12 w-auto object-contain opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 sm:h-14 md:h-16"
+                      className="h-16 w-auto object-contain opacity-90 sm:h-18 md:h-20"
                     />
                   </div>
                 ))}
@@ -1205,6 +1196,106 @@ export default function HomePage() {
 
             </div>
           </section>
+
+          {/* ── Google Reviews ─────────────────────────────────────────── */}
+          {googleReviews.length > 0 && (
+            <section id="reviews" className="bg-gray-50 py-14 px-4 sm:px-6 md:px-8 lg:px-12">
+              <div className="mx-auto max-w-6xl">
+                {/* Header */}
+                <div className="mb-10 text-center">
+                  <p className="text-xs sm:text-sm text-[#9aa6bd] font-medium mb-1">What Our Customers Say</p>
+                  <h2 className="text-xl font-black text-[#0c1b33] sm:text-2xl md:text-3xl lg:text-4xl">
+                    Our Google Reviews
+                  </h2>
+                  <div className="mt-3 flex items-center justify-center gap-2">
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <svg key={s} className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <span className="text-sm font-semibold text-[#0c1b33]">5.0 on Google</span>
+                  </div>
+                </div>
+
+                {/* Review cards grid */}
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {googleReviews.map((review, idx) => (
+                    <div
+                      key={idx}
+                      className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                    >
+                      {/* Stars */}
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <svg
+                            key={s}
+                            className={`h-4 w-4 ${s <= review.rating ? "text-yellow-400" : "text-gray-200"}`}
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+
+                      {/* Review text */}
+                      <p className="flex-1 text-sm leading-relaxed text-gray-600 line-clamp-5">
+                        {review.text || "Great service!"}
+                      </p>
+
+                      {/* Author */}
+                      <div className="flex items-center gap-3 border-t border-gray-100 pt-4">
+                        {review.profile_photo_url ? (
+                          <img
+                            src={review.profile_photo_url}
+                            alt={review.author_name}
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1d70ff] text-sm font-bold text-white">
+                            {review.author_name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm font-semibold text-[#0c1b33]">{review.author_name}</p>
+                          {review.relative_time && (
+                            <p className="text-xs text-gray-400">{review.relative_time}</p>
+                          )}
+                        </div>
+                        {/* Google G logo */}
+                        <div className="ml-auto flex-shrink-0">
+                          <svg viewBox="0 0 48 48" className="h-6 w-6">
+                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                            <path fill="none" d="M0 0h48v48H0z"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA to Google */}
+                <div className="mt-10 text-center">
+                  <a
+                    href="https://www.google.com/maps/search/ms+performance+chelmsford"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white hover:bg-[#1558cc] transition shadow-sm"
+                  >
+                    See All Reviews on Google
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </section>
+          )}
 
           <section id="blog" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">
             <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">

@@ -69,6 +69,11 @@ from .endpoints.get_services import GetServices
 from .endpoints.update_service import UpdateService
 from .endpoints.get_settings import GetSettings
 from .endpoints.update_setting import UpdateSetting
+from .endpoints.get_reviews import GetReviews
+from .endpoints.get_all_reviews import GetAllReviews
+from .endpoints.create_review import CreateReview
+from .endpoints.update_review import UpdateReview
+from .endpoints.delete_review import DeleteReview
 from .endpoints.get_clients import GetClients
 from .endpoints.get_all_clients import GetAllClients
 from .endpoints.create_client import CreateClient
@@ -350,6 +355,26 @@ class RoutingV1(BaseRouting):
         self.routing_collection[UpdateSetting.api_name] = (
             UpdateSetting(),
             UpdateSetting.api_url,
+        )
+        self.routing_collection[GetReviews.api_name] = (
+            GetReviews(),
+            GetReviews.api_url,
+        )
+        self.routing_collection[GetAllReviews.api_name] = (
+            GetAllReviews(),
+            GetAllReviews.api_url,
+        )
+        self.routing_collection[CreateReview.api_name] = (
+            CreateReview(),
+            CreateReview.api_url,
+        )
+        self.routing_collection[UpdateReview.api_name] = (
+            UpdateReview(),
+            UpdateReview.api_url,
+        )
+        self.routing_collection[DeleteReview.api_name] = (
+            DeleteReview(),
+            DeleteReview.api_url,
         )
         self.routing_collection[GetClients.api_name] = (
             GetClients(),

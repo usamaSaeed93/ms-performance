@@ -122,6 +122,10 @@ class Configuration:
     # API
     API_PREFIX: str = "ecommerce"
 
+    # Google Places (for homepage reviews)
+    GOOGLE_PLACES_API_KEY: str = os.getenv("GOOGLE_PLACES_API_KEY", "")
+    GOOGLE_PLACE_ID: str = os.getenv("GOOGLE_PLACE_ID", "")
+
     # Storage
     STORAGE_TYPE: str = os.getenv("STORAGE_TYPE", "local")
     LOCAL_STORAGE_PATH: str = os.getenv(

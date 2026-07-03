@@ -8,6 +8,7 @@ import { servicesApi } from './api/servicesApi';
 import { settingsApi } from './api/settingsApi';
 import { mailingApi } from './api/mailingApi';
 import { clientsApi } from './api/clientsApi';
+import { googleReviewsApi } from './api/googleReviewsApi';
 
 export const makeStore = () => {
   return configureStore({
@@ -21,6 +22,7 @@ export const makeStore = () => {
       [settingsApi.reducerPath]: settingsApi.reducer,
       [mailingApi.reducerPath]: mailingApi.reducer,
       [clientsApi.reducerPath]: clientsApi.reducer,
+      [googleReviewsApi.reducerPath]: googleReviewsApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
@@ -35,6 +37,7 @@ export const makeStore = () => {
             settingsApi.util.getRunningQueriesThunk.type,
             mailingApi.util.getRunningQueriesThunk.type,
             clientsApi.util.getRunningQueriesThunk.type,
+            googleReviewsApi.util.getRunningQueriesThunk.type,
           ],
         },
       }).concat(
@@ -46,7 +49,8 @@ export const makeStore = () => {
         servicesApi.middleware,
         settingsApi.middleware,
         mailingApi.middleware,
-        clientsApi.middleware
+        clientsApi.middleware,
+        googleReviewsApi.middleware
       ),
   });
 };
