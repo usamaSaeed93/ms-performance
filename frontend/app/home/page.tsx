@@ -261,6 +261,23 @@ export default function HomePage() {
     return urls;
   }, [settingsData, heroImageUrl, isSettingsLoading]);
 
+  // Per-slide hero texts fetched from settings
+  const heroTexts = useMemo(() => {
+    const raw = settingsData?.find(s => s.key === "hero_texts")?.value;
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed as { subtitle: string; heading: string }[];
+    } catch {}
+    return [];
+  }, [settingsData]);
+
+  const DEFAULT_HERO_SUBTITLE = "Feel the Need for Speed: Dyno Car Tests";
+  const DEFAULT_HERO_HEADING = "Maximize Power And Fuel Efficiency With Our ECU Remapping Services";
+
+  const currentHeroSubtitle = heroTexts[currentHeroIndex]?.subtitle || DEFAULT_HERO_SUBTITLE;
+  const currentHeroHeading  = heroTexts[currentHeroIndex]?.heading  || DEFAULT_HERO_HEADING;
+
   const allTestimonials = [...testimonials];
 
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
@@ -618,16 +635,19 @@ export default function HomePage() {
                 ))
               )}
             </div>
-            <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-            <div className="relative z-10 grid gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:gap-10 md:px-8 md:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:py-14">
+            <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+            <div className="relative z-10 flex min-h-[300px] items-center sm:min-h-[400px] md:min-h-[500px]">
+            <div className="grid w-full gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:gap-10 md:px-8 md:py-12 lg:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:py-14">
               <div className="space-y-4 animate-slide-left sm:space-y-5 md:space-y-6">
-                <p className="flex items-center gap-2 text-xs font-semibold text-white sm:gap-3 sm:text-sm animate-subtitle">
-                  <span className="h-px w-8 bg-white sm:w-12" />
-                  Feel the Need for Speed: Dyno Car Tests
-                </p>
-                <h1 className="text-2xl font-black leading-tight sm:text-3xl md:text-4xl lg:text-[48px] animate-heading">
-                  Maximize Power And Fuel Efficiency With Our ECU Remapping Services
-                </h1>
+                <div className="rounded-2xl backdrop-blur-sm p-5 sm:p-7" style={{ background: 'rgba(0,0,0,0.35)' }}>
+                  <p className="flex items-center gap-2 text-xs font-semibold text-white sm:gap-3 sm:text-sm animate-subtitle">
+                    <span className="h-px w-8 bg-white sm:w-12" />
+                    {currentHeroSubtitle}
+                  </p>
+                  <h1 className="mt-3 text-2xl font-black leading-tight sm:text-3xl md:text-4xl lg:text-[48px] animate-heading">
+                    {currentHeroHeading}
+                  </h1>
+                </div>
               </div>
               <div className="flex justify-center sm:justify-end animate-slide-right">
                 <div className="w-full max-w-[400px] rounded-xl backdrop-blur-[16px] p-4 text-white shadow-[0_30px_70px_rgba(2,6,14,0.7)] sm:rounded-2xl sm:p-6 md:rounded-[15px] md:p-8 animate-card" style={{ background: 'rgba(0, 0, 0, 0.4)' }}>
@@ -712,85 +732,30 @@ export default function HomePage() {
                     </div>
                   )}
 
-                  <p className="mt-3 text-[10px] text-red-400 sm:mt-4 sm:text-xs">or find your vehicle below</p>
+                  {/* Make / Model / Fuel / Engine dropdowns hidden — use gains calculator page instead */}
+                  {/* <p className="mt-3 text-[10px] text-red-400 sm:mt-4 sm:text-xs">or find your vehicle below</p>
                   <div className="mt-3 space-y-3 sm:mt-4 sm:space-y-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">
-                        Make
-                      </p>
-                      <VehicleCombobox
-                        options={brandOptions}
-                        value={selectedBrandId}
-                        onValueChange={(value) => {
-                          setSelectedBrandId(value);
-                          setSelectedModelId("");
-                          setSelectedGenerationId("");
-                          setSelectedEnginePublicId("");
-                        }}
-                        placeholder="- Please Select Make -"
-                        searchPlaceholder="Search make..."
-                        disabled={brandsLoading}
-                        emptyMessage="No make found."
-                      />
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">Make</p>
+                      <VehicleCombobox options={brandOptions} value={selectedBrandId} onValueChange={(value) => { setSelectedBrandId(value); setSelectedModelId(""); setSelectedGenerationId(""); setSelectedEnginePublicId(""); }} placeholder="- Please Select Make -" searchPlaceholder="Search make..." disabled={brandsLoading} emptyMessage="No make found." />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">
-                        Model
-                      </p>
-                      <VehicleCombobox
-                        options={modelOptions}
-                        value={selectedModelId}
-                        onValueChange={(value) => {
-                          setSelectedModelId(value);
-                          setSelectedGenerationId("");
-                          setSelectedEnginePublicId("");
-                        }}
-                        placeholder="- Please Select Model -"
-                        searchPlaceholder="Search model..."
-                        disabled={!selectedBrandId || modelsLoading}
-                        emptyMessage="No model found."
-                      />
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">Model</p>
+                      <VehicleCombobox options={modelOptions} value={selectedModelId} onValueChange={(value) => { setSelectedModelId(value); setSelectedGenerationId(""); setSelectedEnginePublicId(""); }} placeholder="- Please Select Model -" searchPlaceholder="Search model..." disabled={!selectedBrandId || modelsLoading} emptyMessage="No model found." />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">
-                        Fuel
-                      </p>
-                      <VehicleCombobox
-                        options={generationOptions}
-                        value={selectedGenerationId}
-                        onValueChange={(value) => {
-                          setSelectedGenerationId(value);
-                          setSelectedEnginePublicId("");
-                        }}
-                        placeholder="- Please Select Generation -"
-                        searchPlaceholder="Search generation..."
-                        disabled={!selectedModelId || generationsLoading}
-                        emptyMessage="No generation found."
-                      />
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">Fuel</p>
+                      <VehicleCombobox options={generationOptions} value={selectedGenerationId} onValueChange={(value) => { setSelectedGenerationId(value); setSelectedEnginePublicId(""); }} placeholder="- Please Select Generation -" searchPlaceholder="Search generation..." disabled={!selectedModelId || generationsLoading} emptyMessage="No generation found." />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">
-                        Engine
-                      </p>
-                      <VehicleCombobox
-                        options={engineOptions}
-                        value={selectedEnginePublicId}
-                        onValueChange={setSelectedEnginePublicId}
-                        placeholder="- Please Select Engine -"
-                        searchPlaceholder="Search engine..."
-                        disabled={!selectedGenerationId || enginesLoading}
-                        emptyMessage="No engine found."
-                      />
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60 mb-2">Engine</p>
+                      <VehicleCombobox options={engineOptions} value={selectedEnginePublicId} onValueChange={setSelectedEnginePublicId} placeholder="- Please Select Engine -" searchPlaceholder="Search engine..." disabled={!selectedGenerationId || enginesLoading} emptyMessage="No engine found." />
                     </div>
                   </div>
-                  <button
-                    onClick={handleViewGains}
-                    className="mt-6 w-full rounded-[14px] bg-[#ffd200] px-6 py-3 text-sm font-semibold text-black shadow-[0_15px_35px_rgba(255,210,0,0.35)] hover:bg-[#e6c000] transition-colors animate-button"
-                  >
-                    View Gains
-                  </button>
+                  <button onClick={handleViewGains} className="mt-6 w-full rounded-[14px] bg-[#ffd200] px-6 py-3 text-sm font-semibold text-black shadow-[0_15px_35px_rgba(255,210,0,0.35)] hover:bg-[#e6c000] transition-colors animate-button">View Gains</button> */}
                 </div>
               </div>
+            </div>
             </div>
           </section>
           <section id="services" className="space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 md:py-10">

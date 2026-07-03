@@ -7,7 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Upload, ImageIcon, Trash2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2, Upload, ImageIcon, Trash2, Type } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -21,6 +22,8 @@ export default function ConfigurationsPage() {
     const [heroFile, setHeroFile] = useState<File | null>(null);
     const [heroPreview, setHeroPreview] = useState<string | null>(null);
     const [heroImages, setHeroImages] = useState<string[]>([]);
+    const [heroTexts, setHeroTexts] = useState<{ subtitle: string; heading: string }[]>([]);
+    const [savingTextIndex, setSavingTextIndex] = useState<number | null>(null);
 
     useEffect(() => {
         if (settings) {
@@ -53,6 +56,19 @@ export default function ConfigurationsPage() {
             images = [heroImageUrl];
         }
         setHeroImages(images);
+
+        // Load hero texts
+        const heroTextsRaw = settings.find(s => s.key === "hero_texts")?.value;
+        if (heroTextsRaw) {
+            try {
+                const parsed = JSON.parse(heroTextsRaw);
+                if (Array.isArray(parsed)) {
+                    setHeroTexts(parsed);
+                    return;
+                }
+            } catch {}
+        }
+        setHeroTexts([]);
     }, [settings, heroImagesRaw, heroImageUrl]);
 
     const handleToggle = async (checked: boolean) => {
@@ -119,6 +135,37 @@ export default function ConfigurationsPage() {
             toast.success("Hero image removed");
         } catch (error) {
             toast.error("Failed to remove hero image");
+        }
+    };
+
+    const handleHeroTextChange = (index: number, field: "subtitle" | "heading", value: string) => {
+        setHeroTexts((prev) => {
+            const next = [...prev];
+            if (!next[index]) next[index] = { subtitle: "", heading: "" };
+            next[index] = { ...next[index], [field]: value };
+            return next;
+        });
+    };
+
+    const handleSaveHeroText = async (index: number) => {
+        setSavingTextIndex(index);
+        // Build a full array sized to match heroImages length
+        const full: { subtitle: string; heading: string }[] = heroImages.map((_, i) => ({
+            subtitle: heroTexts[i]?.subtitle || "",
+            heading: heroTexts[i]?.heading || "",
+        }));
+        try {
+            await updateSetting({
+                key: "hero_texts",
+                value: JSON.stringify(full),
+                description: "Per-slide hero text (subtitle + heading) for homepage carousel",
+                type: "string",
+            }).unwrap();
+            toast.success(`Slide ${index + 1} text saved`);
+        } catch {
+            toast.error("Failed to save hero text");
+        } finally {
+            setSavingTextIndex(null);
         }
     };
 
@@ -248,6 +295,64 @@ export default function ConfigurationsPage() {
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Hero Slide Texts */}
+                {heroImages.length > 0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Type className="h-5 w-5" />
+                                Hero Slide Texts
+                            </CardTitle>
+                            <CardDescription>
+                                Set the subtitle and heading text for each hero carousel slide. Leave blank to use the default text.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-5">
+                            {heroImages.map((url, index) => (
+                                <div key={`${url}-${index}`} className="rounded-lg border p-4 space-y-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative h-14 w-24 flex-shrink-0 overflow-hidden rounded-md border bg-muted">
+                                            <Image src={url} alt={`Slide ${index + 1}`} fill className="object-cover" />
+                                        </div>
+                                        <p className="text-sm font-semibold">Slide {index + 1}</p>
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label className="text-xs font-medium">Subtitle (small text above heading)</Label>
+                                        <Input
+                                            placeholder="e.g. Feel the Need for Speed: Dyno Car Tests"
+                                            value={heroTexts[index]?.subtitle || ""}
+                                            onChange={(e) => handleHeroTextChange(index, "subtitle", e.target.value)}
+                                            className="h-9 text-sm"
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label className="text-xs font-medium">Heading (main title)</Label>
+                                        <Textarea
+                                            placeholder="e.g. Maximize Power And Fuel Efficiency With Our ECU Remapping Services"
+                                            value={heroTexts[index]?.heading || ""}
+                                            onChange={(e) => handleHeroTextChange(index, "heading", e.target.value)}
+                                            className="text-sm resize-none"
+                                            rows={2}
+                                        />
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        onClick={() => handleSaveHeroText(index)}
+                                        disabled={savingTextIndex === index || isUpdating}
+                                        className="w-full"
+                                    >
+                                        {savingTextIndex === index ? (
+                                            <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Saving...</>
+                                        ) : (
+                                            "Save Slide Text"
+                                        )}
+                                    </Button>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Feature Toggles */}
                 <Card>
