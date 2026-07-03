@@ -272,15 +272,15 @@ export default function HomePage() {
     return [];
   }, [settingsData]);
 
+  const allTestimonials = [...testimonials];
+
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+
   const DEFAULT_HERO_SUBTITLE = "Feel the Need for Speed: Dyno Car Tests";
   const DEFAULT_HERO_HEADING = "Maximize Power And Fuel Efficiency With Our ECU Remapping Services";
 
   const currentHeroSubtitle = heroTexts[currentHeroIndex]?.subtitle || DEFAULT_HERO_SUBTITLE;
   const currentHeroHeading  = heroTexts[currentHeroIndex]?.heading  || DEFAULT_HERO_HEADING;
-
-  const allTestimonials = [...testimonials];
-
-  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
 
   // Stats animation state
   const [animatedStats, setAnimatedStats] = useState<{ [key: string]: number }>({});
