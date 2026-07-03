@@ -41,7 +41,7 @@ async def create_admin_user():
         admin_user = UserCreate(
             first_name="Admin",
             last_name="User",
-            email="info@msperformance.co.uk",
+            email=admin_email,
             password="X7m#9Pk$2Lv@5Nq!",
             timezone="UTC",
         )

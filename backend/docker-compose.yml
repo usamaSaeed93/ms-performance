@@ -6,8 +6,8 @@ services:
     container_name: ecommerce_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: ecommerce_db
+      MYSQL_ROOT_PASSWORD: S3cureDbPass987
+      MYSQL_DATABASE: ms-performance
       MYSQL_USER: ecommerce_user
       MYSQL_PASSWORD: ecommerce_pass
     ports:
@@ -15,7 +15,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pS3cureDbPass987"]
       interval: 10s
       timeout: 5s
       retries: 5

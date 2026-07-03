@@ -46,6 +46,8 @@ const TAG_STYLES: Record<string, { gradient: string; bg: string; text: string; r
     "Hero": { gradient: "from-indigo-500 to-blue-600", bg: "bg-indigo-50", text: "text-indigo-700", ring: "ring-indigo-200", shadow: "shadow-indigo-100" },
     "Content 1": { gradient: "from-emerald-500 to-teal-600", bg: "bg-emerald-50", text: "text-emerald-700", ring: "ring-emerald-200", shadow: "shadow-emerald-100" },
     "Content 2": { gradient: "from-violet-500 to-purple-600", bg: "bg-violet-50", text: "text-violet-700", ring: "ring-violet-200", shadow: "shadow-violet-100" },
+    "Content 3": { gradient: "from-orange-500 to-amber-600", bg: "bg-orange-50", text: "text-orange-700", ring: "ring-orange-200", shadow: "shadow-orange-100" },
+    "Content 4": { gradient: "from-rose-500 to-pink-600", bg: "bg-rose-50", text: "text-rose-700", ring: "ring-rose-200", shadow: "shadow-rose-100" },
 };
 
 // Image uploader component with dynamic hover effects
@@ -435,10 +437,10 @@ export default function ServicesPage() {
                                         </span>
                                     </div>
                                     <p className="text-xs text-muted-foreground">
-                                        These 3 images appear on the <span className="font-medium text-foreground">{selectedService?.title}</span> detail page — the hero banner and two content section images.
+                                        These 5 images appear on the <span className="font-medium text-foreground">{selectedService?.title}</span> detail page — the hero banner and four content section images.
                                     </p>
 
-                                    <div className={`grid gap-3 ${selectedConfig.content3 ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
+                                    <div className="grid gap-3 sm:grid-cols-2">
                                         <ImageUploader
                                             label="Hero Banner"
                                             tag="Hero"
@@ -477,13 +479,27 @@ export default function ServicesPage() {
                                         />
                                         {selectedConfig.content3 && (
                                             <ImageUploader
-                                                label="Gallery Image"
+                                                label="Gallery Image 1"
                                                 tag="Content 3"
                                                 currentUrl={getSettingValue(selectedConfig.content3.settingsKey)}
                                                 fallbackUrl={selectedConfig.content3.fallbackImage}
                                                 onUpload={(file) => handleDetailImageUpload(
                                                     selectedConfig.content3!.settingsKey,
-                                                    `Gallery image for ${selectedService?.title} page`,
+                                                    `Gallery image 1 for ${selectedService?.title} page`,
+                                                    file
+                                                )}
+                                                isUploading={isUploading}
+                                            />
+                                        )}
+                                        {selectedConfig.content4 && (
+                                            <ImageUploader
+                                                label="Gallery Image 2"
+                                                tag="Content 4"
+                                                currentUrl={getSettingValue(selectedConfig.content4.settingsKey)}
+                                                fallbackUrl={selectedConfig.content4.fallbackImage}
+                                                onUpload={(file) => handleDetailImageUpload(
+                                                    selectedConfig.content4!.settingsKey,
+                                                    `Gallery image 2 for ${selectedService?.title} page`,
                                                     file
                                                 )}
                                                 isUploading={isUploading}
