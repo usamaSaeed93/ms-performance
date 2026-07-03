@@ -161,25 +161,13 @@ export default function HomePage() {
   // Google Reviews
   const { data: googleReviews = [] } = useGetGoogleReviewsQuery();
   const clients = useMemo(() => {
-    if (apiClients && apiClients.length > 0) {
-      return apiClients.map((c) => ({
-        id: c.id,
-        name: c.name,
-        details: c.details ?? "",
-        image: c.image_url ?? "/images/services/hero-dyno-v2-ue.png",
-      }));
-    }
-    // Fallback static entries shown until the admin populates the table
-    return [
-      { id: null, name: "BMW 140i B58 Chip Tuning", details: "444 bhp | ECU & TCU remap | Chiptuning", image: "/images/services/hero-dyno-v2-ue.png" },
-      { id: null, name: "Ford Transit Custom 2.0 TDCi 105bhp Chip Tuning", details: "189 bhp | ECU remap | Chiptuning", image: "/images/services/ecu-remapping.png" },
-      { id: null, name: "Ford Fiesta ST 1.5 EcoBoost Chip Tuning", details: "240 bhp | ECU remap | Chiptuning", image: "/images/services/custom-exhausts.png" },
-      { id: null, name: "VW Golf R Stage 2 Remap", details: "380 bhp | Stage 2 ECU remap | Chiptuning", image: "/images/services/dyno-tests.png" },
-      { id: null, name: "Audi S3 8V Custom Exhaust", details: "310 bhp | ECU remap | Custom Exhaust", image: "/images/services/dpf-egr.png" },
-      { id: null, name: "Mercedes A45 AMG Hybrid Turbo", details: "420 bhp | Turbo upgrade | ECU remap", image: "/images/services/ecu-remap-card.png" },
-      { id: null, name: "Subaru WRX STI Dyno Tune", details: "340 bhp | Full dyno tune | Chiptuning", image: "/images/services/our-service.png" },
-      { id: null, name: "Toyota Supra A90 Stage 1", details: "395 bhp | Stage 1 ECU remap | Dyno verified", image: "/images/services/Services1.png" },
-    ];
+    if (!apiClients?.length) return [];
+    return apiClients.map((c) => ({
+      id: c.id,
+      name: c.name,
+      details: c.details ?? "",
+      image: c.image_url ?? "/images/services/hero-dyno-v2-ue.png",
+    }));
   }, [apiClients]);
   const [clientIndex, setClientIndex] = useState(0);
   const prevClient = () => setClientIndex((prev) => (prev - 1 + clients.length) % clients.length);
@@ -1078,6 +1066,7 @@ export default function HomePage() {
           )}
 
           {/* ── Our Clients Carousel ─────────────────────────────────────────── */}
+          {clients.length > 0 && (
           <section id="clients" className="relative overflow-hidden bg-white py-14 px-4 sm:px-6 md:px-8 lg:px-12">
 
             {/* Watermark background text */}
@@ -1208,6 +1197,7 @@ export default function HomePage() {
 
             </div>
           </section>
+          )}
 
           {/* ── Google Reviews ─────────────────────────────────────────── */}
           {googleReviews.length > 0 && (
