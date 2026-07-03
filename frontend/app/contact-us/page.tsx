@@ -6,6 +6,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { navLinks, brandLogos, footerLinks } from "@/lib/constants";
 import { Navbar } from "@/components/Navbar";
+import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL } from "@/lib/constants/contact";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -246,7 +247,9 @@ export default function ContactUsPage() {
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-[#0c1b33]">Requesting A Call:</p>
-                            <p className="text-sm text-[#5c6c86]">0775 1798827 / 01277 715069</p>
+                            <a href={CONTACT_PHONE_TEL} className="text-sm text-[#5c6c86] hover:text-[#1d70ff]">
+                              {CONTACT_PHONE_DISPLAY}
+                            </a>
                           </div>
                         </div>
 

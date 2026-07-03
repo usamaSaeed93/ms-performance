@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
+import { CONTACT_PHONE_DISPLAY } from "@/lib/constants/contact";
 
 export default function PrivacyPolicyPage() {
     return (
@@ -106,7 +107,7 @@ export default function PrivacyPolicyPage() {
                                 <p className="text-[#0c1b33] font-semibold">MS Performance Ltd</p>
                                 <p className="text-[#5c6c86]">Unit 16, Bakers Ln, Chelmsford CM2 8LD</p>
                                 <p className="text-[#5c6c86]">Email: info@msperformance.co.uk</p>
-                                <p className="text-[#5c6c86]">Phone: 0775 179 8827</p>
+                                <p className="text-[#5c6c86]">Phone: {CONTACT_PHONE_DISPLAY}</p>
                             </div>
                         </div>
                     </div>

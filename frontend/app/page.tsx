@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useGetPublishedBlogsQuery } from "@/lib/store/api/blogsApi";
 import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
 import { Navbar } from "@/components/Navbar";
+import { CONTACT_PHONE_DISPLAY } from "@/lib/constants/contact";
 
 const calculatorFields = [
   "Vehicle Make",
@@ -792,7 +793,7 @@ export default function Home() {
               </p>
               <ul className="mt-4 space-y-2 text-sm text-white/70">
                 <li>Unit 16, Bakers Ln, Chelmsford CM2 8LD</li>
-                <li>0775 179 8827 / 01277 715069</li>
+                <li>{CONTACT_PHONE_DISPLAY}</li>
                 <li>Mon - Sat  9:30 - 18:00</li>
                 <li>info@msperformance.co.uk</li>
               </ul>

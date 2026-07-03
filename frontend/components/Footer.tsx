@@ -6,6 +6,7 @@ import { Instagram, Phone, Mail } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useCreateMailingSubscriptionMutation } from "@/lib/store/api/mailingApi";
+import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL, CONTACT_EMAIL, CONTACT_EMAIL_MAILTO } from "@/lib/constants/contact";
 
 export function Footer() {
     const [subscriberName, setSubscriberName] = useState("");
@@ -119,22 +120,19 @@ export function Footer() {
                     <div className="flex items-start gap-3">
                         <Phone className="h-5 w-5 text-[#00b8ff] mt-0.5 shrink-0" />
                         <div>
-                            <p className="text-sm font-medium text-gray-300">0775 1798827 / 01277 715069</p>
+                            <a href={CONTACT_PHONE_TEL} className="text-sm font-medium text-gray-300 hover:text-[#00b8ff]">
+                                {CONTACT_PHONE_DISPLAY}
+                            </a>
                             <p className="text-xs text-gray-500">Mon till Sat: 9:30 till 18:00</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
                         <Mail className="h-5 w-5 text-[#00b8ff] mt-0.5 shrink-0" />
                         <div>
-                            <p className="text-sm font-medium text-gray-300">info@msperformance.co.uk</p>
+                            <a href={CONTACT_EMAIL_MAILTO} className="text-sm font-medium text-gray-300 hover:text-[#00b8ff]">
+                                {CONTACT_EMAIL}
+                            </a>
                             <p className="text-xs text-gray-500">We reply within 1 day</p>
-                        </div>
-                    </div>
-                    <div className="space-y-0.5">
-                        <h4 className="text-sm font-bold text-white">For overseas customers:</h4>
-                        <div className="flex items-center gap-2">
-                            <Phone className="h-4 w-4 text-[#00b8ff]" />
-                            <p className="text-sm text-gray-400">+44 7751 798603</p>
                         </div>
                     </div>
                 </div>
@@ -173,7 +171,7 @@ export function Footer() {
             </div>
 
             <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-8">
-                <p className="text-sm text-gray-400">© Copyright 2025 MSPerformance</p>
+                <p className="text-sm text-gray-400">© Copyright 2026 MSPerformance</p>
                 <div className="flex flex-wrap items-center gap-1 text-sm text-gray-400">
                     <Link href="/privacy-policy" className="hover:text-[#00b8ff]">
                         Privacy Policy
@@ -183,14 +181,20 @@ export function Footer() {
                         Delivery & Returns
                     </Link>
                     <span className="px-2 text-white/10">|</span>
-                    <Link href="/legal-information" className="hover:text-[#00b8ff]">
-                        Legal Information
+                    <Link href="/legal-notice" className="hover:text-[#00b8ff]">
+                        Legal Notice
                     </Link>
                     <span className="px-2 text-white/10">|</span>
                     <Link href="/terms-conditions" className="hover:text-[#00b8ff]">
                         Terms & Conditions
                     </Link>
                 </div>
+                <p className="w-full text-center text-sm text-gray-400 sm:w-auto sm:text-right">
+                    For emergency services call{" "}
+                    <a href={CONTACT_PHONE_TEL} className="font-bold text-white hover:text-[#00b8ff]">
+                        {CONTACT_PHONE_DISPLAY}
+                    </a>
+                </p>
             </div>
         </footer>
     );
