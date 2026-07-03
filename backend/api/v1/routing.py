@@ -74,6 +74,7 @@ from .endpoints.get_all_reviews import GetAllReviews
 from .endpoints.create_review import CreateReview
 from .endpoints.update_review import UpdateReview
 from .endpoints.delete_review import DeleteReview
+from .endpoints.get_client import GetClient
 from .endpoints.get_clients import GetClients
 from .endpoints.get_all_clients import GetAllClients
 from .endpoints.create_client import CreateClient
@@ -375,6 +376,10 @@ class RoutingV1(BaseRouting):
         self.routing_collection[DeleteReview.api_name] = (
             DeleteReview(),
             DeleteReview.api_url,
+        )
+        self.routing_collection[GetClient.api_name] = (
+            GetClient(),
+            GetClient.api_url,
         )
         self.routing_collection[GetClients.api_name] = (
             GetClients(),

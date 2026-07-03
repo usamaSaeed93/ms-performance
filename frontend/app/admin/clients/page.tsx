@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import Image from "next/image";
 import {
@@ -43,6 +44,8 @@ import {
 const emptyForm = {
   name: "",
   details: "",
+  description: "",
+  registration: "",
   image_url: "",
   display_order: 0,
   is_active: true,
@@ -75,6 +78,8 @@ export default function ClientsPage() {
     setFormData({
       name: client.name,
       details: client.details ?? "",
+      description: client.description ?? "",
+      registration: client.registration ?? "",
       image_url: client.image_url ?? "",
       display_order: client.display_order,
       is_active: client.is_active,
@@ -125,6 +130,8 @@ export default function ClientsPage() {
     const payload = {
       name: formData.name,
       details: formData.details || undefined,
+      description: formData.description || undefined,
+      registration: formData.registration?.toUpperCase().replace(/\s/g, "") || undefined,
       image_url: imageUrl || undefined,
       display_order: formData.display_order,
       is_active: formData.is_active,
@@ -353,7 +360,7 @@ export default function ClientsPage() {
             {/* Details */}
             <div className="grid gap-1.5">
               <Label htmlFor="details" className="text-xs font-semibold">
-                Details
+                Short Details (subtitle)
               </Label>
               <Input
                 id="details"
@@ -363,6 +370,41 @@ export default function ClientsPage() {
                   setFormData((p) => ({ ...p, details: e.target.value }))
                 }
                 className="h-9 text-sm"
+              />
+            </div>
+
+            {/* Registration */}
+            <div className="grid gap-1.5">
+              <Label htmlFor="registration" className="text-xs font-semibold">
+                Registration Plate (VRM)
+              </Label>
+              <Input
+                id="registration"
+                placeholder="e.g. AB12 CDE — used to pull performance data"
+                value={formData.registration}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, registration: e.target.value }))
+                }
+                className="h-9 text-sm font-mono uppercase"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Enter the car&apos;s registration to auto-load dyno graphs on the client detail page.
+              </p>
+            </div>
+
+            {/* Description */}
+            <div className="grid gap-1.5">
+              <Label htmlFor="description" className="text-xs font-semibold">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                placeholder="Tell the story of this build — what was done, results, customer feedback..."
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, description: e.target.value }))
+                }
+                className="text-sm min-h-[90px] resize-none"
               />
             </div>
 

@@ -39,6 +39,8 @@ async def create_client(
     db: AsyncSession,
     name: str,
     details: Optional[str] = None,
+    description: Optional[str] = None,
+    registration: Optional[str] = None,
     image_url: Optional[str] = None,
     display_order: int = 0,
     is_active: bool = True,
@@ -46,6 +48,8 @@ async def create_client(
     db_client = Client(
         name=name,
         details=details,
+        description=description,
+        registration=registration,
         image_url=image_url,
         display_order=display_order,
         is_active=is_active,
@@ -61,6 +65,8 @@ async def update_client(
     client_id: int,
     name: Optional[str] = None,
     details: Optional[str] = None,
+    description: Optional[str] = None,
+    registration: Optional[str] = None,
     image_url: Optional[str] = None,
     display_order: Optional[int] = None,
     is_active: Optional[bool] = None,
@@ -73,6 +79,10 @@ async def update_client(
         client.name = name
     if details is not None:
         client.details = details
+    if description is not None:
+        client.description = description
+    if registration is not None:
+        client.registration = registration
     if image_url is not None:
         client.image_url = image_url
     if display_order is not None:

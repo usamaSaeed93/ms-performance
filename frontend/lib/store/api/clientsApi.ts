@@ -11,6 +11,8 @@ export interface Client {
   id: number;
   name: string;
   details: string | null;
+  description: string | null;
+  registration: string | null;
   image_url: string | null;
   display_order: number;
   is_active: boolean;
@@ -19,6 +21,8 @@ export interface Client {
 export interface CreateClientRequest {
   name: string;
   details?: string;
+  description?: string;
+  registration?: string;
   image_url?: string;
   display_order?: number;
   is_active?: boolean;
@@ -28,6 +32,8 @@ export interface UpdateClientRequest {
   id: number;
   name?: string;
   details?: string;
+  description?: string;
+  registration?: string;
   image_url?: string;
   display_order?: number;
   is_active?: boolean;
@@ -74,6 +80,14 @@ export const clientsApi = createApi({
   baseQuery: baseQueryWithAuth,
   tagTypes: ['Clients'],
   endpoints: (builder) => ({
+    getClientById: builder.query<Client, number>({
+      query: (id) => `/clients/${id}`,
+      transformResponse: (response: any) => {
+        if (response?.data) return response.data;
+        return response;
+      },
+      providesTags: (_result, _err, id) => [{ type: 'Clients', id }],
+    }),
     getClients: builder.query<Client[], void>({
       query: () => '/clients',
       transformResponse: (response: any) => {
@@ -132,6 +146,7 @@ export const clientsApi = createApi({
 });
 
 export const {
+  useGetClientByIdQuery,
   useGetClientsQuery,
   useGetAllClientsQuery,
   useCreateClientMutation,

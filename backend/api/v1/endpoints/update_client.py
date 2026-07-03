@@ -22,6 +22,8 @@ class UpdateClient(PutResource):
             client_id=int(client_id),
             name=self.request_data.name,
             details=self.request_data.details,
+            description=self.request_data.description,
+            registration=self.request_data.registration,
             image_url=self.request_data.image_url,
             display_order=self.request_data.display_order,
             is_active=self.request_data.is_active,

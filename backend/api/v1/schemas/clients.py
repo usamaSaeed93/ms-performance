@@ -6,6 +6,8 @@ class ClientSchema(BaseModel):
     id: int
     name: str
     details: Optional[str] = None
+    description: Optional[str] = None
+    registration: Optional[str] = None
     image_url: Optional[str] = None
     display_order: int
     is_active: bool
@@ -23,6 +25,8 @@ class GetClientsResponse(BaseModel):
 class CreateClientRequest(BaseModel):
     name: str
     details: Optional[str] = None
+    description: Optional[str] = None
+    registration: Optional[str] = None
     image_url: Optional[str] = None
     display_order: int = 0
     is_active: bool = True
@@ -37,6 +41,8 @@ class CreateClientResponse(BaseModel):
 class UpdateClientRequest(BaseModel):
     name: Optional[str] = None
     details: Optional[str] = None
+    description: Optional[str] = None
+    registration: Optional[str] = None
     image_url: Optional[str] = None
     display_order: Optional[int] = None
     is_active: Optional[bool] = None

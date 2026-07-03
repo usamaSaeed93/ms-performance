@@ -8,10 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Upload, ImageIcon, Trash2, Type } from "lucide-react";
+import { Loader2, Upload, ImageIcon, Trash2, Type, FlaskConical, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { resolveVRM, type VRMResponse } from "@/lib/api/vrm";
 
 export default function ConfigurationsPage() {
     const { data: settings, isLoading } = useGetSettingsQuery();
@@ -24,6 +25,15 @@ export default function ConfigurationsPage() {
     const [heroImages, setHeroImages] = useState<string[]>([]);
     const [heroTexts, setHeroTexts] = useState<{ subtitle: string; heading: string }[]>([]);
     const [savingTextIndex, setSavingTextIndex] = useState<number | null>(null);
+
+    // VRM tester state
+    const [vrmRegex, setVrmRegex] = useState("");
+    const [savingVrmRegex, setSavingVrmRegex] = useState(false);
+    const [testReg, setTestReg] = useState("");
+    const [vrmTesting, setVrmTesting] = useState(false);
+    const [vrmResult, setVrmResult] = useState<VRMResponse | null>(null);
+    const [vrmTestError, setVrmTestError] = useState<string | null>(null);
+    const [regexMatch, setRegexMatch] = useState<boolean | null>(null);
 
     useEffect(() => {
         if (settings) {
@@ -56,6 +66,10 @@ export default function ConfigurationsPage() {
             images = [heroImageUrl];
         }
         setHeroImages(images);
+
+        // Load VRM regex
+        const savedVrmRegex = settings.find(s => s.key === "vrm_regex")?.value;
+        if (savedVrmRegex) setVrmRegex(savedVrmRegex);
 
         // Load hero texts
         const heroTextsRaw = settings.find(s => s.key === "hero_texts")?.value;
@@ -166,6 +180,54 @@ export default function ConfigurationsPage() {
             toast.error("Failed to save hero text");
         } finally {
             setSavingTextIndex(null);
+        }
+    };
+
+    const handleSaveVrmRegex = async () => {
+        setSavingVrmRegex(true);
+        try {
+            await updateSetting({
+                key: "vrm_regex",
+                value: vrmRegex,
+                description: "Regex pattern to validate UK vehicle registration numbers",
+                type: "string",
+            }).unwrap();
+            toast.success("VRM regex saved");
+        } catch {
+            toast.error("Failed to save regex");
+        } finally {
+            setSavingVrmRegex(false);
+        }
+    };
+
+    const handleTestVrm = async () => {
+        if (!testReg.trim()) {
+            toast.error("Enter a registration number to test");
+            return;
+        }
+        setVrmTesting(true);
+        setVrmResult(null);
+        setVrmTestError(null);
+        setRegexMatch(null);
+
+        // Test regex match first
+        if (vrmRegex.trim()) {
+            try {
+                const regex = new RegExp(vrmRegex.trim(), "i");
+                setRegexMatch(regex.test(testReg.trim()));
+            } catch {
+                setRegexMatch(null);
+            }
+        }
+
+        // Call VRM API
+        try {
+            const data = await resolveVRM(testReg.trim().toUpperCase().replace(/\s/g, ""), "msperformance.co.uk");
+            setVrmResult(data);
+        } catch (err) {
+            setVrmTestError(err instanceof Error ? err.message : "VRM lookup failed");
+        } finally {
+            setVrmTesting(false);
         }
     };
 
@@ -353,6 +415,103 @@ export default function ConfigurationsPage() {
                         </CardContent>
                     </Card>
                 )}
+
+                {/* VRM API Tester */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <FlaskConical className="h-5 w-5" />
+                            VRM API Tester
+                        </CardTitle>
+                        <CardDescription>
+                            Save a regex pattern to validate UK registration plates, then test a specific plate against the gains calculator API to verify it returns vehicle data.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-5">
+                        {/* Regex input */}
+                        <div className="space-y-2">
+                            <Label className="text-xs font-semibold">VRM Validation Regex</Label>
+                            <div className="flex gap-2">
+                                <Input
+                                    value={vrmRegex}
+                                    onChange={(e) => setVrmRegex(e.target.value)}
+                                    placeholder="e.g. ^[A-Z]{2}[0-9]{2}[A-Z]{3}$"
+                                    className="h-9 text-sm font-mono flex-1"
+                                />
+                                <Button size="sm" onClick={handleSaveVrmRegex} disabled={savingVrmRegex} className="h-9">
+                                    {savingVrmRegex ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
+                                </Button>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">
+                                Standard UK new-style: <code className="bg-muted px-1 rounded text-[10px]">^[A-Z]{{2}}[0-9]{{2}}[A-Z]{{3}}$</code>
+                            </p>
+                        </div>
+
+                        {/* Test input */}
+                        <div className="space-y-2">
+                            <Label className="text-xs font-semibold">Test Registration Number</Label>
+                            <div className="flex gap-2">
+                                <Input
+                                    value={testReg}
+                                    onChange={(e) => setTestReg(e.target.value.toUpperCase())}
+                                    placeholder="e.g. AB12CDE"
+                                    className="h-9 text-sm font-mono uppercase flex-1"
+                                />
+                                <Button size="sm" onClick={handleTestVrm} disabled={vrmTesting} className="h-9">
+                                    {vrmTesting ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                                    Test
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Regex match result */}
+                        {regexMatch !== null && (
+                            <div className={`flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium ${regexMatch ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
+                                {regexMatch ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                                Regex {regexMatch ? "matches" : "does NOT match"} &quot;{testReg}&quot;
+                            </div>
+                        )}
+
+                        {/* VRM API result */}
+                        {vrmTestError && (
+                            <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-3">
+                                <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-xs font-semibold text-red-700">VRM API Error</p>
+                                    <p className="text-xs text-red-600 mt-0.5">{vrmTestError}</p>
+                                </div>
+                            </div>
+                        )}
+                        {vrmResult && (
+                            <div className="rounded-lg border border-green-200 bg-green-50 p-4 space-y-2">
+                                <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
+                                    <CheckCircle2 className="h-4 w-4" />
+                                    VRM API returned data successfully
+                                </div>
+                                {vrmResult.engineDetails && (
+                                    <div className="grid gap-1.5 mt-2">
+                                        {[
+                                            { label: "Vehicle", value: vrmResult.engineDetails.fullname },
+                                            { label: "Brand", value: vrmResult.engineDetails.paths?.brand?.name },
+                                            { label: "Model", value: vrmResult.engineDetails.paths?.model?.name },
+                                            { label: "Engine", value: vrmResult.engineDetails.paths?.engine?.name },
+                                            { label: "Fuel", value: vrmResult.engineDetails.specz?.energy },
+                                            { label: "Stock BHP", value: vrmResult.engineDetails.horsepower_original ? `${vrmResult.engineDetails.horsepower_original} BHP` : undefined },
+                                            { label: "Tuned BHP", value: vrmResult.engineDetails.horsepower_white ? `${vrmResult.engineDetails.horsepower_white} BHP` : undefined },
+                                            { label: "Stock Torque", value: vrmResult.engineDetails.torque_original ? `${vrmResult.engineDetails.torque_original} Nm` : undefined },
+                                            { label: "Tuned Torque", value: vrmResult.engineDetails.torque_white ? `${vrmResult.engineDetails.torque_white} Nm` : undefined },
+                                        ].filter(r => r.value).map(row => (
+                                            <div key={row.label} className="flex justify-between text-xs">
+                                                <span className="text-gray-500 font-medium">{row.label}</span>
+                                                <span className="font-semibold text-gray-800">{row.value}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
 
                 {/* Feature Toggles */}
                 <Card>

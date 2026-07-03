@@ -162,7 +162,8 @@ export default function HomePage() {
   const { data: googleReviews = [] } = useGetGoogleReviewsQuery();
   const clients = useMemo(() => {
     if (apiClients && apiClients.length > 0) {
-      return apiClients.map((c: { name: string; details: string | null; image_url: string | null }) => ({
+      return apiClients.map((c) => ({
+        id: c.id,
         name: c.name,
         details: c.details ?? "",
         image: c.image_url ?? "/images/services/hero-dyno-v2-ue.png",
@@ -170,14 +171,14 @@ export default function HomePage() {
     }
     // Fallback static entries shown until the admin populates the table
     return [
-      { name: "BMW 140i B58 Chip Tuning", details: "444 bhp | ECU & TCU remap | Chiptuning", image: "/images/services/hero-dyno-v2-ue.png" },
-      { name: "Ford Transit Custom 2.0 TDCi 105bhp Chip Tuning", details: "189 bhp | ECU remap | Chiptuning", image: "/images/services/ecu-remapping.png" },
-      { name: "Ford Fiesta ST 1.5 EcoBoost Chip Tuning", details: "240 bhp | ECU remap | Chiptuning", image: "/images/services/custom-exhausts.png" },
-      { name: "VW Golf R Stage 2 Remap", details: "380 bhp | Stage 2 ECU remap | Chiptuning", image: "/images/services/dyno-tests.png" },
-      { name: "Audi S3 8V Custom Exhaust", details: "310 bhp | ECU remap | Custom Exhaust", image: "/images/services/dpf-egr.png" },
-      { name: "Mercedes A45 AMG Hybrid Turbo", details: "420 bhp | Turbo upgrade | ECU remap", image: "/images/services/ecu-remap-card.png" },
-      { name: "Subaru WRX STI Dyno Tune", details: "340 bhp | Full dyno tune | Chiptuning", image: "/images/services/our-service.png" },
-      { name: "Toyota Supra A90 Stage 1", details: "395 bhp | Stage 1 ECU remap | Dyno verified", image: "/images/services/Services1.png" },
+      { id: null, name: "BMW 140i B58 Chip Tuning", details: "444 bhp | ECU & TCU remap | Chiptuning", image: "/images/services/hero-dyno-v2-ue.png" },
+      { id: null, name: "Ford Transit Custom 2.0 TDCi 105bhp Chip Tuning", details: "189 bhp | ECU remap | Chiptuning", image: "/images/services/ecu-remapping.png" },
+      { id: null, name: "Ford Fiesta ST 1.5 EcoBoost Chip Tuning", details: "240 bhp | ECU remap | Chiptuning", image: "/images/services/custom-exhausts.png" },
+      { id: null, name: "VW Golf R Stage 2 Remap", details: "380 bhp | Stage 2 ECU remap | Chiptuning", image: "/images/services/dyno-tests.png" },
+      { id: null, name: "Audi S3 8V Custom Exhaust", details: "310 bhp | ECU remap | Custom Exhaust", image: "/images/services/dpf-egr.png" },
+      { id: null, name: "Mercedes A45 AMG Hybrid Turbo", details: "420 bhp | Turbo upgrade | ECU remap", image: "/images/services/ecu-remap-card.png" },
+      { id: null, name: "Subaru WRX STI Dyno Tune", details: "340 bhp | Full dyno tune | Chiptuning", image: "/images/services/our-service.png" },
+      { id: null, name: "Toyota Supra A90 Stage 1", details: "395 bhp | Stage 1 ECU remap | Dyno verified", image: "/images/services/Services1.png" },
     ];
   }, [apiClients]);
   const [clientIndex, setClientIndex] = useState(0);
@@ -1145,6 +1146,17 @@ export default function HomePage() {
                   <div className="p-5">
                     <p className="text-sm font-black uppercase text-[#0c1b33]">{clients[clientIndex].name}</p>
                     <p className="mt-1 text-xs text-[#cc0000]">{clients[clientIndex].details}</p>
+                    {clients[clientIndex].id && (
+                      <Link
+                        href={`/clients/${clients[clientIndex].id}`}
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[#1d70ff] px-4 py-2 text-xs font-semibold text-white hover:bg-[#1558cc] transition"
+                      >
+                        View Performance Stats
+                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    )}
                   </div>
                 </div>
 
