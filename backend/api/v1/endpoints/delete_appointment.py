@@ -8,7 +8,7 @@ from crud.appointment import (
     get_appointment_by_id,
 )
 from core.email import email_service
-from core.setmore import setmore_client
+from core.google_calendar import google_calendar
 
 
 class DeleteAppointment(DeleteResource):
@@ -150,19 +150,39 @@ class UpdateAppointmentStatus(PutResource):
             except Exception as exc:
                 print(f"Failed to send confirmation email: {exc}")
 
-            # 2. Sync to Setmore
+            # 2. Sync to Google Calendar
             try:
-                await setmore_client.create_appointment(
-                    customer_name=appt.customer_name,
-                    customer_email=appt.customer_email,
-                    customer_phone=appt.customer_phone or "",
-                    service_type=appt.service_type,
-                    appointment_date=appt.appointment_date.isoformat(),
-                    appointment_time=appt.appointment_time.isoformat(),
-                    notes=appt.notes or "",
+                from datetime import datetime, timezone
+                appt_date = appt.appointment_date
+                appt_time = appt.appointment_time
+                start_dt = datetime(
+                    appt_date.year, appt_date.month, appt_date.day,
+                    appt_time.hour, appt_time.minute, appt_time.second,
+                    tzinfo=timezone.utc,
+                )
+                end_dt = start_dt + __import__("datetime").timedelta(minutes=60)
+                vehicle_str = ""
+                if appt.vehicle_make:
+                    vehicle_str = f"\nVehicle: {appt.vehicle_make} {appt.vehicle_model or ''}"
+                    if appt.vehicle_registration:
+                        vehicle_str += f" ({appt.vehicle_registration})"
+                description = (
+                    f"Customer: {appt.customer_name}\n"
+                    f"Phone: {appt.customer_phone or 'N/A'}\n"
+                    f"Email: {appt.customer_email}\n"
+                    f"Service: {appt.service_type}"
+                    f"{vehicle_str}"
+                    f"{chr(10) + 'Notes: ' + appt.notes if appt.notes else ''}"
+                )
+                await google_calendar.create_event(
+                    summary=f"{appt.service_type} — {appt.customer_name}",
+                    description=description,
+                    start_datetime=start_dt,
+                    end_datetime=end_dt,
+                    attendee_email=appt.customer_email,
                 )
             except Exception as exc:
-                print(f"Failed to sync to Setmore: {exc}")
+                print(f"Failed to sync to Google Calendar: {exc}")
 
         elif self.new_status == "denied":
             try:

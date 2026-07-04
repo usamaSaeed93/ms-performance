@@ -126,6 +126,10 @@ class Configuration:
     GOOGLE_PLACES_API_KEY: str = os.getenv("GOOGLE_PLACES_API_KEY", "")
     GOOGLE_PLACE_ID: str = os.getenv("GOOGLE_PLACE_ID", "")
 
+    # Google Calendar (for appointment sync via Service Account)
+    GOOGLE_SERVICE_ACCOUNT_JSON: str = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "")
+    GOOGLE_CALENDAR_ID: str = os.getenv("GOOGLE_CALENDAR_ID", "")
+
     # Storage
     STORAGE_TYPE: str = os.getenv("STORAGE_TYPE", "local")
     LOCAL_STORAGE_PATH: str = os.getenv(
