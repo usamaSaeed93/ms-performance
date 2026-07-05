@@ -1399,10 +1399,6 @@ export default function HomePage() {
                 {/* Left Column */}
                 <div className="space-y-4">
                   <FAQItem
-                    question="How often should I change my car's oil?"
-                    answer="For most modern vehicles, we recommend changing your oil every 5,000-7,500 miles or every 6 months, whichever comes first. However, if you drive in severe conditions (frequent short trips, dusty environments, or towing), you may need to change it more frequently."
-                  />
-                  <FAQItem
                     question="Is professional installation necessary for a custom exhaust system?"
                     answer="Yes, professional installation is highly recommended. A properly fitted exhaust system requires precise welding, correct alignment, and secure mounting to prevent rattles, leaks, and potential damage."
                   />
