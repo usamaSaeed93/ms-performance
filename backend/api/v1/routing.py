@@ -65,6 +65,7 @@ from .endpoints.get_available_slots import GetAvailableSlots
 from .endpoints.create_appointment import CreateAppointment
 from .endpoints.get_appointments import GetAppointments
 from .endpoints.delete_appointment import DeleteAppointment, UpdateAppointmentStatus
+from .endpoints.appointment_email_action import AppointmentEmailAction
 from .endpoints.get_services import GetServices
 from .endpoints.update_service import UpdateService
 from .endpoints.get_settings import GetSettings
@@ -340,6 +341,10 @@ class RoutingV1(BaseRouting):
         self.routing_collection[UpdateAppointmentStatus.api_name] = (
             UpdateAppointmentStatus(),
             UpdateAppointmentStatus.api_url,
+        )
+        self.routing_collection[AppointmentEmailAction.api_name] = (
+            AppointmentEmailAction(),
+            AppointmentEmailAction.api_url,
         )
         self.routing_collection[GetServices.api_name] = (
             GetServices(),

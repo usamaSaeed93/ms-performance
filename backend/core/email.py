@@ -355,11 +355,14 @@ MS Performance Team
         service_type: str,
         vehicle_info: Optional[str] = None,
         admin_dashboard_url: Optional[str] = None,
+        appointment_id: Optional[int] = None,
+        notes: Optional[str] = None,
     ) -> bool:
         """
         Send two emails:
         1. Customer — "your request is under review".
-        2. Admin  — "new appointment pending your approval" with a link to the dashboard.
+        2. Admin  — "new appointment pending your approval" with Approve/Deny
+           buttons (HMAC-signed links) and a fallback dashboard link.
         """
         # --- Customer email ---
         customer_html = f"""
@@ -390,8 +393,65 @@ MS Performance Team
             text_content=f"Hi {customer_name},\n\nYour appointment request ({service_type} on {appointment_date} at {appointment_time}) is pending review. We'll confirm within 1 business day.\n\nBest regards,\nMS Performance Team",
         )
 
-        # --- Admin notification email ---
+        # --- Admin notification email (with Approve / Deny buttons) ---
         dashboard_link = admin_dashboard_url or f"{self.frontend_url}/admin/appointments"
+
+        # Build HMAC-signed action links when appointment_id is available
+        action_buttons_html = ""
+        if appointment_id is not None:
+            from core.appointment_token import generate_email_action_token
+
+            approve_token = generate_email_action_token(appointment_id, "approve")
+            deny_token = generate_email_action_token(appointment_id, "deny")
+
+            # Determine backend base URL from FRONTEND_URL
+            # Production: frontend is at https://test.msperformance.co.uk
+            #   → backend API is at the same domain under /ecommerce/v1/
+            backend_base = self.frontend_url.rstrip("/")
+            approve_url = (
+                f"{backend_base}/ecommerce/v1/appointments/{appointment_id}"
+                f"/email-action?action=approve&token={approve_token}"
+            )
+            deny_url = (
+                f"{backend_base}/ecommerce/v1/appointments/{appointment_id}"
+                f"/email-action?action=deny&token={deny_token}"
+            )
+
+            action_buttons_html = f"""
+    <div style="text-align:center;margin:32px 0;">
+      <table cellpadding="0" cellspacing="0" border="0" align="center"><tr>
+        <td style="padding:0 8px;">
+          <a href="{approve_url}"
+             style="display:inline-block;background:#22c55e;color:#ffffff;padding:16px 32px;
+                    border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;
+                    letter-spacing:0.5px;">
+            ✅&nbsp; Approve
+          </a>
+        </td>
+        <td style="padding:0 8px;">
+          <a href="{deny_url}"
+             style="display:inline-block;background:#ef4444;color:#ffffff;padding:16px 32px;
+                    border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;
+                    letter-spacing:0.5px;">
+            ❌&nbsp; Deny
+          </a>
+        </td>
+      </tr></table>
+    </div>
+    <div style="text-align:center;margin:0 0 24px 0;">
+      <a href="{dashboard_link}" style="color:#6b7280;font-size:13px;text-decoration:underline;">
+        or review in admin dashboard
+      </a>
+    </div>"""
+        else:
+            # Fallback: no appointment_id, only show dashboard link (shouldn't happen)
+            action_buttons_html = f"""
+    <div style="text-align:center;margin:32px 0;">
+      <a href="{dashboard_link}" style="background:#1d70ff;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
+        Review in Dashboard →
+      </a>
+    </div>"""
+
         admin_html = f"""
 <html><body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:20px;">
   <div style="background:#0c1b33;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
@@ -405,13 +465,10 @@ MS Performance Team
       <p><strong>Date:</strong> {appointment_date}</p>
       <p><strong>Time:</strong> {appointment_time}</p>
       {"<p><strong>Vehicle:</strong> " + vehicle_info + "</p>" if vehicle_info else ""}
+      {"<p><strong>Notes:</strong> " + notes + "</p>" if notes else ""}
     </div>
-    <div style="text-align:center;margin:32px 0;">
-      <a href="{dashboard_link}" style="background:#1d70ff;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
-        Review in Dashboard →
-      </a>
-    </div>
-    <p style="color:#6b7280;font-size:13px;">Log in to the admin dashboard to approve or deny this request.</p>
+    {action_buttons_html}
+    <p style="color:#6b7280;font-size:13px;">Click Approve or Deny above to take action directly from this email.</p>
   </div>
 </body></html>"""
 

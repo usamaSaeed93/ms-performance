@@ -56,24 +56,23 @@ export default function DpfEgrPage() {
                 <div className="max-w-2xl space-y-5">
                   <p className="flex items-center gap-3 text-xs font-semibold tracking-widest text-[#7ab6ff] uppercase">
                     <span className="h-px w-12 bg-[#7ab6ff]" />
-                    Restore Efficiency &amp; Reliability
+                    Professional DPF Cleaning Services
                   </p>
                   <h1 className="text-4xl font-black leading-tight sm:text-5xl md:text-6xl">
-                    DPF &amp; EGR Solutions
+                    DPF Cleaning &amp; Diagnostics
                   </h1>
                   <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-xl">
-                    Expert diagnosis, professional cleaning, and targeted software fixes to get your diesel emissions
-                    system back to full health — without the cost of a full replacement.
+                    A blocked Diesel Particulate Filter (DPF) can lead to reduced engine power, poor fuel economy, warning lights, and your vehicle entering limp mode. We provide professional diagnostics, cleaning, and regeneration services to restore your vehicle's performance.
                   </p>
                   <div className="flex flex-wrap gap-3 pt-2">
                     <span className="rounded-full bg-[#1d70ff]/20 border border-[#1d70ff]/40 px-4 py-1.5 text-sm font-medium text-[#7ab6ff]">
-                      Dealer-Level Diagnostics
+                      DPF Diagnostics
                     </span>
                     <span className="rounded-full bg-[#1d70ff]/20 border border-[#1d70ff]/40 px-4 py-1.5 text-sm font-medium text-[#7ab6ff]">
                       DPF Cleaning
                     </span>
                     <span className="rounded-full bg-[#1d70ff]/20 border border-[#1d70ff]/40 px-4 py-1.5 text-sm font-medium text-[#7ab6ff]">
-                      EGR Fault Repair
+                      DPF Regeneration
                     </span>
                   </div>
                 </div>
@@ -85,27 +84,23 @@ export default function DpfEgrPage() {
           <section className="bg-white px-4 py-16 sm:px-6 md:px-8 lg:px-12">
             <div className="max-w-7xl mx-auto grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 items-center">
               <div className="space-y-6">
-                <span className="text-xs font-bold tracking-widest text-[#1d70ff] uppercase">Root Cause Diagnosis</span>
+                <span className="text-xs font-bold tracking-widest text-[#1d70ff] uppercase">Professional Diagnostics</span>
                 <h2 className="text-3xl font-black text-[#0c1b33] sm:text-4xl leading-tight">
-                  Keep It Clean,<br />Keep It Running
+                  Accurate Diagnosis,<br />Effective Solutions
                 </h2>
                 <p className="text-base text-[#5c6c86] leading-relaxed">
-                  Modern diesel engines depend on complex emissions systems to meet legal standards. When the DPF
-                  blocks or the EGR valve sticks, performance plummets, fuel economy tanks, and your dashboard lights
-                  up. Most garages simply replace parts. We find the root cause.
+                  Using advanced diagnostic equipment, our experienced technicians accurately identify the cause of DPF faults before recommending the most effective solution for your vehicle.
                 </p>
                 <p className="text-base text-[#5c6c86] leading-relaxed">
-                  Using dealer-level diagnostic equipment, we pinpoint whether the issue is a faulty sensor, a
-                  software glitch, a driving pattern issue, or genuine mechanical failure — and then apply the most
-                  cost-effective, reliable fix available.
+                  If you're experiencing any symptoms of a blocked DPF, it's important to have your vehicle inspected before the problem becomes more expensive to repair. We help you avoid the cost of unnecessary DPF replacement.
                 </p>
                 <ul className="space-y-3 pt-2">
                   {[
-                    "Full dealer-level fault code diagnosis",
-                    "Forced & chemical DPF regeneration",
-                    "EGR valve cleaning, repair & replacement",
-                    "Software reset & recalibration",
-                    "Root-cause analysis to prevent recurrence",
+                    "Accurate identification of root causes",
+                    "Advanced diagnostic equipment",
+                    "Experienced technicians",
+                    "Cost-effective alternatives to replacement",
+                    "Honest advice and recommendations",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-3">
                       <div className="mt-0.5 h-5 w-5 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
@@ -174,15 +169,17 @@ export default function DpfEgrPage() {
                 a turbo boost leak, or simply the wrong driving cycle. Treating the cause means the problem
                 doesn&apos;t come back two months later.
               </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-4 border-t border-white/10">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-4 border-t border-white/10">
                 {[
-                  { value: "90%", label: "DPFs Saved from Replacement" },
-                  { value: "£100s", label: "Avg. Customer Saving" },
-                  { value: "1-Day", label: "Typical Turnaround" },
-                  { value: "5★", label: "Customer Rating" },
+                  { value: "Experts", label: "Experienced DPF specialists" },
+                  { value: "Advanced", label: "Dealer-level diagnostics" },
+                  { value: "Honest", label: "Transparent pricing" },
+                  { value: "Savings", label: "Cost-effective alternatives" },
+                  { value: "Fast", label: "Quick turnaround" },
+                  { value: "Quality", label: "Workmanship guaranteed" },
                 ].map((stat) => (
                   <div key={stat.label} className="space-y-1">
-                    <div className="text-4xl font-black text-[#1d70ff]">{stat.value}</div>
+                    <div className="text-2xl font-black text-[#1d70ff]">{stat.value}</div>
                     <div className="text-sm text-gray-400">{stat.label}</div>
                   </div>
                 ))}
@@ -196,14 +193,12 @@ export default function DpfEgrPage() {
               <div className="bg-gray-50 rounded-3xl p-8 lg:p-12">
                 <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
                   <div className="space-y-6">
-                    <span className="text-xs font-bold tracking-widest text-[#1d70ff] uppercase">The Benefits</span>
+                    <span className="text-xs font-bold tracking-widest text-[#1d70ff] uppercase">Our Services</span>
                     <h2 className="text-3xl font-black text-[#0c1b33] sm:text-4xl">
-                      Benefits of Our DPF &amp; EGR Service
+                      Our DPF Services Include
                     </h2>
                     <p className="text-base text-[#5c6c86] leading-relaxed">
-                      Restoring your emissions system isn&apos;t just about turning off a warning light. Done properly,
-                      it brings back lost power, improves fuel efficiency, and protects the engine from further damage
-                      caused by running in a compromised state.
+                      Whether your vehicle has a blocked DPF, warning light or reduced performance, MS Performance can diagnose the problem and recommend the right solution.
                     </p>
                     <div className="space-y-6">
                       {[
@@ -213,8 +208,8 @@ export default function DpfEgrPage() {
                               <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" stroke="white" strokeWidth="2" strokeLinecap="round" />
                             </svg>
                           ),
-                          title: "Restored Power & Efficiency",
-                          desc: "A clean DPF and properly functioning EGR valve means your engine breathes freely again — power returns and fuel economy improves noticeably.",
+                          title: "DPF Diagnostics",
+                          desc: "We carry out a full diagnostic inspection to identify blocked filters, faulty sensors, regeneration issues and underlying engine faults.",
                         },
                         {
                           icon: (
@@ -222,8 +217,8 @@ export default function DpfEgrPage() {
                               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           ),
-                          title: "Turbo & Engine Protection",
-                          desc: "A restricted DPF forces the turbo to work harder under back pressure. Cleaning protects your turbo from premature failure — a very expensive repair.",
+                          title: "DPF Cleaning",
+                          desc: "Our professional cleaning process removes soot and ash build-up, restoring airflow and improving engine efficiency.",
                         },
                         {
                           icon: (
@@ -232,8 +227,17 @@ export default function DpfEgrPage() {
                               <path d="M12 8v4l3 3" stroke="white" strokeWidth="2" strokeLinecap="round" />
                             </svg>
                           ),
-                          title: "Significant Cost Saving",
-                          desc: "DPF cleaning is a fraction of the cost of replacement, which can run to £1,000–£3,000+. We save the vast majority of DPFs we see.",
+                          title: "Forced DPF Regeneration",
+                          desc: "Where appropriate, we perform a controlled regeneration to safely burn away accumulated soot and return the filter to normal operation.",
+                        },
+                        {
+                          icon: (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          ),
+                          title: "DPF Repairs & Replacement",
+                          desc: "If your DPF is beyond cleaning, we offer expert repair and replacement services using quality components.",
                         },
                       ].map((item, i) => (
                         <div key={i} className="flex items-start gap-4">
@@ -249,17 +253,16 @@ export default function DpfEgrPage() {
                     </div>
                   </div>
                   <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-6 self-start">
-                    <h3 className="text-xl font-black text-[#0c1b33]">What&apos;s Included in Our Service</h3>
+                    <h3 className="text-xl font-black text-[#0c1b33]">Common Signs of a Blocked DPF</h3>
                     <ul className="space-y-4">
                       {[
-                        "Full dealer-level diagnostic scan",
-                        "DPF differential pressure test",
-                        "Forced or chemical DPF regeneration",
-                        "EGR valve inspection & clean/replace",
-                        "Root-cause fault investigation",
-                        "Software reset & recalibration",
-                        "Test drive to verify regeneration cycle",
-                        "Clear report of findings & actions taken",
+                        "DPF warning light illuminated",
+                        "Vehicle in limp mode",
+                        "Loss of engine power",
+                        "Poor fuel economy",
+                        "Excessive exhaust smoke",
+                        "Failed DPF regeneration",
+                        "Engine management light",
                       ].map((item) => (
                         <li key={item} className="flex items-start gap-3">
                           <div className="mt-0.5 h-5 w-5 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">

@@ -125,6 +125,8 @@ class CreateAppointment(PostResource):
                 appointment_time=self.appointment.appointment_time.strftime("%I:%M %p"),
                 service_type=self.appointment.service_type,
                 vehicle_info=vehicle_info,
+                appointment_id=self.appointment.id,
+                notes=self.appointment.notes,
             )
         except Exception as e:
             print(f"Failed to send pending email: {e}")

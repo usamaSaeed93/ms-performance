@@ -7,34 +7,29 @@ import { useServicePageImages } from "@/hooks/useServicePageImage";
 
 const faqs = [
   {
-    question: "What is ECU Remapping and how does it work?",
+    question: "What is remapping?",
     answer:
-      "ECU remapping involves modifying the software in your car's Engine Control Unit (ECU) to optimise performance. We adjust parameters like fuel injection timing, turbo boost pressure, and ignition timing to unlock your vehicle's true potential. This process is done using specialised equipment that reads your current ECU map, modifies it, and writes the optimised version back to your vehicle.",
+      "Car remapping involves modifying a vehicle to enhance its performance, including boosting speed, improving functionality, and enhancing the overall driving experience. This process exclusively applies to existing car models and demands the expertise of professionals to ensure error-free execution.",
   },
   {
-    question: "Will ECU remapping void my warranty?",
+    question: "Is remapping safe for the vehicles?",
     answer:
-      "ECU remapping can potentially affect your manufacturer's warranty, as it modifies the original factory settings. However, we offer warranty protection on our work. We recommend discussing this with your dealer or warranty provider before proceeding. Many customers choose to remap after their warranty period has expired.",
+      "Car remapping, performed by MSPerformance, involves enhancing and optimizing the engine power of a vehicle while adhering to safe limits. Our remapping service takes into account the high tolerance level of your vehicle and considers any applicable warranty claims. A thorough remapping procedure ensures that the engine control unit (ECU) does not approach component failure, making it completely safe for your car. It is crucial to choose a reputable company with skilled remapping experts who can flawlessly execute the job. We commence our car remapping process by thoroughly understanding your vehicle, ensuring improvements are made without any mechanical or component failures.",
   },
   {
-    question: "How long does the ECU remapping process take?",
+    question: "Do you provide a warranty?",
     answer:
-      "The ECU remapping process typically takes between 2–4 hours, depending on your vehicle's make and model. This includes reading the original map, creating the optimised version, testing, and verification. We ensure thorough testing to guarantee optimal performance and reliability.",
+      "While undergoing vehicle remapping with MSPerformance, you can rest assured that your car will not encounter any mechanical or engine-related problems when properly maintained. However, we understand the importance of customer satisfaction, which is why we provide a 30-day money-back guarantee if the remapping results do not meet your desired outcomes or expectations.",
   },
   {
-    question: "Is ECU remapping safe for my vehicle?",
+    question: "What about insurance?",
     answer:
-      "Yes, when performed by experienced professionals like our team at MSPerformance, ECU remapping is completely safe. We use proven calibration techniques and test all modifications on our dyno to ensure your vehicle operates within safe parameters. We never push your engine beyond its safe operating limits.",
+      "Prior to making any modifications to your vehicle, we strongly recommend that clients inform their insurance company to avoid potential complications when filing insurance claims. Many insurance providers do not penalize customers for modifying their cars and transforming them into more fuel-efficient models. Additionally, we offer a conformity certificate if requested by the vehicle owner, ensuring compliance with any applicable regulations or requirements.",
   },
   {
-    question: "What improvements can I expect after ECU remapping?",
+    question: "Do you keep a copy of the original files?",
     answer:
-      "After ECU remapping, you can typically expect a 15–30% increase in power and torque, improved fuel efficiency (especially in diesel vehicles), smoother acceleration, and better throttle response. The exact improvements vary depending on your vehicle's make, model, and current configuration.",
-  },
-  {
-    question: "Do you offer mobile ECU remapping services?",
-    answer:
-      "Yes, we offer mobile ECU remapping services for your convenience. Our qualified technicians can come to your location with all necessary equipment. This service is particularly popular for fleet vehicles and customers who prefer not to visit our workshop.",
+      "At MSPerformance, we prioritize the security of our customers' original car files. We ensure their preservation by storing them in a secure archive, allowing you the option to restore your vehicle to its original configuration if the need arises in the future. This service provides you with peace of mind, knowing that your car's original settings can be reinstated whenever required, guaranteeing flexibility and preserving the integrity of your vehicle.",
   },
 ];
 
@@ -219,52 +214,57 @@ export default function ServicesPage() {
                   <div className="space-y-6">
                     <span className="text-xs font-bold tracking-widest text-[#1d70ff] uppercase">The Benefits</span>
                     <h2 className="text-3xl font-black text-[#0c1b33] sm:text-4xl">
-                      Key Benefits of ECU Remapping
+                      Key Benefits of the Service
                     </h2>
                     <p className="text-base text-[#5c6c86] leading-relaxed">
-                      A quality ECU remap transforms the entire character of your vehicle — making it safer to
-                      overtake, more responsive in daily traffic, and often more economical on longer runs. Here&apos;s
-                      what you can look forward to after your remap.
+                      Unlock the potential of your car with our service's key benefits, including enhanced
+                      horsepower and performance through software customization.
                     </p>
+                    <ul className="space-y-3 pt-2 pb-4">
+                      {[
+                        "Precise Workmanship, Exceeding Customer Expectations",
+                        "100% Committed to Excellence in Every Project",
+                        "Extensive Selection of Premium Performance Upgrades",
+                      ].map((item) => (
+                        <li key={item} className="flex items-start gap-3">
+                          <div className="mt-0.5 h-5 w-5 rounded-full bg-[#22c55e] flex items-center justify-center flex-shrink-0">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                              <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                          <span className="text-sm font-semibold text-[#5c6c86]">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
                     <div className="space-y-6">
                       {[
                         {
                           icon: (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                              <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           ),
-                          title: "Increased Safety",
-                          desc: "Faster overtaking response means less time in oncoming lanes. Our remaps deliver power precisely where you need it, when you need it most.",
+                          title: "Increase Safety",
+                          desc: "Dedicated to auto repair done right the first time",
                         },
                         {
                           icon: (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                               <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2" />
                               <polyline points="12 6 12 12 16 14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           ),
-                          title: "Fast, Transparent Process",
-                          desc: "Most remaps are completed in just 2–4 hours, including a full dyno run before and after. No hidden fees — the price you see is the price you pay.",
-                        },
-                        {
-                          icon: (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          ),
-                          title: "Proven, Data-Backed Results",
-                          desc: "Every remap is validated with before-and-after dyno graphs. You leave knowing exactly what you gained — not just claims, but hard numbers.",
+                          title: "Time-Saving",
+                          desc: "Our remappers install the perfect remap for your car in minutes",
                         },
                       ].map((item, i) => (
-                        <div key={i} className="flex items-start gap-4">
-                          <div className="flex-shrink-0 h-11 w-11 rounded-full bg-[#1d70ff] flex items-center justify-center">
+                        <div key={i} className="flex items-start gap-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                          <div className="flex-shrink-0 h-16 w-16 bg-[#1d70ff] flex items-center justify-center">
                             {item.icon}
                           </div>
                           <div>
-                            <h3 className="font-bold text-[#0c1b33] text-lg">{item.title}</h3>
-                            <p className="mt-1 text-sm text-[#5c6c86] leading-relaxed">{item.desc}</p>
+                            <h3 className="font-bold text-[#0c1b33] text-xl">{item.title}</h3>
+                            <p className="mt-2 text-sm text-[#5c6c86] leading-relaxed">{item.desc}</p>
                           </div>
                         </div>
                       ))}
