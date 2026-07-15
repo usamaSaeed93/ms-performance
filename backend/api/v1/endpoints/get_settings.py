@@ -65,8 +65,11 @@ class GetSettings(GetResource):
             self.logger.warning(f"Could not regenerate presigned URL: {e}")
             return url
 
-    def _refresh_value(self, value: str, r2_client, bucket_name: str) -> str:
-        """Refresh a setting value — handles both a plain URL and a JSON array of URLs."""
+    def _refresh_value(self, value: str, transform) -> str:
+        """Refresh a setting value — handles both a plain URL and a JSON array of URLs.
+
+        *transform* is a callable that maps a single URL to its refreshed value.
+        """
         if not value:
             return value
 
@@ -78,11 +81,7 @@ class GetSettings(GetResource):
                 urls = json.loads(stripped)
                 if isinstance(urls, list):
                     return json.dumps([
-                        self._regenerate_url(u, r2_client, bucket_name)
-                        if isinstance(u, str)
-                        and self._is_r2_presigned_url(u)
-                        and self._url_is_expiring_soon(u)
-                        else u
+                        transform(u) if isinstance(u, str) else u
                         for u in urls
                     ])
             except Exception:
@@ -90,9 +89,7 @@ class GetSettings(GetResource):
             return value
 
         # Plain URL
-        if self._is_r2_presigned_url(value) and self._url_is_expiring_soon(value):
-            return self._regenerate_url(value, r2_client, bucket_name)
-        return value
+        return transform(value)
 
     # ------------------------------------------------------------------
     # Main flow
@@ -104,9 +101,13 @@ class GetSettings(GetResource):
 
     async def _refresh_expired_urls(self, settings):
         """
-        Detect R2 presigned URLs that are expired or within 48 h of expiry,
-        regenerate them, persist the fresh URLs to the database, and return
-        SettingSchema objects so the response always contains valid URLs.
+        Ensure R2 image URLs stored in settings never break.
+
+        When a permanent public base URL is configured (``R2_PUBLIC_URL``), any
+        stored presigned/direct R2 URL is rewritten to the permanent public URL
+        (which never expires). Otherwise we fall back to regenerating presigned
+        URLs that are expired or within 48 h of expiry. Fresh values are
+        persisted so the rewrite happens at most once per object.
         """
         try:
             from core.storage import get_storage
@@ -116,12 +117,24 @@ class GetSettings(GetResource):
 
             r2_client = storage.r2_client
             bucket_name = storage.bucket_name
+
+            if getattr(storage, "public_url", None):
+                # Permanent public URL configured: rewrite to it (no expiry).
+                def transform(url: str) -> str:
+                    return storage.to_public_url(url)
+            else:
+                # No public URL: regenerate presigned URLs nearing expiry.
+                def transform(url: str) -> str:
+                    if self._is_r2_presigned_url(url) and self._url_is_expiring_soon(url):
+                        return self._regenerate_url(url, r2_client, bucket_name)
+                    return url
+
             needs_commit = False
             result = []
 
             for s in settings:
                 original = s.value or ""
-                refreshed = self._refresh_value(original, r2_client, bucket_name)
+                refreshed = self._refresh_value(original, transform)
 
                 if refreshed != original:
                     s.value = refreshed  # mark ORM object dirty for batch commit

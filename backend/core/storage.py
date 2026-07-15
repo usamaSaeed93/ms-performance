@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import BinaryIO, Optional
+from urllib.parse import urlparse
 
 import boto3
 from botocore.client import Config
@@ -49,6 +50,15 @@ class StorageInterface(ABC):
     async def download_file(self, bucket_name: str, object_name: str) -> bytes:
         """Download a file and return bytes"""
         pass
+
+    def to_public_url(self, url: str) -> str:
+        """Rewrite a stored URL to a permanent public URL when possible.
+
+        Base implementation is a no-op; storage backends that expose a public
+        base URL override this to convert expiring/presigned URLs into permanent
+        ones. Non-matching or empty values are returned unchanged.
+        """
+        return url
 
 
 class R2Storage(StorageInterface):
@@ -159,7 +169,15 @@ class R2Storage(StorageInterface):
     async def get_presigned_url(
         self, bucket_name: str, object_name: str, expiration: int = 3600
     ) -> str:
-        """Generate presigned URL for R2"""
+        """Return a URL for the object.
+
+        When a public base URL is configured we return the permanent public URL
+        (which never expires) instead of a short-lived presigned URL.
+        """
+        if self.public_url:
+            base_url = self.public_url.rstrip("/")
+            object_path = object_name.lstrip("/")
+            return f"{base_url}/{object_path}"
         try:
             bucket = self.bucket_name
             url = self.r2_client.generate_presigned_url(
@@ -170,6 +188,44 @@ class R2Storage(StorageInterface):
             return url
         except ClientError as e:
             raise Exception(f"Failed to generate presigned URL: {str(e)}")
+
+    def _extract_object_key(self, url: str) -> Optional[str]:
+        """Extract the R2 object key from a presigned/direct/public R2 URL."""
+        try:
+            path = urlparse(url).path.lstrip("/")
+        except Exception:
+            return None
+        if not path:
+            return None
+        # Presigned/direct S3-style URLs include the bucket as the first path
+        # segment: https://<account>.r2.cloudflarestorage.com/<bucket>/<key>
+        prefix = f"{self.bucket_name}/"
+        if path.startswith(prefix):
+            return path[len(prefix):]
+        # Public dev URLs (pub-*.r2.dev/<key>) and custom domains serve the key
+        # directly at the path root.
+        return path
+
+    def to_public_url(self, url: str) -> str:
+        """Rewrite a presigned/direct R2 URL to the permanent public URL.
+
+        No-op when no public base URL is configured, the value is empty, or the
+        URL does not point at this R2 bucket.
+        """
+        if not url or not self.public_url:
+            return url
+        # Already a public URL for this bucket — leave untouched.
+        base_url = self.public_url.rstrip("/")
+        if url.startswith(base_url + "/"):
+            return url
+        # Only rewrite URLs that point at R2 (presigned or direct endpoint).
+        host = urlparse(url).netloc
+        if "r2.cloudflarestorage.com" not in host and not host.endswith("r2.dev"):
+            return url
+        key = self._extract_object_key(url)
+        if not key:
+            return url
+        return f"{base_url}/{key}"
 
     async def file_exists(self, bucket_name: str, object_name: str) -> bool:
         """Check if file exists in R2"""
