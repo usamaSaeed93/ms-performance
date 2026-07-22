@@ -13,6 +13,18 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { resolveVRM, type VRMResponse } from "@/lib/api/vrm";
+import {
+    DEFAULT_GAINS_CALCULATOR_HERO_IMAGE,
+    DEFAULT_HOME_ABOUT_CONTENT,
+    DEFAULT_HOME_ABOUT_IMAGE,
+    DEFAULT_SERVICES_PAGE_HERO_IMAGE,
+    GAINS_CALCULATOR_HERO_IMAGE_KEY,
+    HOME_ABOUT_CONTENT_KEY,
+    HOME_ABOUT_IMAGE_KEY,
+    SERVICES_PAGE_HERO_IMAGE_KEY,
+    parseHomeAboutContent,
+    type HomeAboutContent,
+} from "@/lib/constants/homeAboutContent";
 
 export default function ConfigurationsPage() {
     const { data: settings, isLoading } = useGetSettingsQuery();
@@ -25,6 +37,15 @@ export default function ConfigurationsPage() {
     const [heroImages, setHeroImages] = useState<string[]>([]);
     const [heroTexts, setHeroTexts] = useState<{ subtitle: string; heading: string }[]>([]);
     const [savingTextIndex, setSavingTextIndex] = useState<number | null>(null);
+
+    const [servicesHeroFile, setServicesHeroFile] = useState<File | null>(null);
+    const [servicesHeroPreview, setServicesHeroPreview] = useState<string | null>(null);
+    const [gainsHeroFile, setGainsHeroFile] = useState<File | null>(null);
+    const [gainsHeroPreview, setGainsHeroPreview] = useState<string | null>(null);
+    const [homeAboutFile, setHomeAboutFile] = useState<File | null>(null);
+    const [homeAboutPreview, setHomeAboutPreview] = useState<string | null>(null);
+    const [homeAboutContent, setHomeAboutContent] = useState<HomeAboutContent>(DEFAULT_HOME_ABOUT_CONTENT);
+    const [savingHomeAbout, setSavingHomeAbout] = useState(false);
 
     // VRM tester state
     const [vrmRegex, setVrmRegex] = useState("");
@@ -83,7 +104,19 @@ export default function ConfigurationsPage() {
             } catch {}
         }
         setHeroTexts([]);
+
+        const aboutRaw = settings.find((s) => s.key === HOME_ABOUT_CONTENT_KEY)?.value;
+        setHomeAboutContent(parseHomeAboutContent(aboutRaw));
     }, [settings, heroImagesRaw, heroImageUrl]);
+
+    const servicesHeroImageUrl =
+        settings?.find((s) => s.key === SERVICES_PAGE_HERO_IMAGE_KEY)?.value ||
+        DEFAULT_SERVICES_PAGE_HERO_IMAGE;
+    const gainsHeroImageUrl =
+        settings?.find((s) => s.key === GAINS_CALCULATOR_HERO_IMAGE_KEY)?.value ||
+        DEFAULT_GAINS_CALCULATOR_HERO_IMAGE;
+    const homeAboutImageUrl =
+        settings?.find((s) => s.key === HOME_ABOUT_IMAGE_KEY)?.value || DEFAULT_HOME_ABOUT_IMAGE;
 
     const handleToggle = async (checked: boolean) => {
         try {
@@ -180,6 +213,45 @@ export default function ConfigurationsPage() {
             toast.error("Failed to save hero text");
         } finally {
             setSavingTextIndex(null);
+        }
+    };
+
+    const handleSingleImageUpload = async (
+        file: File,
+        key: string,
+        description: string,
+        folder: string,
+        onDone: () => void
+    ) => {
+        try {
+            const res = await uploadImage({ file, folder }).unwrap();
+            await updateSetting({
+                key,
+                value: res.url,
+                description,
+                type: "string",
+            }).unwrap();
+            onDone();
+            toast.success("Image updated");
+        } catch {
+            toast.error("Failed to update image");
+        }
+    };
+
+    const handleSaveHomeAboutContent = async () => {
+        setSavingHomeAbout(true);
+        try {
+            await updateSetting({
+                key: HOME_ABOUT_CONTENT_KEY,
+                value: JSON.stringify(homeAboutContent),
+                description: "Homepage Customized Performance Solutions section text",
+                type: "string",
+            }).unwrap();
+            toast.success("Homepage about text saved");
+        } catch {
+            toast.error("Failed to save homepage about text");
+        } finally {
+            setSavingHomeAbout(false);
         }
     };
 
@@ -415,6 +487,345 @@ export default function ConfigurationsPage() {
                         </CardContent>
                     </Card>
                 )}
+
+                {/* Services page hero background */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <ImageIcon className="h-5 w-5" />
+                            Services Page Hero Image
+                        </CardTitle>
+                        <CardDescription>
+                            Background image behind “Our Premium Services” on the main Services page.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="relative h-48 w-full rounded-lg overflow-hidden border bg-muted">
+                            <Image
+                                src={servicesHeroPreview || servicesHeroImageUrl}
+                                alt="Services page hero"
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+                        <label
+                            htmlFor="services-hero-image"
+                            className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                        >
+                            <Upload className="h-5 w-5 text-muted-foreground mb-1" />
+                            <p className="text-xs text-muted-foreground">
+                                {servicesHeroFile ? (
+                                    <span className="font-medium text-foreground">{servicesHeroFile.name}</span>
+                                ) : (
+                                    <>Click to change services hero image</>
+                                )}
+                            </p>
+                            <Input
+                                id="services-hero-image"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    if (!f) return;
+                                    setServicesHeroFile(f);
+                                    const reader = new FileReader();
+                                    reader.onload = (ev) => setServicesHeroPreview(ev.target?.result as string);
+                                    reader.readAsDataURL(f);
+                                }}
+                            />
+                        </label>
+                        {servicesHeroFile && (
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    className="flex-1"
+                                    disabled={isUploading || isUpdating}
+                                    onClick={() =>
+                                        handleSingleImageUpload(
+                                            servicesHeroFile,
+                                            SERVICES_PAGE_HERO_IMAGE_KEY,
+                                            "Background image for /services hero (Our Premium Services)",
+                                            "services",
+                                            () => {
+                                                setServicesHeroFile(null);
+                                                setServicesHeroPreview(null);
+                                            }
+                                        )
+                                    }
+                                >
+                                    {(isUploading || isUpdating) ? (
+                                        <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Uploading...</>
+                                    ) : (
+                                        <><Upload className="h-3 w-3 mr-1" /> Upload & Save</>
+                                    )}
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        setServicesHeroFile(null);
+                                        setServicesHeroPreview(null);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Gains calculator hero background */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <ImageIcon className="h-5 w-5" />
+                            Gains Calculator Hero Image
+                        </CardTitle>
+                        <CardDescription>
+                            Background image behind “Vehicle Gains” on the Gains Calculator page.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="relative h-48 w-full rounded-lg overflow-hidden border bg-muted">
+                            <Image
+                                src={gainsHeroPreview || gainsHeroImageUrl}
+                                alt="Gains calculator hero"
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+                        <label
+                            htmlFor="gains-hero-image"
+                            className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                        >
+                            <Upload className="h-5 w-5 text-muted-foreground mb-1" />
+                            <p className="text-xs text-muted-foreground">
+                                {gainsHeroFile ? (
+                                    <span className="font-medium text-foreground">{gainsHeroFile.name}</span>
+                                ) : (
+                                    <>Click to change gains calculator hero image</>
+                                )}
+                            </p>
+                            <Input
+                                id="gains-hero-image"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    if (!f) return;
+                                    setGainsHeroFile(f);
+                                    const reader = new FileReader();
+                                    reader.onload = (ev) => setGainsHeroPreview(ev.target?.result as string);
+                                    reader.readAsDataURL(f);
+                                }}
+                            />
+                        </label>
+                        {gainsHeroFile && (
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    className="flex-1"
+                                    disabled={isUploading || isUpdating}
+                                    onClick={() =>
+                                        handleSingleImageUpload(
+                                            gainsHeroFile,
+                                            GAINS_CALCULATOR_HERO_IMAGE_KEY,
+                                            "Background image for /gains-calculator hero (Vehicle Gains)",
+                                            "hero",
+                                            () => {
+                                                setGainsHeroFile(null);
+                                                setGainsHeroPreview(null);
+                                            }
+                                        )
+                                    }
+                                >
+                                    {(isUploading || isUpdating) ? (
+                                        <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Uploading...</>
+                                    ) : (
+                                        <><Upload className="h-3 w-3 mr-1" /> Upload & Save</>
+                                    )}
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        setGainsHeroFile(null);
+                                        setGainsHeroPreview(null);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Homepage about section */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Type className="h-5 w-5" />
+                            Homepage — Customized Performance Solutions
+                        </CardTitle>
+                        <CardDescription>
+                            Edit the about section text and the adjacent image on the homepage.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-5">
+                        <div className="space-y-3">
+                            <Label className="text-xs font-semibold">Section image</Label>
+                            <div className="relative h-48 w-full rounded-lg overflow-hidden border bg-muted">
+                                <Image
+                                    src={homeAboutPreview || homeAboutImageUrl}
+                                    alt="Homepage about"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <label
+                                htmlFor="home-about-image"
+                                className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                            >
+                                <Upload className="h-5 w-5 text-muted-foreground mb-1" />
+                                <p className="text-xs text-muted-foreground">
+                                    {homeAboutFile ? (
+                                        <span className="font-medium text-foreground">{homeAboutFile.name}</span>
+                                    ) : (
+                                        <>Click to change adjacent image</>
+                                    )}
+                                </p>
+                                <Input
+                                    id="home-about-image"
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        const f = e.target.files?.[0];
+                                        if (!f) return;
+                                        setHomeAboutFile(f);
+                                        const reader = new FileReader();
+                                        reader.onload = (ev) => setHomeAboutPreview(ev.target?.result as string);
+                                        reader.readAsDataURL(f);
+                                    }}
+                                />
+                            </label>
+                            {homeAboutFile && (
+                                <div className="flex gap-2">
+                                    <Button
+                                        size="sm"
+                                        className="flex-1"
+                                        disabled={isUploading || isUpdating}
+                                        onClick={() =>
+                                            handleSingleImageUpload(
+                                                homeAboutFile,
+                                                HOME_ABOUT_IMAGE_KEY,
+                                                "Homepage Customized Performance Solutions adjacent image",
+                                                "home",
+                                                () => {
+                                                    setHomeAboutFile(null);
+                                                    setHomeAboutPreview(null);
+                                                }
+                                            )
+                                        }
+                                    >
+                                        {(isUploading || isUpdating) ? (
+                                            <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Uploading...</>
+                                        ) : (
+                                            <><Upload className="h-3 w-3 mr-1" /> Upload & Save</>
+                                        )}
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setHomeAboutFile(null);
+                                            setHomeAboutPreview(null);
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="border-t" />
+
+                        <div className="grid gap-3">
+                            <div className="grid gap-1.5">
+                                <Label className="text-xs font-medium">Eyebrow</Label>
+                                <Input
+                                    className="h-9 text-sm"
+                                    value={homeAboutContent.eyebrow}
+                                    onChange={(e) =>
+                                        setHomeAboutContent((prev) => ({ ...prev, eyebrow: e.target.value }))
+                                    }
+                                />
+                            </div>
+                            <div className="grid gap-1.5">
+                                <Label className="text-xs font-medium">Title</Label>
+                                <Textarea
+                                    className="text-sm"
+                                    rows={2}
+                                    value={homeAboutContent.title}
+                                    onChange={(e) =>
+                                        setHomeAboutContent((prev) => ({ ...prev, title: e.target.value }))
+                                    }
+                                />
+                            </div>
+                            <div className="grid gap-1.5">
+                                <Label className="text-xs font-medium">Paragraph</Label>
+                                <Textarea
+                                    className="text-sm"
+                                    rows={5}
+                                    value={homeAboutContent.paragraph}
+                                    onChange={(e) =>
+                                        setHomeAboutContent((prev) => ({ ...prev, paragraph: e.target.value }))
+                                    }
+                                />
+                            </div>
+                            <div className="grid gap-1.5">
+                                <Label className="text-xs font-medium">Bullets (one per line)</Label>
+                                <Textarea
+                                    className="text-sm"
+                                    rows={4}
+                                    value={homeAboutContent.bullets.join("\n")}
+                                    onChange={(e) =>
+                                        setHomeAboutContent((prev) => ({
+                                            ...prev,
+                                            bullets: e.target.value
+                                                .split("\n")
+                                                .map((line) => line.trim())
+                                                .filter(Boolean),
+                                        }))
+                                    }
+                                />
+                            </div>
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    className="flex-1"
+                                    disabled={savingHomeAbout || isUpdating}
+                                    onClick={handleSaveHomeAboutContent}
+                                >
+                                    {savingHomeAbout ? (
+                                        <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Saving...</>
+                                    ) : (
+                                        "Save About Text"
+                                    )}
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setHomeAboutContent(DEFAULT_HOME_ABOUT_CONTENT)}
+                                >
+                                    Reset defaults
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 {/* VRM API Tester */}
                 <Card>

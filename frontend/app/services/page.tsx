@@ -6,9 +6,23 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { services as baseServices } from "@/lib/constants/services";
 import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
+import { useGetSettingsQuery } from "@/lib/store/api/settingsApi";
+import {
+    DEFAULT_SERVICES_PAGE_HERO_IMAGE,
+    SERVICES_PAGE_HERO_IMAGE_KEY,
+} from "@/lib/constants/homeAboutContent";
 
 export default function ServicesPage() {
     const { data: servicesData, isLoading: isServicesLoading } = useGetServicesQuery();
+    const { data: settings, isLoading: isSettingsLoading } = useGetSettingsQuery();
+
+    const heroImage = useMemo(() => {
+        if (isSettingsLoading) return null;
+        return (
+            settings?.find((s) => s.key === SERVICES_PAGE_HERO_IMAGE_KEY)?.value ||
+            DEFAULT_SERVICES_PAGE_HERO_IMAGE
+        );
+    }, [settings, isSettingsLoading]);
 
     // Use API data with dynamic images, fallback to static
     const allServices = useMemo(() => {
@@ -63,14 +77,16 @@ export default function ServicesPage() {
             <main className="space-y-20 pb-20">
                 {/* Hero Section */}
                 <section className="relative overflow-hidden bg-[#030814] text-white">
-                    <Image
-                        src="/images/services/IMG_4394.png"
-                        alt="Our Services"
-                        width={1600}
-                        height={700}
-                        className="absolute inset-0 h-full w-full object-cover object-center scale-110 origin-center opacity-60"
-                        priority
-                    />
+                    {heroImage && (
+                        <Image
+                            src={heroImage}
+                            alt="Our Services"
+                            width={1600}
+                            height={700}
+                            className="absolute inset-0 h-full w-full object-cover object-center scale-110 origin-center opacity-60"
+                            priority
+                        />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/50 to-black" />
                     <div className="relative px-4 py-20 sm:px-6 sm:py-24 md:px-8 md:py-32 lg:px-12">
                         <div className="space-y-4 max-w-4xl mx-auto text-center sm:space-y-6">

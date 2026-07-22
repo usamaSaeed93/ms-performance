@@ -35,6 +35,11 @@ import {
   detectEngineType,
   estimateEngineParams,
 } from "@/lib/utils/dynoGenerator";
+import { useGetSettingsQuery } from "@/lib/store/api/settingsApi";
+import {
+  DEFAULT_GAINS_CALCULATOR_HERO_IMAGE,
+  GAINS_CALCULATOR_HERO_IMAGE_KEY,
+} from "@/lib/constants/homeAboutContent";
 
 // Custom Gauge Component matching the design
 // Custom Gauge Component matching the design
@@ -150,6 +155,15 @@ function GainsCalculatorContent() {
   const searchParams = useSearchParams();
   const regParam = searchParams?.get("reg");
   const engineParam = searchParams?.get("engine");
+  const { data: settings, isLoading: isSettingsLoading } = useGetSettingsQuery();
+
+  const heroImage = useMemo(() => {
+    if (isSettingsLoading) return null;
+    return (
+      settings?.find((s) => s.key === GAINS_CALCULATOR_HERO_IMAGE_KEY)?.value ||
+      DEFAULT_GAINS_CALCULATOR_HERO_IMAGE
+    );
+  }, [settings, isSettingsLoading]);
 
   // Manual selection state
   const [selectedBrandId, setSelectedBrandId] = useState<string>("");
@@ -641,14 +655,16 @@ function GainsCalculatorContent() {
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-[#030814] text-white h-[250px] sm:h-[350px] md:h-[450px] lg:h-[530px]">
               {/* Background Image */}
-              <Image
-                src="/images/hero/gainsHero.png"
-                alt="Vehicle Gains"
-                width={1600}
-                height={530}
-                className="absolute inset-0 h-full w-full object-cover"
-                priority
-              />
+              {heroImage && (
+                <Image
+                  src={heroImage}
+                  alt="Vehicle Gains"
+                  width={1600}
+                  height={530}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  priority
+                />
+              )}
               {/* Dark overlay for text readability */}
               <div className="absolute inset-0 bg-black/50 pointer-events-none z-10" />
               <div className="relative h-full flex items-center px-4 sm:px-6 md:px-8 lg:px-12 py-8 sm:py-12 md:py-16 lg:py-20 z-20">

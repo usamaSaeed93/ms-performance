@@ -37,6 +37,12 @@ import { useGetServicesQuery } from "@/lib/store/api/servicesApi";
 import { useGetSettingsQuery } from "@/lib/store/api/settingsApi";
 import { useGetClientsQuery } from "@/lib/store/api/clientsApi";
 import { useGetGoogleReviewsQuery } from "@/lib/store/api/googleReviewsApi";
+import {
+  DEFAULT_HOME_ABOUT_IMAGE,
+  HOME_ABOUT_CONTENT_KEY,
+  HOME_ABOUT_IMAGE_KEY,
+  parseHomeAboutContent,
+} from "@/lib/constants/homeAboutContent";
 
 const DEFAULT_HERO_IMAGE = "/images/services/hero-dyno-v2-ue.png";
 
@@ -264,6 +270,19 @@ export default function HomePage() {
     } catch {}
     return [];
   }, [settingsData]);
+
+  const homeAboutContent = useMemo(() => {
+    const raw = settingsData?.find((s) => s.key === HOME_ABOUT_CONTENT_KEY)?.value;
+    return parseHomeAboutContent(raw);
+  }, [settingsData]);
+
+  const homeAboutImage = useMemo(() => {
+    if (isSettingsLoading) return null;
+    return (
+      settingsData?.find((s) => s.key === HOME_ABOUT_IMAGE_KEY)?.value ||
+      DEFAULT_HOME_ABOUT_IMAGE
+    );
+  }, [settingsData, isSettingsLoading]);
 
   const allTestimonials = [...testimonials];
 
@@ -918,20 +937,16 @@ export default function HomePage() {
             <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
               <div className="space-y-4 sm:space-y-5 md:space-y-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#1d70ff] sm:text-sm">
-                  Customized Performance Solutions
+                  {homeAboutContent.eyebrow}
                 </p>
                 <h2 className="text-3xl font-black text-[#0c1b33] sm:text-4xl md:text-5xl">
-                  We&apos;re Chelmsford&apos;s Finest Car Tuning &amp; Exhaust Destination
+                  {homeAboutContent.title}
                 </h2>
                 <p className="text-sm text-[#5c6c86] sm:text-base md:text-lg leading-relaxed">
-                  With over a decade of experience in car tuning and custom exhaust installation, we are industry leaders. Our advanced programming capabilities unlock unique features for your vehicle. From exhilarating pops and bangs to mesmerizing flames, we can customize your exhaust system to deliver stunning effects. Trust us to elevate your car&apos;s performance and sound to new heights.
+                  {homeAboutContent.paragraph}
                 </p>
                 <ul className="space-y-3 pt-1">
-                  {[
-                    "Precise Workmanship, Exceeding Customer Expectations",
-                    "100% Committed to Excellence in Every Project",
-                    "Extensive Selection of Premium Performance Upgrades",
-                  ].map((item) => (
+                  {homeAboutContent.bullets.map((item) => (
                     <li key={item} className="flex items-center gap-3">
                       <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#1d70ff]">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
@@ -944,13 +959,15 @@ export default function HomePage() {
                 </ul>
               </div>
               <div className="relative h-[250px] w-full overflow-hidden sm:h-[300px] md:h-[400px] lg:h-full">
-                <Image
-                  src="/images/hero/mechanic-working.png"
-                  alt="Mechanic working"
-                  width={600}
-                  height={500}
-                  className="h-full w-full rounded-xl object-cover sm:rounded-2xl md:rounded-[20px]"
-                />
+                {homeAboutImage && (
+                  <Image
+                    src={homeAboutImage}
+                    alt="Mechanic working"
+                    width={600}
+                    height={500}
+                    className="h-full w-full rounded-xl object-cover sm:rounded-2xl md:rounded-[20px]"
+                  />
+                )}
               </div>
             </div>
 
