@@ -21,7 +21,8 @@ class UpdateService(PutResource):
             service_id=int(service_id),
             image_url=self.request_data.image_url,
             link=self.request_data.link,
-            description=self.request_data.description
+            description=self.request_data.description,
+            page_content=self.request_data.page_content,
         )
         if not self.service:
             raise HTTPException(status_code=404, detail="Service not found")

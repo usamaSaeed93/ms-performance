@@ -20,6 +20,12 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { SERVICE_PAGES, ServiceImageType } from "@/hooks/useServicePageImage";
+import { ServicePageContentEditor } from "@/lib/components/admin/ServicePageContentEditor";
+import { SERVICE_PAGE_CONTENT_DEFAULTS } from "@/lib/constants/servicePageContentDefaults";
+import {
+    mergeServicePageContent,
+    type ServicePageContent,
+} from "@/lib/types/servicePageContent";
 
 // Color tags for services
 const SERVICE_COLORS: Record<string, { bg: string; text: string; border: string; label: string }> = {
@@ -39,6 +45,9 @@ const TITLE_TO_SLUG: Record<string, string> = {
     "Servicing": "servicing",
     "Number Plates": "number-plates",
     "Adblue Solutions": "adblue-solutions",
+    "Performance Tuning": "performance-tuning",
+    "ECU Diagnostics": "ecu-diagnostics",
+    "Stage Upgrades": "stage-upgrades",
 };
 
 // Tag style config for image uploaders
@@ -177,6 +186,7 @@ export default function ServicesPage() {
         link: "",
         description: "",
     });
+    const [pageContent, setPageContent] = useState<ServicePageContent | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const getSettingValue = useCallback((key: string) => {
@@ -190,6 +200,13 @@ export default function ServicesPage() {
             link: service.link || "",
             description: service.description || "",
         });
+        const slug = TITLE_TO_SLUG[service.title] || "";
+        const defaults = slug ? SERVICE_PAGE_CONTENT_DEFAULTS[slug] : null;
+        setPageContent(
+            defaults
+                ? mergeServicePageContent(defaults, service.page_content ?? null)
+                : null
+        );
         setSelectedFile(null);
         setIsOpen(true);
     };
@@ -221,11 +238,22 @@ export default function ServicesPage() {
             await updateService({
                 id: selectedService.id,
                 ...formData,
+                ...(pageContent ? { page_content: pageContent } : {}),
             }).unwrap();
             toast.success("Service updated successfully");
             setIsOpen(false);
         } catch (error) {
             toast.error("Failed to update service");
+        }
+    };
+
+    const handleResetPageContent = () => {
+        if (!selectedService) return;
+        const slug = TITLE_TO_SLUG[selectedService.title] || "";
+        const defaults = slug ? SERVICE_PAGE_CONTENT_DEFAULTS[slug] : null;
+        if (defaults) {
+            setPageContent(structuredClone(defaults));
+            toast.message("Page text reset to defaults (save to apply)");
         }
     };
 
@@ -254,11 +282,6 @@ export default function ServicesPage() {
         );
     }
 
-    const excludedTitles = new Set([
-        "ECU Diagnostics",
-        "Stage Upgrades",
-        "Performance Tuning",
-    ]);
     const selectedSlug = selectedService ? getSlug(selectedService.title) : "";
     const selectedConfig = selectedSlug ? SERVICE_PAGES[selectedSlug] : null;
 
@@ -267,12 +290,12 @@ export default function ServicesPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Services</h1>
                 <p className="text-muted-foreground">
-                    Manage the thumbnails, detail page images, and information for each service.
+                    Manage thumbnails, detail page images, and editable page text for each service.
                 </p>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {services?.filter((service) => !excludedTitles.has(service.title)).map((service) => {
+                {services?.map((service) => {
                     const color = getColorTag(service.title);
                     const slug = getSlug(service.title);
                     const hasDetailImages = slug && SERVICE_PAGES[slug];
@@ -330,7 +353,7 @@ export default function ServicesPage() {
 
             {/* Edit Dialog */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-[720px] max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             {selectedService?.title}
@@ -341,7 +364,7 @@ export default function ServicesPage() {
                             )}
                         </DialogTitle>
                         <DialogDescription>
-                            Manage the thumbnail, detail page images, and information for this service.
+                            Manage the thumbnail, detail page images, page text, and card information for this service.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -541,6 +564,26 @@ export default function ServicesPage() {
                                 />
                             </div>
                         </div>
+
+                        {pageContent && (
+                            <>
+                                <div className="border-t" />
+                                <div className="flex justify-end">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleResetPageContent}
+                                    >
+                                        Reset page text to defaults
+                                    </Button>
+                                </div>
+                                <ServicePageContentEditor
+                                    value={pageContent}
+                                    onChange={setPageContent}
+                                />
+                            </>
+                        )}
                     </div>
 
                     <DialogFooter>

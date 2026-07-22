@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, TIMESTAMP, TEXT
+from sqlalchemy import Column, Integer, String, TIMESTAMP, TEXT, JSON
 
 from db.base_class import Base
 
@@ -16,6 +16,8 @@ class Service(Base):
     link = Column(String(500), nullable=True)
     image_url = Column(String(500), nullable=True)
     display_order = Column(Integer, default=0)
+    # Structured detail-page copy (hero, sections, FAQs). Null = use frontend defaults.
+    page_content = Column(JSON, nullable=True)
 
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
     updated_at = Column(

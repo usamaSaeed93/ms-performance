@@ -4,33 +4,12 @@ import Image from "next/image";
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { useServicePageImages } from "@/hooks/useServicePageImage";
-
-const faqs = [
-    {
-        question: "What does ECU diagnostics do?",
-        answer:
-            "ECU diagnostics involve using specialized computers to communicate with your car's On-Board Diagnostics (OBD) system. This allows us to read fault codes, view live sensor data, and check the health of various electronic modules to pinpoint issues.",
-    },
-    {
-        question: "Why is my engine warning light on?",
-        answer:
-            "The 'Check Engine' light can trigger for hundreds of reasons, from a loose gas cap to a failing catalytic converter. Our diagnostics service will read the specific error code to tell you exactly what is wrong, avoiding guesswork.",
-    },
-    {
-        question: "Can you reset airbag or ABS lights?",
-        answer:
-            "Yes, we can diagnose and reset warning lights for Airbags, ABS, Traction Control, and more—provided the underlying fault has been rectified. We prioritize safety and will ensure the system is functioning correctly.",
-    },
-    {
-        question: "Do you offer dealer-level coding?",
-        answer:
-            "For many makes, yes. We can perform coding and adaptation for new modules, unlock hidden features, and update software versions, offering a dealer-level service at a fraction of the cost.",
-    },
-];
+import { useServicePageContent } from "@/hooks/useServicePageContent";
 
 export default function EcuDiagnosticsPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
     const { heroImage, content1Image, content2Image } = useServicePageImages("ecu-diagnostics");
+    const { content } = useServicePageContent("ecu-diagnostics");
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -55,10 +34,10 @@ export default function EcuDiagnosticsPage() {
                             <div className="space-y-4 max-w-3xl sm:space-y-5 md:space-y-6">
                                 <p className="flex items-center gap-2 text-xs font-semibold text-[#7ab6ff] sm:gap-3 sm:text-sm animate-subtitle">
                                     <span className="h-px w-8 bg-[#7ab6ff] sm:w-12" />
-                                    Pinpoint Accuracy
+                                    {content.hero.eyebrow}
                                 </p>
                                 <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl lg:text-6xl animate-heading">
-                                    ECU Diagnostics
+                                    {content.hero.title}
                                 </h1>
                             </div>
                         </div>
@@ -70,11 +49,13 @@ export default function EcuDiagnosticsPage() {
                             <div className="space-y-4 flex flex-col sm:space-y-5 md:space-y-6">
                                 <div className="space-y-4 sm:space-y-5 md:space-y-6">
                                     <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl lg:text-5xl">
-                                        Stop Guessing, Start Fixing
+                                        {content.intro.title}
                                     </h2>
-                                    <p className="text-sm leading-relaxed text-[#5c6c86] sm:text-base md:text-lg">
-                                        Modern cars are computers on wheels. When a problem arises, you need more than just a spanner; you need advanced diagnostic capability. We use state-of-the-art diagnostic tools to talk to your car's ECU, TCM, BCM, and other modules to identify faults quickly and accurately.
-                                    </p>
+                                    {content.intro.paragraphs.map((paragraph, index) => (
+                                        <p key={index} className="text-sm leading-relaxed text-[#5c6c86] sm:text-base md:text-lg">
+                                            {paragraph}
+                                        </p>
+                                    ))}
                                 </div>
                                 <div className="relative overflow-hidden rounded-[20px] flex-shrink-0 animate-slide-right">
                                     {content1Image && (
@@ -106,10 +87,10 @@ export default function EcuDiagnosticsPage() {
                     <section className="px-8 py-10 lg:px-12">
                         <div className="mx-auto max-w-4xl text-center space-y-6">
                             <h2 className="text-4xl font-black text-[#0c1b33] lg:text-5xl">
-                                Advanced Troubleshooting
+                                {content.why.title}
                             </h2>
                             <p className="text-base leading-relaxed text-[#0c1b33] lg:text-lg">
-                                We don't just read codes; we interpret live data. By analyzing sensor outputs in real-time, we can catch intermittent faults and issues that haven't yet triggered a warning light. This preventative approach saves you money on major repairs down the line.
+                                {content.why.paragraph}
                             </p>
                         </div>
                     </section>
@@ -120,36 +101,22 @@ export default function EcuDiagnosticsPage() {
                             <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-12">
                                 <div className="space-y-4 animate-slide-left sm:space-y-5 md:space-y-6">
                                     <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl lg:text-4xl animate-heading">
-                                        Diagnostic Services
+                                        {content.benefits.title}
                                     </h2>
                                     <p className="text-sm leading-relaxed text-[#0c1b33] sm:text-base md:text-lg">
-                                        Comprehensive scanning for all vehicle makes and models.
+                                        {content.benefits.paragraph}
                                     </p>
                                     <ul className="space-y-4">
-                                        <li className="flex items-start gap-3">
-                                            <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
-                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-base text-[#0c1b33]">Full System Scans</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
-                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-base text-[#0c1b33]">Live Data Logging</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
-                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-base text-[#0c1b33]">Module Coding & Programming</span>
-                                        </li>
+                                        {content.benefits.bullets.map((bullet, index) => (
+                                            <li key={index} className="flex items-start gap-3">
+                                                <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
+                                                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </div>
+                                                <span className="text-base text-[#0c1b33]">{bullet}</span>
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                                 <div className="space-y-8">
@@ -160,8 +127,8 @@ export default function EcuDiagnosticsPage() {
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 className="text-xl font-bold text-[#0c1b33]">Clear Reports</h3>
-                                            <p className="mt-2 text-base text-[#0c1b33]">We explain the jargon so you know exactly what is wrong.</p>
+                                            <h3 className="text-xl font-bold text-[#0c1b33]">{content.benefits.features[0].title}</h3>
+                                            <p className="mt-2 text-base text-[#0c1b33]">{content.benefits.features[0].desc}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -173,10 +140,10 @@ export default function EcuDiagnosticsPage() {
                     <section className="px-8 py-10 lg:px-12">
                         <div className="mx-auto max-w-4xl space-y-8">
                             <h2 className="text-center text-4xl font-black text-[#0c1b33] lg:text-5xl">
-                                Frequently Asked Questions
+                                {content.faq.title}
                             </h2>
                             <div className="space-y-4">
-                                {faqs.map((faq, index) => (
+                                {content.faq.items.map((faq, index) => (
                                     <div key={index} className="rounded-[16px] bg-white shadow-sm">
                                         <button
                                             onClick={() => setOpenFaq(openFaq === index ? null : index)}
@@ -208,4 +175,3 @@ export default function EcuDiagnosticsPage() {
         </div>
     );
 }
-

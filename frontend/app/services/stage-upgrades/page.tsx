@@ -4,33 +4,12 @@ import Image from "next/image";
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { useServicePageImages } from "@/hooks/useServicePageImage";
-
-const faqs = [
-    {
-        question: "What is Stage 1?",
-        answer:
-            "Stage 1 is the entry-level upgrade, usually consisting of just an ECU Remap (software update). It requires no hardware changes and optimizes the stock components for better power and efficiency.",
-    },
-    {
-        question: "What is Stage 2?",
-        answer:
-            "Stage 2 adds hardware modifications to the Stage 1 map. This typically includes a freer-flowing exhaust (downpipe/cat-back) and an intake system upgrade (intercooler/induction kit) to handle the increased heat and airflow.",
-    },
-    {
-        question: "What is Stage 3?",
-        answer:
-            "Stage 3 is a serious upgrade involving changing the turbocharger itself, along with injectors, fuel pumps, and often engine internal strengthening. This transforms the car's performance capabilities entirely.",
-    },
-    {
-        question: "Are these packages reliable?",
-        answer:
-            "Yes, our compiled packages are tested to work harmoniously. We select components that complement each other and tune the ECU to ensure safe operation at these higher power levels.",
-    },
-];
+import { useServicePageContent } from "@/hooks/useServicePageContent";
 
 export default function StageUpgradesPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
     const { heroImage, content1Image, content2Image } = useServicePageImages("stage-upgrades");
+    const { content } = useServicePageContent("stage-upgrades");
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -55,10 +34,10 @@ export default function StageUpgradesPage() {
                             <div className="space-y-4 max-w-3xl sm:space-y-5 md:space-y-6">
                                 <p className="flex items-center gap-2 text-xs font-semibold text-[#7ab6ff] sm:gap-3 sm:text-sm animate-subtitle">
                                     <span className="h-px w-8 bg-[#7ab6ff] sm:w-12" />
-                                    Structured Performance
+                                    {content.hero.eyebrow}
                                 </p>
                                 <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl lg:text-6xl animate-heading">
-                                    Stage Upgrades
+                                    {content.hero.title}
                                 </h1>
                             </div>
                         </div>
@@ -70,11 +49,13 @@ export default function StageUpgradesPage() {
                             <div className="space-y-4 flex flex-col sm:space-y-5 md:space-y-6">
                                 <div className="space-y-4 sm:space-y-5 md:space-y-6">
                                     <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl lg:text-5xl">
-                                        The Path to Power
+                                        {content.intro.title}
                                     </h2>
-                                    <p className="text-sm leading-relaxed text-[#5c6c86] sm:text-base md:text-lg">
-                                        Tuning should be a journey, not a gamble. Our structured Stage packages (Stage 1, 2, and 3) provide a proven roadmap for upgrading your vehicle. We combine the best hardware with our bespoke software to deliver reliable performance enhancements at every level.
-                                    </p>
+                                    {content.intro.paragraphs.map((paragraph, index) => (
+                                        <p key={index} className="text-sm leading-relaxed text-[#5c6c86] sm:text-base md:text-lg">
+                                            {paragraph}
+                                        </p>
+                                    ))}
                                 </div>
                                 <div className="relative overflow-hidden rounded-[20px] flex-shrink-0 animate-slide-right">
                                     {content1Image && (
@@ -106,10 +87,10 @@ export default function StageUpgradesPage() {
                     <section className="px-8 py-10 lg:px-12">
                         <div className="mx-auto max-w-4xl text-center space-y-6">
                             <h2 className="text-4xl font-black text-[#0c1b33] lg:text-5xl">
-                                Tested Combinations
+                                {content.why.title}
                             </h2>
                             <p className="text-base leading-relaxed text-[#0c1b33] lg:text-lg">
-                                We have done the research so you don't have to. We know which intercoolers fit best, which exhausts drone the least, and which turbos spool the fastest. Our packages remove the trial-and-error from modifying your car.
+                                {content.why.paragraph}
                             </p>
                         </div>
                     </section>
@@ -120,36 +101,22 @@ export default function StageUpgradesPage() {
                             <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-12">
                                 <div className="space-y-4 animate-slide-left sm:space-y-5 md:space-y-6">
                                     <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl lg:text-4xl animate-heading">
-                                        Clear Upgrade Path
+                                        {content.benefits.title}
                                     </h2>
                                     <p className="text-sm leading-relaxed text-[#0c1b33] sm:text-base md:text-lg">
-                                        Start with a remap and grow your build over time.
+                                        {content.benefits.paragraph}
                                     </p>
                                     <ul className="space-y-4">
-                                        <li className="flex items-start gap-3">
-                                            <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
-                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-base text-[#0c1b33]">Proven Power Figures</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
-                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-base text-[#0c1b33]">Balanced Hardware & Software</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
-                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-base text-[#0c1b33]">Cost-Effective Bundles</span>
-                                        </li>
+                                        {content.benefits.bullets.map((bullet, index) => (
+                                            <li key={index} className="flex items-start gap-3">
+                                                <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
+                                                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </div>
+                                                <span className="text-base text-[#0c1b33]">{bullet}</span>
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                                 <div className="space-y-8">
@@ -160,8 +127,8 @@ export default function StageUpgradesPage() {
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 className="text-xl font-bold text-[#0c1b33]">Best Value</h3>
-                                            <p className="mt-2 text-base text-[#0c1b33]">Packages often save you money compared to buying parts individually.</p>
+                                            <h3 className="text-xl font-bold text-[#0c1b33]">{content.benefits.features[0].title}</h3>
+                                            <p className="mt-2 text-base text-[#0c1b33]">{content.benefits.features[0].desc}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -173,10 +140,10 @@ export default function StageUpgradesPage() {
                     <section className="px-8 py-10 lg:px-12">
                         <div className="mx-auto max-w-4xl space-y-8">
                             <h2 className="text-center text-4xl font-black text-[#0c1b33] lg:text-5xl">
-                                Frequently Asked Questions
+                                {content.faq.title}
                             </h2>
                             <div className="space-y-4">
-                                {faqs.map((faq, index) => (
+                                {content.faq.items.map((faq, index) => (
                                     <div key={index} className="rounded-[16px] bg-white shadow-sm">
                                         <button
                                             onClick={() => setOpenFaq(openFaq === index ? null : index)}
@@ -208,4 +175,3 @@ export default function StageUpgradesPage() {
         </div>
     );
 }
-

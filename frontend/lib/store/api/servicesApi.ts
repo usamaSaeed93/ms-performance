@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { BASE_URL } from '../../config';
+import type { ServicePageContentPartial } from '@/lib/types/servicePageContent';
 
 export interface Service {
   id: number;
@@ -9,6 +10,7 @@ export interface Service {
   link: string;
   image_url: string;
   display_order: number;
+  page_content?: ServicePageContentPartial | null;
 }
 
 export interface UpdateServiceRequest {
@@ -16,6 +18,7 @@ export interface UpdateServiceRequest {
   image_url?: string;
   link?: string;
   description?: string;
+  page_content?: ServicePageContentPartial | null;
 }
 
 const baseQuery = fetchBaseQuery({

@@ -4,33 +4,12 @@ import Image from "next/image";
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { useServicePageImages } from "@/hooks/useServicePageImage";
-
-const faqs = [
-    {
-        question: "How is this different from ECU remapping?",
-        answer:
-            "Performance tuning is a broader term that encompasses ECU remapping, but also includes hardware modifications, suspension setups, and handling improvements. It's a holistic approach to making your car faster and better to drive.",
-    },
-    {
-        question: "Will tuning reduce engine life?",
-        answer:
-            "If done correctly and maintained properly, no. We ensure all modifications remain within safe tolerances. However, pushing an engine to its absolute limit will naturally increase wear, so we advise regular maintenance for high-performance builds.",
-    },
-    {
-        question: "Can I improve fuel economy?",
-        answer:
-            "Yes, 'Eco-tuning' is a form of performance tuning where we optimize the engine for efficiency rather than outright power. This can yield significant savings, especially for high-mileage drivers.",
-    },
-    {
-        question: "Is it reversible?",
-        answer:
-            "Most software changes are fully reversible. Hardware changes can also be reversed, though labor costs would apply.",
-    },
-];
+import { useServicePageContent } from "@/hooks/useServicePageContent";
 
 export default function PerformanceTuningPage() {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
     const { heroImage, content1Image, content2Image } = useServicePageImages("performance-tuning");
+    const { content } = useServicePageContent("performance-tuning");
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -55,10 +34,10 @@ export default function PerformanceTuningPage() {
                             <div className="space-y-4 max-w-3xl sm:space-y-5 md:space-y-6">
                                 <p className="flex items-center gap-2 text-xs font-semibold text-[#7ab6ff] sm:gap-3 sm:text-sm animate-subtitle">
                                     <span className="h-px w-8 bg-[#7ab6ff] sm:w-12" />
-                                    Total Vehicle Optimization
+                                    {content.hero.eyebrow}
                                 </p>
                                 <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl lg:text-6xl animate-heading">
-                                    Performance Tuning
+                                    {content.hero.title}
                                 </h1>
                             </div>
                         </div>
@@ -70,11 +49,13 @@ export default function PerformanceTuningPage() {
                             <div className="space-y-4 flex flex-col sm:space-y-5 md:space-y-6">
                                 <div className="space-y-4 sm:space-y-5 md:space-y-6">
                                     <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl lg:text-5xl">
-                                        Beyond Just Horsepower
+                                        {content.intro.title}
                                     </h2>
-                                    <p className="text-sm leading-relaxed text-[#5c6c86] sm:text-base md:text-lg">
-                                        Real performance isn't just about a peak dyno number; it's about how the car drives, stops, and handles. Our performance tuning services cover the entire vehicle. From upgrading brakes and suspension to fine-tuning throttle maps for perfect response, we build complete driver's cars.
-                                    </p>
+                                    {content.intro.paragraphs.map((paragraph, index) => (
+                                        <p key={index} className="text-sm leading-relaxed text-[#5c6c86] sm:text-base md:text-lg">
+                                            {paragraph}
+                                        </p>
+                                    ))}
                                 </div>
                                 <div className="relative overflow-hidden rounded-[20px] flex-shrink-0 animate-slide-right">
                                     {content1Image && (
@@ -106,10 +87,10 @@ export default function PerformanceTuningPage() {
                     <section className="px-8 py-10 lg:px-12">
                         <div className="mx-auto max-w-4xl text-center space-y-6">
                             <h2 className="text-4xl font-black text-[#0c1b33] lg:text-5xl">
-                                A Holistic Approach
+                                {content.why.title}
                             </h2>
                             <p className="text-base leading-relaxed text-[#0c1b33] lg:text-lg">
-                                We don't believe in "one size fits all". We take the time to understand your driving style and goals. Whether you want a track day weapon or a comfortable fast road cruiser, we tailor every aspect of the tune to suit you.
+                                {content.why.paragraph}
                             </p>
                         </div>
                     </section>
@@ -120,36 +101,22 @@ export default function PerformanceTuningPage() {
                             <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-12">
                                 <div className="space-y-4 animate-slide-left sm:space-y-5 md:space-y-6">
                                     <h2 className="text-2xl font-black text-[#0c1b33] sm:text-3xl md:text-4xl lg:text-4xl animate-heading">
-                                        Unlock Potential
+                                        {content.benefits.title}
                                     </h2>
                                     <p className="text-sm leading-relaxed text-[#0c1b33] sm:text-base md:text-lg">
-                                        Experience a car that feels tighter, sharper, and more alive.
+                                        {content.benefits.paragraph}
                                     </p>
                                     <ul className="space-y-4">
-                                        <li className="flex items-start gap-3">
-                                            <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
-                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-base text-[#0c1b33]">Sharper Throttle Response</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
-                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-base text-[#0c1b33]">Improved Handling & Braking</span>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
-                                                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-base text-[#0c1b33]">Optimized Power Delivery</span>
-                                        </li>
+                                        {content.benefits.bullets.map((bullet, index) => (
+                                            <li key={index} className="flex items-start gap-3">
+                                                <div className="mt-1 h-6 w-6 rounded bg-[#1d70ff] flex items-center justify-center flex-shrink-0">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
+                                                        <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </div>
+                                                <span className="text-base text-[#0c1b33]">{bullet}</span>
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                                 <div className="space-y-8">
@@ -160,8 +127,8 @@ export default function PerformanceTuningPage() {
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 className="text-xl font-bold text-[#0c1b33]">Reliability Focus</h3>
-                                            <p className="mt-2 text-base text-[#0c1b33]">We keep safety margins intact for daily driveability.</p>
+                                            <h3 className="text-xl font-bold text-[#0c1b33]">{content.benefits.features[0].title}</h3>
+                                            <p className="mt-2 text-base text-[#0c1b33]">{content.benefits.features[0].desc}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -173,10 +140,10 @@ export default function PerformanceTuningPage() {
                     <section className="px-8 py-10 lg:px-12">
                         <div className="mx-auto max-w-4xl space-y-8">
                             <h2 className="text-center text-4xl font-black text-[#0c1b33] lg:text-5xl">
-                                Frequently Asked Questions
+                                {content.faq.title}
                             </h2>
                             <div className="space-y-4">
-                                {faqs.map((faq, index) => (
+                                {content.faq.items.map((faq, index) => (
                                     <div key={index} className="rounded-[16px] bg-white shadow-sm">
                                         <button
                                             onClick={() => setOpenFaq(openFaq === index ? null : index)}
@@ -208,4 +175,3 @@ export default function PerformanceTuningPage() {
         </div>
     );
 }
-
