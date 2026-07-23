@@ -9,7 +9,6 @@ import {
   vehicleModels,
   services,
   brandLogos,
-  stats,
   products,
   testimonials,
   footerLinks,
@@ -43,6 +42,7 @@ import {
   HOME_ABOUT_IMAGE_KEY,
   parseHomeAboutContent,
 } from "@/lib/constants/homeAboutContent";
+import { parseStats, HOME_STATS_KEY } from "@/lib/constants/stats";
 
 const DEFAULT_HERO_IMAGE = "/images/services/hero-dyno-v2-ue.png";
 
@@ -294,8 +294,14 @@ export default function HomePage() {
   const currentHeroSubtitle = heroTexts[currentHeroIndex]?.subtitle || DEFAULT_HERO_SUBTITLE;
   const currentHeroHeading  = heroTexts[currentHeroIndex]?.heading  || DEFAULT_HERO_HEADING;
 
-  // Stats animation state
-  const [animatedStats, setAnimatedStats] = useState<{ [key: string]: number }>({});
+  // Homepage statistics — editable from the admin Settings page, defaults otherwise.
+  const homeStats = useMemo(
+    () => parseStats(settingsData?.find((s) => s.key === HOME_STATS_KEY)?.value),
+    [settingsData]
+  );
+
+  // Stats animation state (keyed by index so duplicate values never collide)
+  const [animatedStats, setAnimatedStats] = useState<{ [key: number]: number }>({});
   const [hasAnimated, setHasAnimated] = useState(false);
   const statsRef = useRef<HTMLDivElement>(null);
   const productsCarouselRef = useRef<HTMLDivElement>(null);
@@ -325,14 +331,14 @@ export default function HomePage() {
             setHasAnimated(true);
 
             // Initialize all stats to 0
-            const initialStats: { [key: string]: number } = {};
-            stats.forEach((stat) => {
-              initialStats[stat.value] = 0;
+            const initialStats: { [key: number]: number } = {};
+            homeStats.forEach((_, index) => {
+              initialStats[index] = 0;
             });
             setAnimatedStats(initialStats);
 
             // Animate each stat
-            stats.forEach((stat) => {
+            homeStats.forEach((stat, index) => {
               const targetValue = getNumericValue(stat.value);
               const duration = 2000; // 2 seconds
               const steps = 60;
@@ -346,7 +352,7 @@ export default function HomePage() {
 
                 setAnimatedStats((prev) => ({
                   ...prev,
-                  [stat.value]: Math.floor(currentValue),
+                  [index]: Math.floor(currentValue),
                 }));
 
                 if (currentStep >= steps) {
@@ -354,7 +360,7 @@ export default function HomePage() {
                   // Ensure final value is exact
                   setAnimatedStats((prev) => ({
                     ...prev,
-                    [stat.value]: targetValue,
+                    [index]: targetValue,
                   }));
                 }
               }, stepDuration);
@@ -370,7 +376,7 @@ export default function HomePage() {
     return () => {
       observer.disconnect();
     };
-  }, [hasAnimated]);
+  }, [hasAnimated, homeStats]);
 
   useEffect(() => {
     setCurrentHeroIndex(0);
@@ -972,15 +978,15 @@ export default function HomePage() {
             </div>
 
             <div ref={statsRef} className="grid gap-6 px-4 pb-6 sm:gap-8 sm:px-6 sm:pb-8 md:grid-cols-2 md:px-8 md:pb-10 lg:grid-cols-4">
-              {stats.map((stat) => {
+              {homeStats.map((stat, index) => {
                 const numericValue = hasAnimated
-                  ? (animatedStats[stat.value] ?? getNumericValue(stat.value))
+                  ? (animatedStats[index] ?? getNumericValue(stat.value))
                   : 0;
                 const suffix = getSuffix(stat.value);
                 const displayValue = `${Math.floor(numericValue)}${suffix}`;
 
                 return (
-                  <div key={stat.value} className="space-y-2">
+                  <div key={`${stat.label}-${index}`} className="space-y-2">
                     <p className="text-3xl font-black text-[#0c1b33] sm:text-4xl">{displayValue}</p>
                     <div className="h-px w-10 bg-[#1d70ff] sm:w-12" />
                     <p className="text-xs text-[#5c6c86] sm:text-sm">{stat.label}</p>

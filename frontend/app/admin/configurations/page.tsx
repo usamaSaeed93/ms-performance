@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Upload, ImageIcon, Trash2, Type, FlaskConical, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, Upload, ImageIcon, Trash2, Type, FlaskConical, CheckCircle2, XCircle, BarChart3, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -25,6 +25,12 @@ import {
     parseHomeAboutContent,
     type HomeAboutContent,
 } from "@/lib/constants/homeAboutContent";
+import {
+    DEFAULT_STATS,
+    HOME_STATS_KEY,
+    parseStats,
+    type StatItem,
+} from "@/lib/constants/stats";
 
 export default function ConfigurationsPage() {
     const { data: settings, isLoading } = useGetSettingsQuery();
@@ -46,6 +52,9 @@ export default function ConfigurationsPage() {
     const [homeAboutPreview, setHomeAboutPreview] = useState<string | null>(null);
     const [homeAboutContent, setHomeAboutContent] = useState<HomeAboutContent>(DEFAULT_HOME_ABOUT_CONTENT);
     const [savingHomeAbout, setSavingHomeAbout] = useState(false);
+
+    const [homeStats, setHomeStats] = useState<StatItem[]>(DEFAULT_STATS);
+    const [savingStats, setSavingStats] = useState(false);
 
     // VRM tester state
     const [vrmRegex, setVrmRegex] = useState("");
@@ -107,6 +116,9 @@ export default function ConfigurationsPage() {
 
         const aboutRaw = settings.find((s) => s.key === HOME_ABOUT_CONTENT_KEY)?.value;
         setHomeAboutContent(parseHomeAboutContent(aboutRaw));
+
+        const statsRaw = settings.find((s) => s.key === HOME_STATS_KEY)?.value;
+        setHomeStats(parseStats(statsRaw));
     }, [settings, heroImagesRaw, heroImageUrl]);
 
     const servicesHeroImageUrl =
@@ -252,6 +264,44 @@ export default function ConfigurationsPage() {
             toast.error("Failed to save homepage about text");
         } finally {
             setSavingHomeAbout(false);
+        }
+    };
+
+    const handleStatChange = (index: number, field: "value" | "label", value: string) => {
+        setHomeStats((prev) => {
+            const next = [...prev];
+            next[index] = { ...next[index], [field]: value };
+            return next;
+        });
+    };
+
+    const handleAddStat = () => {
+        setHomeStats((prev) => [...prev, { value: "", label: "" }]);
+    };
+
+    const handleRemoveStat = (index: number) => {
+        setHomeStats((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const handleSaveStats = async () => {
+        // Drop fully empty rows before persisting.
+        const cleaned = homeStats.filter(
+            (s) => s.value.trim().length > 0 || s.label.trim().length > 0
+        );
+        setSavingStats(true);
+        try {
+            await updateSetting({
+                key: HOME_STATS_KEY,
+                value: JSON.stringify(cleaned),
+                description: "Homepage statistics counters (value + label)",
+                type: "string",
+            }).unwrap();
+            setHomeStats(cleaned.length > 0 ? cleaned : DEFAULT_STATS);
+            toast.success("Homepage statistics saved");
+        } catch {
+            toast.error("Failed to save statistics");
+        } finally {
+            setSavingStats(false);
         }
     };
 
@@ -823,6 +873,93 @@ export default function ConfigurationsPage() {
                                     Reset defaults
                                 </Button>
                             </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Homepage Statistics */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5" />
+                            Homepage Statistics
+                        </CardTitle>
+                        <CardDescription>
+                            The counters shown on the homepage (e.g. “945+ Cars Remapped”). The value
+                            animates from 0 — keep a suffix like <code className="bg-muted px-1 rounded">+</code> or{" "}
+                            <code className="bg-muted px-1 rounded">%</code> on the value.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {homeStats.map((stat, index) => (
+                            <div key={index} className="rounded-lg border p-4 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm font-semibold">Stat {index + 1}</p>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7"
+                                        onClick={() => handleRemoveStat(index)}
+                                        disabled={isUpdating || savingStats}
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                </div>
+                                <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
+                                    <div className="grid gap-1.5">
+                                        <Label className="text-xs font-medium">Value</Label>
+                                        <Input
+                                            className="h-9 text-sm"
+                                            placeholder="e.g. 945+"
+                                            value={stat.value}
+                                            onChange={(e) => handleStatChange(index, "value", e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="grid gap-1.5">
+                                        <Label className="text-xs font-medium">Label</Label>
+                                        <Input
+                                            className="h-9 text-sm"
+                                            placeholder="e.g. Cars Remapped By The MS Performance"
+                                            value={stat.label}
+                                            onChange={(e) => handleStatChange(index, "label", e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleAddStat}
+                            disabled={isUpdating || savingStats}
+                        >
+                            <Plus className="h-3.5 w-3.5 mr-1" /> Add statistic
+                        </Button>
+
+                        <div className="flex gap-2 border-t pt-4">
+                            <Button
+                                size="sm"
+                                className="flex-1"
+                                disabled={savingStats || isUpdating}
+                                onClick={handleSaveStats}
+                            >
+                                {savingStats ? (
+                                    <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Saving...</>
+                                ) : (
+                                    "Save Statistics"
+                                )}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={savingStats || isUpdating}
+                                onClick={() => setHomeStats(DEFAULT_STATS)}
+                            >
+                                Reset defaults
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
