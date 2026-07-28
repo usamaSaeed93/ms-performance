@@ -834,8 +834,9 @@ export default function HomePage() {
                         <Image
                           src={service.image}
                           alt={service.title}
-                          width={320}
-                          height={220}
+                          width={640}
+                          height={440}
+                          sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
                           className="h-48 w-full object-cover animate-image-hover"
                         />
                       </div>
@@ -881,9 +882,9 @@ export default function HomePage() {
                     <Image
                       src={logo}
                       alt={`Brand logo ${index + 1}`}
-                      width={180}
-                      height={80}
-                      className="h-16 w-auto object-contain opacity-90 sm:h-18 md:h-20"
+                      width={222}
+                      height={222}
+                      className="h-24 w-auto object-contain opacity-90 sm:h-28 md:h-32"
                     />
                   </div>
                 ))}
@@ -893,9 +894,9 @@ export default function HomePage() {
                     <Image
                       src={logo}
                       alt={`Brand logo ${index + 1}`}
-                      width={180}
-                      height={80}
-                      className="h-16 w-auto object-contain opacity-90 sm:h-18 md:h-20"
+                      width={222}
+                      height={222}
+                      className="h-24 w-auto object-contain opacity-90 sm:h-28 md:h-32"
                     />
                   </div>
                 ))}
@@ -1369,8 +1370,8 @@ export default function HomePage() {
                           <Image
                             src={post.image}
                             alt={post.title}
-                            width={128}
-                            height={128}
+                            width={512}
+                            height={512}
                             className="h-full w-full object-cover"
                           />
                         </div>

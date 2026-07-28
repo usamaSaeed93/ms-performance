@@ -305,10 +305,7 @@ html {
   animation: scrollLogos 30s linear infinite;
   display: flex;
   width: fit-content;
-}
-
-.animate-scroll-logos:hover {
-  animation-play-state: paused;
+  /* Keep the marquee running even while hovered */
 }
 
 /* Circular Progress Ring Animations */
