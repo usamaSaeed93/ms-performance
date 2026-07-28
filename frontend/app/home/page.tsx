@@ -873,7 +873,7 @@ export default function HomePage() {
             {/* Carousel Indicators — hidden */}
           </section>
 
-          <section className="px-4 py-8 sm:px-6 sm:py-10 md:px-8 md:py-12 overflow-hidden">
+          <section className="bg-white px-4 py-8 sm:px-6 sm:py-10 md:px-8 md:py-12 overflow-hidden">
             <div className="relative w-full overflow-hidden">
               <div className="flex items-center gap-12 sm:gap-16 md:gap-20 lg:gap-28 animate-scroll-logos">
                 {/* First set of logos */}
@@ -901,42 +901,6 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-              {heroImages.length > 1 && (
-                <>
-                  <button
-                    onClick={() =>
-                      setCurrentHeroIndex((prev) =>
-                        prev === 0 ? heroImages.length - 1 : prev - 1
-                      )
-                    }
-                    className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/30 bg-black/30 p-2 text-white backdrop-blur transition hover:bg-black/50 pointer-events-auto"
-                    aria-label="Previous hero image"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setCurrentHeroIndex((prev) => (prev + 1) % heroImages.length)}
-                    className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/30 bg-black/30 p-2 text-white backdrop-blur transition hover:bg-black/50 pointer-events-auto"
-                    aria-label="Next hero image"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                  <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/30 px-3 py-2 backdrop-blur pointer-events-auto">
-                    {heroImages.map((_, index) => (
-                      <button
-                        key={`hero-dot-${index}`}
-                        onClick={() => setCurrentHeroIndex(index)}
-                        className={`h-2 rounded-full transition-all ${index === currentHeroIndex ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white"}`}
-                        aria-label={`Go to hero image ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
             </div>
           </section>
 
