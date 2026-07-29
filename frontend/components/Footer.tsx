@@ -6,7 +6,7 @@ import { Instagram, Phone, Mail } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useCreateMailingSubscriptionMutation } from "@/lib/store/api/mailingApi";
-import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL, CONTACT_EMAIL, CONTACT_EMAIL_MAILTO } from "@/lib/constants/contact";
+import { CONTACT_PHONE_DISPLAY, CONTACT_PHONE_TEL, CONTACT_PHONE_2_DISPLAY, CONTACT_PHONE_2_TEL, CONTACT_EMAIL, CONTACT_EMAIL_MAILTO } from "@/lib/constants/contact";
 
 export function Footer() {
     const [subscriberName, setSubscriberName] = useState("");
@@ -120,8 +120,11 @@ export function Footer() {
                     <div className="flex items-start gap-3">
                         <Phone className="h-5 w-5 text-[#00b8ff] mt-0.5 shrink-0" />
                         <div>
-                            <a href={CONTACT_PHONE_TEL} className="text-sm font-medium text-gray-300 hover:text-[#00b8ff]">
+                            <a href={CONTACT_PHONE_TEL} className="block text-sm font-medium text-gray-300 hover:text-[#00b8ff]">
                                 {CONTACT_PHONE_DISPLAY}
+                            </a>
+                            <a href={CONTACT_PHONE_2_TEL} className="block text-sm font-medium text-gray-300 hover:text-[#00b8ff]">
+                                {CONTACT_PHONE_2_DISPLAY}
                             </a>
                             <p className="text-xs text-gray-500">Mon till Sat: 9:30 till 18:00</p>
                         </div>
