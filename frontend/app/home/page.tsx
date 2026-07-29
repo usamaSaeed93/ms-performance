@@ -884,7 +884,7 @@ export default function HomePage() {
                       alt={`Brand logo ${index + 1}`}
                       width={222}
                       height={222}
-                      className="h-24 w-auto object-contain opacity-90 sm:h-28 md:h-32"
+                      className="h-24 w-auto object-contain sm:h-28 md:h-32"
                     />
                   </div>
                 ))}
@@ -896,7 +896,7 @@ export default function HomePage() {
                       alt={`Brand logo ${index + 1}`}
                       width={222}
                       height={222}
-                      className="h-24 w-auto object-contain opacity-90 sm:h-28 md:h-32"
+                      className="h-24 w-auto object-contain sm:h-28 md:h-32"
                     />
                   </div>
                 ))}
