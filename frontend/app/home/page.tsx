@@ -824,7 +824,7 @@ export default function HomePage() {
                       case "Dyno Tests": return "/services/dyno-tests";
                       case "Custom Exhausts": return "/services/custom-exhausts";
                       case "DPF & EGR Services": return "/services/dpf-egr-services";
-                      case "Turbo Upgrades": return "/services/turbo-upgrades";
+                      case "Intake Upgrades": return "/services/intake-upgrades";
                       case "Servicing": return "/services/servicing";
                       case "Number Plates": return "/services/number-plates";
                       case "Adblue Solutions": return "/services/adblue-solutions";
@@ -943,9 +943,9 @@ export default function HomePage() {
                   <Image
                     src={homeAboutImage}
                     alt="Mechanic working"
-                    width={600}
-                    height={500}
-                    className="h-full w-full rounded-xl object-cover sm:rounded-2xl md:rounded-[20px]"
+                    fill
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    className="rounded-xl object-cover sm:rounded-2xl md:rounded-[20px]"
                   />
                 )}
               </div>

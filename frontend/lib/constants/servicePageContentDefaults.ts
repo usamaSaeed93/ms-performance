@@ -6,7 +6,7 @@ export const SERVICE_SLUG_TO_TITLE: Record<string, string> = {
   "dyno-tests": "Dyno Tests",
   "custom-exhausts": "Custom Exhausts",
   "dpf-egr-services": "DPF & EGR Services",
-  "turbo-upgrades": "Turbo Upgrades",
+  "intake-upgrades": "Intake Upgrades",
   servicing: "Servicing",
   "number-plates": "Number Plates",
   "adblue-solutions": "Adblue Solutions",
@@ -455,10 +455,10 @@ export const SERVICE_PAGE_CONTENT_DEFAULTS: Record<string, ServicePageContent> =
     },
   },
 
-  "turbo-upgrades": {
+  "intake-upgrades": {
     hero: {
       eyebrow: "Maximum Forced Induction",
-      title: "Turbo Upgrades",
+      title: "Intake Upgrades",
       subtitle:
         "From hybrid turbos for spirited road driving to full frame turbo conversions for track day domination — we supply, fit, and custom-tune the complete forced induction package.",
       badges: ["Hybrid Turbos", "Full Frame Kits", "Dyno Calibrated"],

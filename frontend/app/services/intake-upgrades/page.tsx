@@ -30,11 +30,11 @@ const featureIcons = [
   ),
 ];
 
-export default function TurboUpgradesPage() {
+export default function IntakeUpgradesPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const { heroImage, content1Image, content2Image, content3Image, content4Image } =
-    useServicePageImages("turbo-upgrades");
-  const { content } = useServicePageContent("turbo-upgrades");
+    useServicePageImages("intake-upgrades");
+  const { content } = useServicePageContent("intake-upgrades");
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -45,7 +45,7 @@ export default function TurboUpgradesPage() {
           {/* ── Hero ─────────────────────────────────────────────────────────── */}
           <section className="relative overflow-hidden bg-[#030814] text-white min-h-[520px] flex items-center">
             {heroImage && (
-              <Image src={heroImage} alt="Turbo Upgrades" fill className="object-cover opacity-50" priority />
+              <Image src={heroImage} alt="Intake Upgrades" fill className="object-cover opacity-50" priority />
             )}
             <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-transparent" />
             <div className="relative w-full px-4 py-20 sm:px-6 md:px-8 lg:px-12">
@@ -104,7 +104,7 @@ export default function TurboUpgradesPage() {
               </div>
               <div className="relative overflow-hidden rounded-2xl h-[380px] sm:h-[440px] shadow-lg">
                 {content1Image ? (
-                  <Image src={content1Image} alt="Turbocharger" fill className="object-cover" />
+                  <Image src={content1Image} alt="Air intake system" fill className="object-cover" />
                 ) : (
                   <div className="h-full bg-gray-200 animate-pulse" />
                 )}

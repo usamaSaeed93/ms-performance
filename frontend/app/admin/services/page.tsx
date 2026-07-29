@@ -41,7 +41,7 @@ const TITLE_TO_SLUG: Record<string, string> = {
     "Dyno Tests": "dyno-tests",
     "Custom Exhausts": "custom-exhausts",
     "DPF & EGR Services": "dpf-egr-services",
-    "Turbo Upgrades": "turbo-upgrades",
+    "Intake Upgrades": "intake-upgrades",
     "Servicing": "servicing",
     "Number Plates": "number-plates",
     "Adblue Solutions": "adblue-solutions",

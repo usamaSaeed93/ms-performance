@@ -44,8 +44,8 @@ const SERVICE_PAGE_CONFIG: Record<string, {
         content3: { settingsKey: "service_page_content3_dpf_egr", fallbackImage: "/images/services/IMG_4401.png" },
         content4: { settingsKey: "service_page_content4_dpf_egr", fallbackImage: "/images/services/IMG_4402.png" },
     },
-    "turbo-upgrades": {
-        label: "Turbo Upgrades",
+    "intake-upgrades": {
+        label: "Intake Upgrades",
         hero: { settingsKey: "service_page_hero_turbo_upgrades", fallbackImage: "/images/services/IMG_4403.png" },
         content1: { settingsKey: "service_page_content1_turbo_upgrades", fallbackImage: "/images/services/IMG_4395.png" },
         content2: { settingsKey: "service_page_content2_turbo_upgrades", fallbackImage: "/images/services/IMG_4402.png" },
