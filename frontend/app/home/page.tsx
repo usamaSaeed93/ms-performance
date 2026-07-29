@@ -403,6 +403,15 @@ export default function HomePage() {
     return allServices.slice(start, start + itemsPerPage);
   };
 
+  // Autoplay the services carousel
+  useEffect(() => {
+    if (totalServicePages <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentServiceIndex((prev) => (prev + 1) % totalServicePages);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [totalServicePages]);
+
   const totalProductPages = Math.max(1, Math.ceil(homeProducts.length / productsPerPage));
   const nextProducts = () => {
     if (productsCarouselRef.current) {
