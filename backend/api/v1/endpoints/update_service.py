@@ -19,6 +19,7 @@ class UpdateService(PutResource):
         self.service = await crud_service.update_service(
             self.db,
             service_id=int(service_id),
+            title=self.request_data.title,
             image_url=self.request_data.image_url,
             link=self.request_data.link,
             description=self.request_data.description,

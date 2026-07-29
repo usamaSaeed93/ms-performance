@@ -182,6 +182,7 @@ export default function ServicesPage() {
     const [selectedService, setSelectedService] = useState<any>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
+        title: "",
         image_url: "",
         link: "",
         description: "",
@@ -196,6 +197,7 @@ export default function ServicesPage() {
     const handleEdit = (service: any) => {
         setSelectedService(service);
         setFormData({
+            title: service.title || "",
             image_url: service.image_url || "",
             link: service.link || "",
             description: service.description || "",
@@ -538,6 +540,20 @@ export default function ServicesPage() {
 
                         {/* Text Fields */}
                         <div className="grid gap-3">
+                            <div className="grid gap-2">
+                                <Label htmlFor="title" className="text-xs font-medium">Service Name</Label>
+                                <Input
+                                    id="title"
+                                    value={formData.title}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({ ...prev, title: e.target.value }))
+                                    }
+                                    className="h-9 text-sm"
+                                />
+                                <p className="text-[10px] text-muted-foreground">
+                                    Shown on the homepage carousel and the Services page.
+                                </p>
+                            </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="link" className="text-xs font-medium">Link URL</Label>
                                 <Input

@@ -18,6 +18,7 @@ class GetServicesResponse(BaseModel):
     services: List[ServiceSchema]
 
 class UpdateServiceRequest(BaseModel):
+    title: Optional[str] = None
     image_url: Optional[str] = None
     link: Optional[str] = None
     description: Optional[str] = None

@@ -15,6 +15,7 @@ export interface Service {
 
 export interface UpdateServiceRequest {
   id: number;
+  title?: string;
   image_url?: string;
   link?: string;
   description?: string;
