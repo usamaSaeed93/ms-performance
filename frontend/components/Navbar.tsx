@@ -57,7 +57,7 @@ export function Navbar({ showTopBar = true }: NavbarProps) {
       href={FILES_PORTAL_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 rounded-[12px] border-2 border-[#1d70ff] bg-[#1d70ff]/20 px-3 py-2 text-xs font-bold text-white shadow-[0_8px_24px_rgba(29,112,255,0.35)] transition hover:bg-[#1d70ff] hover:text-white sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
+      className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-[12px] bg-[#1d70ff] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)] transition hover:bg-[#1a5fe6] active:scale-95 sm:gap-2"
     >
       <FolderOpen className="h-4 w-4 shrink-0" />
       <span className="hidden sm:inline">Files Portal</span>
@@ -266,7 +266,7 @@ export function Navbar({ showTopBar = true }: NavbarProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={toggleMobileMenu}
-                className="flex w-full items-center justify-center gap-2 rounded-[12px] border border-white/20 px-6 py-3.5 text-center text-base font-semibold text-white transition hover:border-[#1d70ff] hover:bg-[#1d70ff]/10"
+                className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#1d70ff] px-6 py-3.5 text-center text-base font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)] transition hover:bg-[#1a5fe6]"
               >
                 <FolderOpen className="h-5 w-5" />
                 Files Portal
