@@ -36,7 +36,7 @@ jobs:
       - name: Build Next.js app
         run: pnpm build
         env:
-          NEXT_PUBLIC_API_URL: https://test.msperformance.co.uk
+          NEXT_PUBLIC_API_URL: https://msperformance.co.uk
 
       - name: Deploy Frontend to Server
         uses: easingthemes/ssh-deploy@v5.0.3
