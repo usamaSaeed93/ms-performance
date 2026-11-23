@@ -72,14 +72,15 @@ export default function AdblueSolutionsPage() {
                       </span>
                     ))}
                   </div>
-                  <div className="pt-2">
+                  {/* Appointments module temporarily disabled */}
+                  {/* <div className="pt-2">
                     <a
                       href="/book-appointment"
                       className="inline-block rounded-xl bg-[#1d70ff] px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(29,112,255,0.35)] hover:bg-[#1565e0] transition-colors"
                     >
                       Book a Checkup
                     </a>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

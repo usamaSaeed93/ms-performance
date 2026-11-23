@@ -176,12 +176,13 @@ export function Navbar({ showTopBar = true }: NavbarProps) {
 
             <div className="hidden items-center gap-2 lg:flex xl:gap-3">
               {filesPortalButton}
-              <Link
+              {/* Appointments module temporarily disabled */}
+              {/* <Link
                 href="/book-appointment"
                 className="flex-shrink-0 rounded-[12px] bg-[#1d70ff] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)] transition hover:bg-[#1a5fe6] active:scale-95"
               >
                 Book Appointment
-              </Link>
+              </Link> */}
             </div>
 
             <button
@@ -281,13 +282,14 @@ export function Navbar({ showTopBar = true }: NavbarProps) {
               >
                 Contact Us
               </button>
-              <Link
+              {/* Appointments module temporarily disabled */}
+              {/* <Link
                 href="/book-appointment"
                 onClick={toggleMobileMenu}
                 className="block w-full rounded-[12px] bg-[#1d70ff] px-6 py-3.5 text-center text-base font-semibold text-white shadow-[0_15px_45px_rgba(29,112,255,0.3)] transition hover:bg-[#1a5fe6]"
               >
                 Book Appointment
-              </Link>
+              </Link> */}
             </div>
           </div>
         </div>
@@ -297,3 +299,4 @@ export function Navbar({ showTopBar = true }: NavbarProps) {
     </>
   );
 }
+
